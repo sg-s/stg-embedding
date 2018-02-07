@@ -1,0 +1,10 @@
+*.mat
+*DS_Store
+*.crabsort
+*.abf
+*.txt
+*.smr
+*.s2r
+*.eps
+*.pdf
+*.sublime-workspace
