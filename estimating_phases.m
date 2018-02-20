@@ -10,10 +10,12 @@ pHeader;
 dm = dataManager;
 dm.verbosity = 0;
 path_name = dm.getPath('17fc38dc295b93f8234588c5b4f6455e');
-c = crabsort(false);
-[c.path_name, file_name, file_ext] = fileparts(path_name);
-c.file_name = [file_name file_ext];
-c.loadFile;
+if ~exist('c','var')
+	c = crabsort(false);
+	[c.path_name, file_name, file_ext] = fileparts(path_name);
+	c.file_name = [file_name file_ext];
+	c.loadFile;
+end
 
 PD = c.spikes.PD.PD*c.dt;
 LP = c.spikes.LP.LP*c.dt;
@@ -93,20 +95,32 @@ end
 PD_offs = PD(computeOnsOffs(diff(PD)>250));
 PD_ons = PD(computeOnsOffs(diff(PD)<250));
 
-if PD_ons(1) > PD_offs(1)
+% make sure we have vectors the same length, and PD turns on before LP
+while PD_ons(1) > PD_offs(1)
 	PD_offs(1) = [];
 end
-
-PD_ons = PD_ons(1:length(PD_offs));
 
 LP_offs = LP(computeOnsOffs(diff(LP)>250));
 LP_ons = LP(computeOnsOffs(diff(LP)<250));
 
-if LP_ons(1) > LP_offs(1)
+while LP_ons(1) > LP_offs(1)
 	LP_offs(1) = [];
 end
 
-LP_ons = LP_ons(1:length(LP_offs));
+while LP_ons(1) < PD_ons(1)
+	LP_ons(1) = [];
+end
+
+while LP_offs(1) < PD_ons(1)
+	LP_offs(1) = [];
+end
+
+% trim all vectors to the same length
+z = min([length(PD_ons),length(PD_offs), length(LP_ons), length( LP_offs)]);
+LP_ons = LP_ons(1:z);
+LP_offs = LP_offs(1:z);
+PD_offs = PD_offs(1:z);
+PD_ons = PD_ons(1:z);
 
 
 figure('outerposition',[300 300 1200 1209],'PaperUnits','points','PaperSize',[1200 1209]); hold on
@@ -169,14 +183,17 @@ end
 %% Measuring phases: the classical way
 % Now we measure "phases" using the traditional way by finding the time delay between the last spike in PD and the first spike in LP, and normalizing by the burst period. 
 
-% there's a shift, so correct for it
-trad_phase_diff_ons = circshift(LP_ons,-1) - PD_ons;
+
+trad_phase_diff_ons = LP_ons - PD_ons;
 trad_phase_diff_ons(end) = NaN;
 trad_phase_diff_ons(1:end-1) = trad_phase_diff_ons(1:end-1)./diff(PD_ons);
+trad_phase_diff_ons(trad_phase_diff_ons>1) = trad_phase_diff_ons(trad_phase_diff_ons>1) - 1;
 
-trad_phase_diff_offs = circshift(LP_offs,-1) - PD_offs;
+trad_phase_diff_offs = LP_offs - PD_offs;
 trad_phase_diff_offs(end) = NaN;
 trad_phase_diff_offs(1:end-1) = trad_phase_diff_offs(1:end-1)./diff(PD_offs);
+trad_phase_diff_offs(trad_phase_diff_offs>1) = trad_phase_diff_offs(trad_phase_diff_offs>1) - 1;
+
 
 figure('outerposition',[300 300 1001 900],'PaperUnits','points','PaperSize',[1200 900]); hold on
 subplot(2,2,1); hold on
@@ -224,12 +241,9 @@ if being_published
 end
 
 
-
 %% Extracting periods using the Hilbert transform 
 % In this section, I attempt to extract periods of the neurons from their spike trains, but by first extracting the true phase of the neuron using the Hilbert transform. For a discussion on extracting phases and amplitudes from time series, see "Synchronization"  by Pikovsky, Rosenblum & Kurths (Appendix A2). 
 
-%%
-% In (a), I compare the periods extracted from the first and last spikes (green, red), and from the Hilbert transform. Note that the periods from the Hilbert transform agree well with the traditional way, but the distribution is more well-behaved and more mono-modal. In (b), I plot the true phase vs. the normalized time since phase onset. The error bars are standard deviations across all periods, and the dotted line is the assumption of linearity (as in the traditional method). Finally, in the panel on the right, I plot the amplitude-phase diagram of the time series, showing every oscilaltion. Data from PD is shown in (a-b), and data from LP is shown in (c-d). 
 
 PD_embed = zeros(400e3,1);
 PD_embed(PD) = 1;
@@ -244,6 +258,42 @@ LPs = spiketimes2f(LP_embed,time,1e-3,1e-1);
 
 [A_LP, p_LP, H_LP] = phasify(LPs);
 [A_PD, p_PD, H_PD] = phasify(PDs);
+
+% align phases to burst onset (phase = 0 at start of burst)
+
+phase_offset = -pi - mean(p_PD(PD_ons));
+p_PD = p_PD + phase_offset;
+p_PD(p_PD < -pi) =  p_PD(p_PD < -pi) + 2*pi;
+
+p_LP = p_LP + phase_offset;
+p_LP(p_LP < -pi) =  p_LP(p_LP < -pi) + 2*pi;
+
+
+%%
+% In the following figure, I compare the rasters of PD and LP to the extracted phases of LP and PD. Note that the phase of PD is 0 at the onset of PD bursting (by construction). Note however, that the phase of LP also tends to be 0 at the onset of LP bursting -- which naturally comes out of the data, showing that the phase reconstruction captures the burst onsets well.
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+subplot(2,1,1); hold on
+raster(PD_zp,LP_zp,'deltat',1e-3)
+set(gca,'YTick',[.5 1.5],'YTickLabel',{'PD','LP'})
+set(gca,'XLim',[10 20])
+
+
+subplot(2,1,2); hold on
+plot(time, p_PD)
+plot(time, p_LP)
+set(gca,'XLim',[10 20],'YTick',[-pi 0 pi],'YTickLabel',[0 .5 1],'YLim',[-pi pi])
+xlabel('Time (s)')
+ylabel('Phase')
+prettyFig();
+
+if being_published
+	snapnow
+	delete(gcf)
+end
+
+%%
+% In (a), I compare the periods extracted from the first and last spikes (green, red), and from the Hilbert transform. Note that the periods from the Hilbert transform agree well with the traditional way, but the distribution is more well-behaved and more mono-modal. In (b), I plot the true phase vs. the normalized time since phase onset. The error bars are standard deviations across all periods, and the dotted line is the assumption of linearity (as in the traditional method). Finally, in the panel on the right, I plot the amplitude-phase diagram of the time series, showing every oscilaltion. Data from PD is shown in (a-b), and data from LP is shown in (c-d). 
 
 N = 100;
 PD_T = NaN(1e6,1);
@@ -313,7 +363,8 @@ X_PD = X;
 
 % show the phase portrait
 subplot(2,3,3); 
-polarplot(p_PD(1e3:end-1e3),A_PD(1e3:end-1e3))
+p = polarplot(p_PD(1e3:end-1e3),A_PD(1e3:end-1e3));
+p.Color = [p.Color(1:3) .3];
 
 
 % now do LP
@@ -340,7 +391,7 @@ xlabel('Period of LP (ms)')
 ylabel('Probability')
 legend({'Using first spike','using last spike','Hilbert transform'})
 title('LP')
-set(gca,'XLim',[500 800])
+set(gca,'XLim',[500 800],'YLim',[0 .05])
 
 % now plot the phase curve
 [~,LP_phase_peaks] = findpeaks(p_LP,'MinPeakProminence',3);
@@ -361,8 +412,8 @@ ylabel('True phase (radian)')
 
 % show the phase portrait
 subplot(2,3,6); 
-polarplot(p_LP(1e3:end-1e3),A_LP(1e3:end-1e3))
-
+p = polarplot(p_LP(1e3:end-1e3),A_LP(1e3:end-1e3));
+p.Color = [p.Color(1:3) .3];
 
 prettyFig();
 labelFigure('x_offset',-.01,'y_offset',.01,'font_size',28)
@@ -458,6 +509,67 @@ hy = (hy/sum(hy))/mean(diff(hx));
 l2(2) = stairs(ax(2),hx,hy,'LineWidth',3,'Color',[0 0 1]);
 
 legend(l2,{'Hilbert transform spikes','Hilbert transform of intracellular'})
+
+prettyFig();
+labelFigure('x_offset',-.01,'y_offset',.01,'font_size',28)
+
+if being_published
+	snapnow
+	delete(gcf)
+end
+
+%% Estimating phases differences form cross correlation functions
+% In this section, I use the crosscorrelation function to estimate the phase difference between LP and PD. Note that both delays and periods can be inferred from a single cross correlation function, and I define the phase offset as the ratio of the delay to the period for that snippet. Note that the phase differences calcualted this way agree with the phase differences calcualted using the Hilbert transform. 
+
+X = PD_smooth;
+Y = LP_smooth;
+
+window_size = 2e3;
+
+X = stagger(X, window_size, 1e3);
+Y = stagger(Y, window_size, 1e3);
+
+XY = NaN(window_size,size(X,2));
+
+parfor i = 1:size(X,2)
+	X(:,i) = X(:,i) - mean(X(:,i));
+	X(:,i) = X(:,i)/std(X(:,i));
+	Y(:,i) = Y(:,i) - mean(Y(:,i));
+	Y(:,i) = Y(:,i)/std(Y(:,i));
+
+	temp = xcorr(X(:,i),Y(:,i));
+	XY(:,i) = temp(window_size:end)/window_size;
+
+end
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+subplot(1,2,1); hold on
+plot(1:window_size,XY,'Color',[0.5 0 0 .1])
+xlabel('Lag (ms)')
+ylabel('Cross correlation (norm)')
+
+[~,loc] = max(XY);
+
+[~,loc2] = min(XY(400:800,:));
+loc2 = loc2 + 400;
+
+phase_diff_xcorr = loc./loc2;
+
+subplot(1,2,2); hold on
+clear l
+[hy,hx] = histcounts((phase_diff_xcorr),20);
+hx = hx(1:end-1) + mean(diff(hx));
+hy = (hy/sum(hy))/mean(diff(hx));
+l(2) = stairs(hx,hy,'LineWidth',3,'Color',[1 0 0]);
+
+[hy,hx] = histcounts((direct_phase_diff_int),200);
+hx = hx(1:end-1) + mean(diff(hx));
+hy = (hy/sum(hy))/mean(diff(hx));
+l(1) = stairs(hx,hy,'LineWidth',3,'Color',[0 0 1]);
+ylabel('Probability')
+xlabel('Phase difference b/w LP & PD')
+set(gca,'XLim',[0.4 .6])
+legend(l,{'Hilbert transform of intracellular','Cross correlation intracellular'})
 
 prettyFig();
 labelFigure('x_offset',-.01,'y_offset',.01,'font_size',28)
