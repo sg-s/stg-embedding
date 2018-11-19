@@ -29,32 +29,31 @@ for j = 1:length(compartments)
 	end
 end
 
+x.AB.add('Leak','gbar',0,'E',-50);
 x.LP.add('Leak','gbar',.3,'E',-50);
 x.PY.add('Leak','gbar',.1,'E',-50);
 
 
 % set up synapses as in Fig. 2e
-x.connect('AB','LP','Chol','gbar',30);
-x.connect('AB','PY','Chol','gbar',3);
-x.connect('AB','LP','Glut','gbar',30);
-x.connect('AB','PY','Glut','gbar',10);
-x.connect('LP','PY','Glut','gbar',1);
-x.connect('PY','LP','Glut','gbar',30);
-x.connect('LP','AB','Glut','gbar',30);
+x.connect('AB','LP','prinz-temperature/Chol','gbar',30);
+x.connect('AB','PY','prinz-temperature/Chol','gbar',3);
+x.connect('AB','LP','prinz-temperature/Glut','gbar',30);
+x.connect('AB','PY','prinz-temperature/Glut','gbar',10);
+x.connect('LP','PY','prinz-temperature/Glut','gbar',1);
+x.connect('PY','LP','prinz-temperature/Glut','gbar',30);
+x.connect('LP','AB','prinz-temperature/Glut','gbar',30);
 
 
 % randomize Qs
 q_min = 1;
 q_max = 3;
 
-q = rand(length(x.get('*Q_tau_m')),1)*(q_max-q_min) + q_min;
-x.set('*Q_tau_m',q);
+% make a Q vector for the channels and one for the synapses
+q_channels = rand(18,1)*(q_max-q_min) + q_min;
+q_synapses = rand(14,1)*(q_max-q_min) + q_min;
 
-q = rand(length(x.get('*Q_tau_h')),1)*(q_max-q_min) + q_min;
-x.set('*Q_tau_h',q);
-
-q = rand(length(x.get('*Q_g')),1)*(q_max-q_min) + q_min;
-x.set('*Q_g',q);
+x.set('AB*Q_*',q_channels)
+x.set('*synapses*Q*',q_synapses)
 
 x.t_end = 5e3;
 x.dt = .1;
