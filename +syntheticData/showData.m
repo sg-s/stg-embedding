@@ -25,7 +25,7 @@ for i = 1:length(allfiles)
 		for k = 1:3
 			these_spikes(these_spikes(:,k)<a | these_spikes(:,k)>z,k) = NaN;
 		end
-		raster(these_spikes(:,1),these_spikes(:,2),these_spikes(:,3))
+		mtools.neuro.raster(these_spikes)
 		drawnow
 
 
