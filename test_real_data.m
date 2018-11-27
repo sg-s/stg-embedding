@@ -105,7 +105,7 @@ for i = 1:3
 		subplot(3,3,idx); hold on
 		idx = idx + 1;
 		L = p.projected_data(i,j).label_info;
-		cplot(p.projected_data(i,j).time,p.projected_data(i,j).isis,L)
+		plot(p.projected_data(i,j).time,p.projected_data(i,j).isis,'k.','MarkerSize',3)
 		set(gca,'YScale','log')
 		drawnow
 
