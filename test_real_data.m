@@ -82,14 +82,46 @@ if being_published
 	delete(gcf)
 end
 
+
+%%
+% Now I convert it into a ISI vs time representation: 
+
+p = panopticon;
+p.spikes = all_spikes;
+p.time = all_time;
+
+p.findISIs;
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+idx = 1;
+neuron_names = {'pdn','lpn','pyn'};
+for i = 1:3
+	for j = 1:3
+		subplot(3,3,idx); hold on
+
+		cplot(p.isis(i,j).time,p.isis(i,j).data,all_temperature(p.isis(i,j).time),'use_scatter',false,'n_colors',40); 
+		set(gca,'YScale','log','YLim',[1 1e6],'XLim',[1 4e7])
+		title([neuron_names{i} '\rightarrow' neuron_names{j}])
+		idx = idx +1;
+
+	end
+end
+
+prettyFig('plw',1,'lw',1);
+
+if being_published
+	snapnow
+	delete(gcf)
+end
+
 %%
 % Now I compute ISIs in various windows for this entire dataset. 
 
 
 p = panopticon;
-p.spikes = all_spikes;
+
 p.label_info = all_temperature;
-p.time = all_time;
+
 p.resample(1e-3);
 p.window_size = 20; % seconds 
 p.step_size = 1;
