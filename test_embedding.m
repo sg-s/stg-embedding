@@ -63,7 +63,7 @@ end
 %% ISI representation
 % 
 
-data = computeISIs(data);
+data = computeISIs(data,{'PD','LP'});
 
 figure('outerposition',[300 300 1200 1000],'PaperUnits','points','PaperSize',[1200 1000]); hold on
 clear ax
