@@ -130,7 +130,10 @@ if being_published
 	delete(gcf)
 end
 
+%%
+% Now we bin all the data in two ways: we bin into 10 second non-overlapping windows, and for those windows collapse time. Then, we bin the ISIs logarthimically, to obtain matrices (images) that represent the firing pattern in each window. 
 
+binned_data = imageify(data,'neurons',{'PD','LP'});
 
 %% How to reproduce this document
 % 
