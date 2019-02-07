@@ -7,14 +7,24 @@ pHeader;
 % the pyloric circuit with temperature ramps and neuromodulators and see if I can 
 % represent the activity of the network in a nice way
 
-data_dir = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding/828_128';
 
-data = crabsort.consolidate('nerves',{'pdn','lpn'},'neurons',{'LP','PD'},'data_dir',data_dir);
+% specify data files to work with:
+data_files = {'828_001_1',...
+              '828_042',...
+              '828_128',...
+              '857_016',...
+              '857_020_1',...
+              '857_104',...
+              '857_080'};
 
-data_dir = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding/828_042';
+data_dir = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding/';
 
-data = [data crabsort.consolidate('nerves',{'pdn','lpn'},'neurons',{'LP','PD'},'data_dir',data_dir)];
+data = [];
+for i = 1:length(data_files)
+	data = [data crabsort.consolidate('neurons',{'LP','PD'},'data_dir',[data_dir data_files{i}])];
+end
 
+return
 
 % first, show all the raster (examples)
 all_temp = nonnans(unique([data.temperature]));
