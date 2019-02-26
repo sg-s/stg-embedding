@@ -22,7 +22,7 @@ end
 % handle each bit of the data indepndently
 if length(data) > 1
 
-	for i = 1:length(data)
+	parfor i = 1:length(data)
 		data(i) = computeISIs(data(i), neurons);
 	end
 	return
@@ -50,7 +50,13 @@ for i = 1:length(neurons)
 			for k = length(spiketimesA):-1:1
 				temp = spiketimesA(k) - spiketimesB;
 				temp(temp<0) = Inf;
-				isis(k) = min(temp);
+				if isempty(temp)
+					isis(k) = Inf;
+				else
+					isis(k) = min(temp);
+				end
+				
+
 			end
 
 		end

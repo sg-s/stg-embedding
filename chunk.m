@@ -1,14 +1,8 @@
-% this function converts data that is returned by 
-% crabsort.consolidate
-% into discretized data, like an image
-
-function binned_data = imageify(data, varargin)
-
+function cdata = chunk(data, varargin)
 
 % options and defaults
-options.n_bins = 30;
-options.min_isi = 3e-3;
-options.max_isi = 5;
+
+
 options.window_size = 10; % seconds
 options.neurons = [];
 
@@ -51,15 +45,12 @@ for i = length(fn):-1:1
 	metdata_variables = [metdata_variables; fn{i}];
 end
 
-bin_edges = logspace(log10(options.min_isi), log10(options.max_isi),options.n_bins+1);
-bin_centres = bin_edges(1:end-1)+diff(bin_edges)/2;
 N = length(options.neurons);
-M = zeros((N^2)*options.n_bins,1e3);
 idx = 1;
 
-binned_data = struct;
+cdata = struct;
 for i = 1:length(metdata_variables)
-	binned_data.(metdata_variables{i}) = NaN(1e3,1);
+	cdata.(metdata_variables{i}) = NaN(1e3,1);
 end
 
 for i = 1:length(data)
@@ -72,8 +63,6 @@ for i = 1:length(data)
 	while z < data(i).T
 
 
-		A = 1;
-		Z = A + options.n_bins-1;
 
 		for j = 1:N
 			for k = 1:N
@@ -89,23 +78,11 @@ for i = 1:length(data)
 				end
 				frame = this_isi(in_frame);
 				frame(isinf(frame)) = [];
-				H = histcounts(frame,bin_edges);
 
-				H =H.*sqrt(bin_centres);
 
-				if sum(H) > 0 
-					H = H/sum(H);
-				end
+				% add
+				cdata(idx).([options.neurons{j} '_' options.neurons{k}]) = frame;
 
-				if any(isnan(H))
-					keyboard
-				end
-
-				% add into matrix
-				M(A:Z,idx) = H;
-
-				A = Z;
-				Z = A + options.n_bins-1;
 
 			end
 
@@ -115,7 +92,7 @@ for i = 1:length(data)
 
 		% add metadata
 		for j = 1:length(metdata_variables)
-			binned_data.(metdata_variables{j})(idx) = data(i).(metdata_variables{j});
+			cdata(idx).(metdata_variables{j}) = data(i).(metdata_variables{j});
 		end
 
 		a = z;
@@ -129,6 +106,3 @@ for i = 1:length(data)
 
 end
 
-M = M(:,1:idx-1);
-
-binned_data.M = M;
