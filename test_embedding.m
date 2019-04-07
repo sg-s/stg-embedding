@@ -1,7 +1,4 @@
 
-pHeader;
-
-
 %%
 % In this document, I take some data from Sara Haddad where she recorded from
 % the pyloric circuit with temperature ramps and neuromodulators and see if I can 
@@ -19,11 +16,12 @@ data_files = {'828_001_1',...
 
 data_dir = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding/';
 
-data = [];
-for i = 1:length(data_files)
-	data = crabsort.merge(data,crabsort.consolidate('neurons',{'LP','PD'},'data_dir',[data_dir data_files{i}]));
+if ~exist('data','var')
+	data = [];
+	for i = 1:length(data_files)
+		data = crabsort.merge(data,crabsort.consolidate('neurons',{'LP','PD'},'data_dir',[data_dir data_files{i}]));
+	end
 end
-
 
 % first, show all the raster (examples)
 all_temp = 11:4:31;
@@ -47,7 +45,7 @@ for i = 1:N*3
 	case 1
 		% centralized
 		show_this = find([data.decentralized] == false & [data.temperature] == this_temp & [data.proctolin] == 0,1,'first');
-		ylabel([oval(this_temp) 'C'])
+		ylabel([strlib.oval(this_temp) 'C'])
 	case 2
 		show_this = find([data.decentralized] == true & [data.temperature] == this_temp & [data.proctolin] == 0,1,'first');
 	case 0
@@ -55,18 +53,14 @@ for i = 1:N*3
 	end
 
 	if ~isempty(show_this)
-		mtools.neuro.raster(data(show_this).PD,data(show_this).LP,'deltat',1);
+		neurolib.raster(data(show_this).PD,data(show_this).LP,'deltat',1);
 	end
 	set(gca,'XLim',[0 5],'YTick',[],'XTick',[],'XColor','w')
 
 end
 
-prettyFig()
+figlib.pretty
 
-if being_published	
-	snapnow	
-	delete(gcf)
-end
 
 
 %%
@@ -77,7 +71,7 @@ figure('outerposition',[300 300 700 1e3],'PaperUnits','points','PaperSize',[700 
 idx= 0;
 for i = 1:length(data)
 	if data(i).decentralized == 0 && (isnan(data(i).oxotremorine) | data(i).oxotremorine == 0) && (isnan(data(i).proctolin) | data(i).proctolin == 0)
-		mtools.neuro.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
+		neurolib.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
 		idx = idx + 2;
 	end
 end
@@ -85,14 +79,8 @@ end
 set(gca,'XLim',[0 150],'YLim',[0 idx]);
 xlabel('Time (s)')
 title('Control, all temperatures')
-prettyFig('plw',1,'lw',1);
 
-
-if being_published
-	snapnow
-	delete(gcf)
-end
-
+figlib.pretty
 
 %%
 % Now show all decentralized data
@@ -102,7 +90,7 @@ figure('outerposition',[300 300 700 1e3],'PaperUnits','points','PaperSize',[700 
 idx= 0;
 for i = 1:length(data)
 	if data(i).decentralized == 1 && (isnan(data(i).oxotremorine) | data(i).oxotremorine == 0) && (isnan(data(i).proctolin) | data(i).proctolin == 0)
-		mtools.neuro.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
+		neurolib.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
 		idx = idx + 2;
 	end
 end
@@ -110,23 +98,18 @@ end
 set(gca,'XLim',[0 150],'YLim',[0 idx]);
 xlabel('Time (s)')
 title('Decentralized, all temperatures')
-prettyFig('plw',1,'lw',1);
 
-
-if being_published
-	snapnow
-	delete(gcf)
-end
+figlib.pretty()
 
 %%
 % Now show all decentralized data with oxotremorine
 
 figure('outerposition',[300 300 700 1e3],'PaperUnits','points','PaperSize',[700 1e3]); hold on
 
-idx= 0;
+idx = 0;
 for i = 1:length(data)
 	if (~isnan(data(i).oxotremorine) & data(i).oxotremorine> 0) && (isnan(data(i).proctolin) | data(i).proctolin == 0)
-		mtools.neuro.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
+		neurolib.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
 		idx = idx + 2;
 	end
 end
@@ -134,14 +117,8 @@ end
 set(gca,'XLim',[0 150],'YLim',[0 idx]);
 xlabel('Time (s)')
 title('oxotremorine, all temperatures')
-prettyFig('plw',1,'lw',1);
 
-
-if being_published
-	snapnow
-	delete(gcf)
-end
-
+figlib.pretty()
 
 %%
 % Now show all decentralized data with proctolin
@@ -151,7 +128,7 @@ figure('outerposition',[300 300 700 1e3],'PaperUnits','points','PaperSize',[700 
 idx= 0;
 for i = 1:length(data)
 	if (~isnan(data(i).proctolin) & data(i).proctolin> 0) && (isnan(data(i).oxotremorine) | data(i).oxotremorine == 0)
-		mtools.neuro.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
+		neurolib.raster(data(i).PD,data(i).LP,'deltat',1,'yoffset',idx)
 		idx = idx + 2;
 	end
 end
@@ -159,19 +136,67 @@ end
 set(gca,'XLim',[0 150],'YLim',[0 idx]);
 xlabel('Time (s)')
 title('Proctolin, all temperatures')
-prettyFig('plw',1,'lw',1);
 
-
-if being_published
-	snapnow
-	delete(gcf)
-end
+figlib.pretty()
 
 
 %% ISI representation
 % 
 
+
+
+
+% compute ISIS
 data = computeISIs(data,{'PD','LP'});
+
+
+
+% bin all data
+cdata = chunk(data,'neurons',{'LP','PD'});
+
+cdata =  rmfield(cdata,'mask');
+
+
+% convert into a giant matrix
+mdata = matrixify(cdata,'neurons',{'LP','PD'});
+
+% compute pairwise distances
+D_LP_LP = neurolib.ISIDistance( mdata.LP_LP');
+D_LP_PD = neurolib.ISIDistance( mdata.LP_PD');
+D_PD_PD = neurolib.ISIDistance( mdata.PD_PD');
+D_PD_LP = neurolib.ISIDistance( mdata.PD_LP');
+
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% compute pairwise distances b/w all pairs of points
+D =  ISIDist(cdata,{'LP','PD'});
+
+
+
+
+
+
+
+
+
+
+
+return
 
 figure('outerposition',[300 300 1200 1000],'PaperUnits','points','PaperSize',[1200 1000]); hold on
 clear ax
@@ -192,7 +217,7 @@ for i = 1:N*3
 	case 1
 		% centralized
 		show_this = find([data.decentralized] == false & [data.temperature] == this_temp & [data.proctolin] == 0,1,'first');
-		ylabel([oval(this_temp) 'C'])
+		ylabel([strlib.oval(this_temp) 'C'])
 	case 2
 		show_this = find([data.decentralized] == true & [data.temperature] == this_temp & [data.proctolin] == 0,1,'first');
 	case 0
@@ -260,7 +285,7 @@ bin_centres = bin_edges(1:end-1)+diff(bin_edges)/2;
 xtick = [1 10 19 30];
 
 for i = length(xtick):-1:1
-	XTickLabels{i} = oval(1e3*bin_centres(xtick(i)));
+	XTickLabels{i} = strlib.oval(1e3*bin_centres(xtick(i)));
 end
 
 figure('outerposition',[300 300 800 1200],'PaperUnits','points','PaperSize',[800 1200]); hold on

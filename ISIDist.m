@@ -4,11 +4,20 @@ function D = ISIDist(data,neuron_names)
 
 D = zeros(length(data));
 
+% check that neuron names are valid
+assert(iscell(neuron_names),'neuron_names should be a cell array')
+for i = 1:length(neuron_names)
+	for j = 1:length(neuron_names)
+		assert(isfield(data,[neuron_names{j} '_' neuron_names{j}]),'field did not resolve')
+	end
+end
+
+
 
 for a = 1:length(data)
-	textbar(a,length(data))
+	corelib.textbar(a,length(data))
 	X = data(a);
-	parfor b = 1:length(data)
+	for b = 1:length(data)
 		
 		Y = data(b);
 

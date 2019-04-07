@@ -11,6 +11,7 @@ function d = ISIDist_core(A,B)
 	end
 
 	for k = 1:length(A)
+		keyboard
 		d = d + min(abs(A(k) - B));
 	end
 
