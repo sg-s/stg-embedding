@@ -15,21 +15,21 @@ end
 
 
 % make a list of metdata variables from the fields of data
-metdata_variables = {};
+metadata_variables = {};
 fn = fieldnames(data);
 for i = length(fn):-1:1
 	if any(isstrprop(fn{i},'upper'))
 		continue
 	end
-	metdata_variables = [metdata_variables; fn{i}];
+	metadata_variables = [metadata_variables; fn{i}];
 end
 
 N = length(options.neurons);
 idx = 1;
 
 cdata = struct;
-for i = 1:length(metdata_variables)
-	cdata.(metdata_variables{i}) = NaN(1e3,1);
+for i = 1:length(metadata_variables)
+	cdata.(metadata_variables{i}) = NaN(1e3,1);
 end
 
 for i = 1:length(data)
@@ -44,6 +44,12 @@ for i = 1:length(data)
 
 
 		for j = 1:N
+
+			these_spikes = data(i).(options.neurons{j});
+			these_spikes(these_spikes < a) = [];
+			these_spikes(these_spikes > z) = [];
+			cdata(idx).(options.neurons{j}) = these_spikes;
+
 			for k = 1:N
 
 				
@@ -70,8 +76,8 @@ for i = 1:length(data)
 		
 
 		% add metadata
-		for j = 1:length(metdata_variables)
-			cdata(idx).(metdata_variables{j}) = data(i).(metdata_variables{j});
+		for j = 1:length(metadata_variables)
+			cdata(idx).(metadata_variables{j}) = data(i).(metadata_variables{j});
 		end
 
 		a = z;

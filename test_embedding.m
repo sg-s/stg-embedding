@@ -160,39 +160,92 @@ cdata =  rmfield(cdata,'mask');
 % convert into a giant matrix
 mdata = matrixify(cdata,'neurons',{'LP','PD'});
 
+
 % compute pairwise distances
-D_LP_LP = neurolib.ISIDistance( mdata.LP_LP');
-D_LP_PD = neurolib.ISIDistance( mdata.LP_PD');
-D_PD_PD = neurolib.ISIDistance( mdata.PD_PD');
-D_PD_LP = neurolib.ISIDistance( mdata.PD_LP');
+if exist('combined_distance.mat','file') == 2
+	load('combined_distance.mat','D')
+	load('all_dist.mat')
+else
 
-return
+	D_LP_LP = neurolib.ISIDistance( mdata.LP_LP');
+	D_LP_PD = neurolib.ISIDistance( mdata.LP_PD');
+	D_PD_PD = neurolib.ISIDistance( mdata.PD_PD');
+	D_PD_LP = neurolib.ISIDistance( mdata.PD_LP');
+
+	% % hot fix -- recompute distances when NaN
+	% for i = 1:length(D_PD_LP)
+	% 	corelib.textbar(i,length(D_PD_LP))
+	% 	for j = i+1:length(D_PD_LP)
+	% 		if isnan(D_PD_LP(j,i))
+	% 			temp =  neurolib.ISIDistance(mdata.PD_LP([j i],:)');
+	% 			D_PD_LP(j,i) = temp(2,1);
+	% 		end
+	% 	end
+	% end
+
+	save('all_dist.mat','D_LP_LP','D_LP_PD','D_PD_PD','D_PD_LP')
+	D = D_PD_PD/mean(D_PD_PD(:)) + D_LP_LP/mean(D_LP_LP(:)) + D_LP_PD/mean(D_LP_PD(:)) + D_PD_LP/mean(D_PD_LP(:));
+
+	%D = D_PD_PD/mean(D_PD_PD(:)) + D_LP_LP/mean(D_LP_LP(:));
+
+	D = D + tril(D)';
+
+	save('combined_distance.mat','D')
+end
 
 
 
+% use tsne to embed into 2D
 
+SS = 1;
+t = TSNE; t.distance_matrix = D(1:SS:end,1:SS:end);
+t.perplexity = 100;
+t.implementation = TSNE.implementation.vandermaaten;
+R = t.fit;
 
+mdataSS = mdata;
+fn = fieldnames(mdata);
+for i = 1:length(fn)
+	mdataSS.(fn{i}) = mdataSS.(fn{i})(1:SS:end,:);
+end
 
+figure('outerposition',[300 300 903 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 
+% colour by experiment
+unique_exp = unique(mdataSS.experiment_idx);
+subplot(2,2,1); hold on
+plot(R(:,1),R(:,2),'k.')
 
+for i = 1:length(unique_exp)
+	plot(R(mdataSS.experiment_idx==unique_exp(i),1),R(mdataSS.experiment_idx==unique_exp(i),2),'.')
+end
 
+% colour by temperature
+all_temp = 7:2:31;
+subplot(2,2,2); hold on
+plot(R(:,1),R(:,2),'.','Color',[.2 .2 .2])
+c = parula(length(all_temp));
+for i = 1:length(all_temp)
+	plot(R(mdataSS.temperature==all_temp(i),1),R(mdataSS.temperature==all_temp(i),2),'.','Color',c(i,:),'MarkerSize',24)
+end
 
+% colour by centralized
+subplot(2,2,3); hold on
+plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',32)
+mdataSS.serotonin(isnan(mdataSS.serotonin)) = 0;
+mdataSS.proctolin(isnan(mdataSS.proctolin)) = 0;
+mdataSS.oxotremorine(isnan(mdataSS.oxotremorine)) = 0;
 
+only_decentralized = mdataSS.decentralized == 1 & mdataSS.serotonin == 0 & mdataSS.proctolin == 0 & mdataSS.oxotremorine == 0;
 
+plot(R(mdataSS.decentralized==0,1),R(mdataSS.decentralized==0,2),'g.','MarkerSize',10)
+plot(R(only_decentralized,1),R(only_decentralized,2),'k.','MarkerSize',10)
+plot(R(mdataSS.proctolin>0,1),R(mdataSS.proctolin>0,2),'b.','MarkerSize',10)
+plot(R(mdataSS.serotonin>0,1),R(mdataSS.serotonin>0,2),'b.','MarkerSize',10)
+plot(R(mdataSS.oxotremorine>0,1),R(mdataSS.oxotremorine>0,2),'r.','MarkerSize',10)
+axis off
 
-
-
-
-% compute pairwise distances b/w all pairs of points
-D =  ISIDist(cdata,{'LP','PD'});
-
-
-
-
-
-
-
-
+figlib.pretty
 
 
 
