@@ -2,6 +2,11 @@
 % the global ISI database
 function add(data, varargin)
 
+
+isi_data_dir = getpref('thoth','isi_data_dir');
+isi_distance_dir = getpref('thoth','isi_distance_dir');
+
+
 options.neurons = {};
 
 
@@ -18,14 +23,14 @@ parfor i = 1:length(data)
 end
 
 
-filelib.mkdir('~/isi_data')
+filelib.mkdir(isi_data_dir)
 
 
 % save in DB
 
 for i = 1:length(data)
 	expid = data{i}.experiment_idx(1);
-	exp_dir = ['~/isi_data' filesep mat2str(expid)];
+	exp_dir = [isi_data_dir filesep mat2str(expid)];
 	filelib.mkdir(exp_dir)
 
 

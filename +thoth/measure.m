@@ -45,7 +45,7 @@ for i = 1:length(allexp)
 
 		% load the isis file
 		isis_file = [all_types(j).folder filesep all_types(j).name filesep 'isis.mat'];
-		assert(exist(isis_file,'file')==2,'isis file not found')
+		assert(exist(isis_file,'file')==2,['isis file not found: ' isis_file])
 
 
 		clear isis
@@ -104,7 +104,12 @@ for i = 1:length(all_isis_types)
 
 		% load this isis files
 		isis_file = [isi_data_dir filesep allexp(ii).name filesep all_isis_types{i} filesep 'isis.mat'];
-		assert(exist(isis_file,'file')==2,'isis file not found')
+		if exist(isis_file,'file')~=2
+			disp('No ISIs file, skipping...')
+			continue
+		end
+
+
 		clear isis
 		load(isis_file)
 		isisA = isis;
@@ -129,7 +134,12 @@ for i = 1:length(all_isis_types)
 
 			% load the other ISIs file
 			isis_file = [isi_data_dir filesep allexp(jj).name filesep all_isis_types{i} filesep 'isis.mat'];
-			assert(exist(isis_file,'file')==2,'isis file not found')
+
+			if exist(isis_file,'file')~=2
+				disp('No ISIs file, skipping...')
+				continue
+			end
+
 			clear isis
 			load(isis_file)
 			isisB = isis;
