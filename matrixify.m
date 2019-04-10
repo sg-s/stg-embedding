@@ -76,3 +76,19 @@ for i = 1:length(cdata)
 
 end
 
+
+% also combine all the spike times
+N = N + 1;
+
+for i = 1:length(options.neurons)
+	M.(options.neurons{i}) = NaN(length(cdata),N);
+end
+
+
+for i = 1:length(cdata)
+	for j = 1:length(options.neurons)
+		spiketimes = cdata(i).(options.neurons{j});
+		M.(options.neurons{j})(i,1:length(spiketimes)) = spiketimes;
+	end
+
+end

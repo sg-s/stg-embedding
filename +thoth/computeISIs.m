@@ -2,7 +2,7 @@
 
 function data = computeISIs(data, neurons)
 
-
+assert(length(data) == 1,'This function only works on scalar structures')
 
 % check that everything in the neuron list is there in the data
 for i = 1:length(neurons)
@@ -14,20 +14,9 @@ end
 for i = 1:length(neurons)
 	for j = 1:length(neurons)
 		fn = [neurons{i} '_' neurons{j}];
-		data(1).(fn) = [];
+		data.(fn) = [];
 	end
 end
-
-
-% handle each bit of the data indepndently
-if length(data) > 1
-
-	parfor i = 1:length(data)
-		data(i) = computeISIs(data(i), neurons);
-	end
-	return
-end
-
 
 
 
@@ -37,28 +26,45 @@ for i = 1:length(neurons)
 		fn = [neurons{i} '_' neurons{j}];
 
 		data.(fn) = [];
+
+		N = size(data.(neurons{i}),2);
+
 		if i == j
 			spiketimes = data.(neurons{i});
-			isis = diff(spiketimes);
+			isis = [diff(spiketimes);  NaN(1,N)] ;
 		else
 			spiketimesA = data.(neurons{i});
 			spiketimesB = data.(neurons{j});
 
-			isis = NaN(length(spiketimesA),1);
+
+			% do it for each row separately
+			all_isis = NaN(1e3,size(spiketimesA,2));
+
+			for ii = 1:size(spiketimesA,2)
+
+				sA = spiketimesA(:,ii);
+				sB = spiketimesB(:,ii);
 
 
-			for k = length(spiketimesA):-1:1
-				temp = spiketimesA(k) - spiketimesB;
-				temp(temp<0) = Inf;
+				isis = NaN(1e3,1);
 
-				if isempty(temp)
-					isis(k) = Inf;
-				else
-					isis(k) = min(temp);
+
+				for k = length(sA):-1:1
+					temp = sA(k) - sB;
+					temp(temp<0) = Inf;
+
+					if isempty(temp)
+						isis(k) = Inf;
+					else
+						isis(k) = min(temp);
+					end
 				end
 
+				all_isis(:,ii) = isis;
 
 			end
+			isis = all_isis;
+
 
 		end
 

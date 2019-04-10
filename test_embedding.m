@@ -199,7 +199,7 @@ end
 
 SS = 1;
 t = TSNE; t.distance_matrix = D(1:SS:end,1:SS:end);
-t.perplexity = 100;
+t.perplexity = 70;
 t.implementation = TSNE.implementation.vandermaaten;
 R = t.fit;
 
@@ -219,15 +219,17 @@ plot(R(:,1),R(:,2),'k.')
 for i = 1:length(unique_exp)
 	plot(R(mdataSS.experiment_idx==unique_exp(i),1),R(mdataSS.experiment_idx==unique_exp(i),2),'.')
 end
+axis off
 
 % colour by temperature
 all_temp = 7:2:31;
 subplot(2,2,2); hold on
-plot(R(:,1),R(:,2),'.','Color',[.2 .2 .2])
+plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',32)
 c = parula(length(all_temp));
 for i = 1:length(all_temp)
 	plot(R(mdataSS.temperature==all_temp(i),1),R(mdataSS.temperature==all_temp(i),2),'.','Color',c(i,:),'MarkerSize',24)
 end
+axis off
 
 % colour by centralized
 subplot(2,2,3); hold on
