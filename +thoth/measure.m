@@ -1,7 +1,14 @@
 % measures distances for all data
 function measure()
 
-allexp = dir('~/isi_data');
+isi_data_dir = getpref('thoth','isi_data_dir');
+isi_distance_dir = getpref('thoth','isi_distance_dir');
+
+
+assert(~isempty(isi_data_dir),'isi_data_dir not set')
+assert(~isempty(isi_distance_dir),'isi_distance_dir not set')
+
+allexp = dir(isi_data_dir);
 
 
 % first do within-experiment distances
@@ -48,9 +55,9 @@ for i = 1:length(allexp)
 		H = hashlib.md5hash(isis);
 
 		% check if this distance file already exists 
-		filelib.mkdir( ['~/isi_distances/' allexp(i).name])
-		filelib.mkdir(['~/isi_distances/' allexp(i).name filesep all_types(j).name])
-		dist_file =  ['~/isi_distances/' allexp(i).name filesep all_types(j).name filesep allexp(i).name '.mat'];
+		filelib.mkdir( [isi_distance_dir filesep allexp(i).name])
+		filelib.mkdir([isi_distance_dir filesep allexp(i).name filesep all_types(j).name])
+		dist_file =  [isi_distance_dir filesep allexp(i).name filesep all_types(j).name filesep allexp(i).name '.mat'];
 
 		if exist(dist_file,'file') == 2
 			disp('Distance file already exists...')
@@ -96,7 +103,7 @@ for i = 1:length(all_isis_types)
 		end
 
 		% load this isis files
-		isis_file = ['~/isi_data/' allexp(ii).name filesep all_isis_types{i} filesep 'isis.mat'];
+		isis_file = [isi_data_dir filesep allexp(ii).name filesep all_isis_types{i} filesep 'isis.mat'];
 		assert(exist(isis_file,'file')==2,'isis file not found')
 		clear isis
 		load(isis_file)
@@ -121,7 +128,7 @@ for i = 1:length(all_isis_types)
 
 
 			% load the other ISIs file
-			isis_file = ['~/isi_data/' allexp(jj).name filesep all_isis_types{i} filesep 'isis.mat'];
+			isis_file = [isi_data_dir filesep allexp(jj).name filesep all_isis_types{i} filesep 'isis.mat'];
 			assert(exist(isis_file,'file')==2,'isis file not found')
 			clear isis
 			load(isis_file)
@@ -129,7 +136,7 @@ for i = 1:length(all_isis_types)
 
 
 			% check if this file already exists
-			dist_file =  ['~/isi_distances/' allexp(ii).name filesep all_isis_types{i} filesep allexp(jj).name '.mat'];
+			dist_file =  [isi_distance_dir filesep allexp(ii).name filesep all_isis_types{i} filesep allexp(jj).name '.mat'];
 
 			clear H
 			H = [hashlib.md5hash(isisA) hashlib.md5hash(isisB)];
