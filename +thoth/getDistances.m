@@ -1,7 +1,7 @@
 % returns precomputed distances
 % for the chosen experiments and ISI types
 
-function D = getDistances(experiments, isi_types)
+function [D, isis] = getDistances(experiments, isi_types)
 
 
 
@@ -21,6 +21,11 @@ if isempty(experiments)
 	% get all experiments
 	experiments = dir(isi_data_dir);
 	experiments = {experiments.name};
+else
+	% remove all underscores from experiment names
+	for i = 1:length(experiments)
+		experiments{i} = strrep(experiments{i},'_','');
+	end
 end
 
 
@@ -44,6 +49,7 @@ for i = 1:length(experiments)
 end
 
 D = zeros(N,N,length(isi_types));
+isis = NaN(1e3,N,length(isi_types));
 
 % now assemble the matrix
 
@@ -55,6 +61,12 @@ for i = 1:length(isi_types)
 		if strcmp(experiments{ii}(1),'.')
 			continue
 		end
+
+
+		% load isis
+		m = matfile([isi_data_dir filesep experiments{ii} filesep isi_types{i} filesep 'isis.mat']);
+		isis(:,data_starts(ii):data_ends(ii),i) = m.isis;
+
 
 		for jj = 1:length(experiments)
 
@@ -70,9 +82,9 @@ for i = 1:length(isi_types)
 			m = matfile(dist_file);
 
 			if ii == jj
-				D(data_starts(ii):data_ends(ii),data_starts(jj):data_ends(jj)) = (m.D);
+				D(data_starts(ii):data_ends(ii),data_starts(jj):data_ends(jj),i) = (m.D);
 			else
-				D(data_starts(jj):data_ends(jj),data_starts(ii):data_ends(ii)) = transpose(m.D);
+				D(data_starts(jj):data_ends(jj),data_starts(ii):data_ends(ii),i) = transpose(m.D);
 			end
 
 
@@ -80,6 +92,8 @@ for i = 1:length(isi_types)
 
 	end
 
+
+	D(:,:,i) = mathlib.symmetrize(D(:,:,i));
 
 
 
