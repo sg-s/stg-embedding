@@ -33,9 +33,9 @@ for i = 1:length(neurons)
 			spiketimes = data.(neurons{i});
 			isis = [diff(spiketimes);  NaN(1,N)] ;
 		else
+			% cross ISIs
 			spiketimesA = data.(neurons{i});
 			spiketimesB = data.(neurons{j});
-
 
 			% do it for each row separately
 			all_isis = NaN(1e3,size(spiketimesA,2));
@@ -50,14 +50,32 @@ for i = 1:length(neurons)
 
 
 				for k = length(sA):-1:1
-					temp = sA(k) - sB;
-					temp(temp<0) = Inf;
 
-					if isempty(temp)
-						isis(k) = Inf;
-					else
-						isis(k) = min(temp);
+					nextAspike = sA(find(sA>sA(k),1,'first'));
+					nextBspike = sB(find(sB>sA(k),1,'first'));
+
+					if isempty(nextBspike)
+						% no next B spike, ISI not defined
+						continue
 					end
+
+					if isempty(nextAspike)
+						% no next A spike, ISI is simply defined
+						isis(k) = nextBspike - sA(k);
+						continue
+					end
+
+					% there is a spike in both A and B
+					% ISI is defined only if nextBspike occurs
+					% before nextAspike
+
+					if nextAspike < nextBspike
+						% ISI not defined
+						continue
+					end
+
+					isis(k) = nextBspike - sA(k);
+
 				end
 
 				all_isis(:,ii) = isis;

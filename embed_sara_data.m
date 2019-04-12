@@ -34,7 +34,9 @@ end
 cdata = structlib.scalarify(cdata);
 
 
-% thoth.add(data,'neurons',{'LP','PD'})
+thoth.add(data,'neurons',{'LP','PD'})
+
+
 if  ~exist('D','var')
 	[D,isis] = thoth.getDistances(data_files,{'PD_PD','PD_LP','LP_LP','LP_PD'});
 end
