@@ -19,11 +19,13 @@ for i = 1:length(neurons)
 end
 
 
-
-% compute isis ans cross isis
+disp('Measuring ISIs:')
+% compute isis and cross isis
 for i = 1:length(neurons)
 	for j = 1:length(neurons)
 		fn = [neurons{i} '_' neurons{j}];
+
+		disp(fn)
 
 		data.(fn) = [];
 

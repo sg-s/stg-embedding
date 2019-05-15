@@ -1,5 +1,7 @@
 % adds data created by crabsort.consolidate to the 
 % the global ISI database
+% data must be a scalar structure containing
+% chunked data (use the "ChunkSIze" option)
 function add(data, varargin)
 
 
@@ -28,7 +30,7 @@ filelib.mkdir(isi_data_dir)
 
 
 expid = data.experiment_idx(1);
-exp_dir = [isi_data_dir filesep mat2str(expid)];
+exp_dir = [isi_data_dir filesep char(expid)];
 filelib.mkdir(exp_dir)
 
 

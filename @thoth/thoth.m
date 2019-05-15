@@ -1,6 +1,0 @@
-classdef thoth
-
-
-
-
-end % classdef
