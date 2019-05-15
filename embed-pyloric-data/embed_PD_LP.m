@@ -2,33 +2,55 @@
 % make sure data directory exists
 filelib.mkdir('cache')
 
-exp_ids = {'828_144_2','828_104_1','828_144_1','828_042'};
 
-if exist('cache/spike_times.mat','file') ~= 2
+data_root = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding';
+avail_exps = dir(data_root);
+exp_ids = {};
+neurons = {'PD','LP'};
+
+    
+% automatically figure out the usable data
+for i = 1:length(avail_exps)
+    if strcmp(avail_exps(i).name(1),'.')
+        continue
+    end
+    allfiles = dir([avail_exps(i).folder filesep avail_exps(i).name filesep '*.crabsort']);
+
+    if length(allfiles) < 3
+        % can't be any data here
+        continue
+    end
+
+    not_sorted = crabsort.checkSorted(allfiles, neurons, true);
+
+    if ~not_sorted
+        exp_ids{end+1} = avail_exps(i).name;
+    end
+
+end
+
+hash = hashlib.md5hash([exp_ids{:}]);
+
+
+if exist(['cache/'  hash '.mat'],'file') ~= 2
 
     disp('Assembling data from source...')
 
-    data_root = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding';
-    
 
+    for i = length(exp_ids):-1:1
 
-    if ~exist('data','var')
-
-        for i = length(exp_ids):-1:1
-
-            data{i} = crabsort.consolidate('neurons',{'PD','LP'},'DataDir',[data_root filesep exp_ids{i}],'ChunkSize',20);
-
-        end
+        data{i} = crabsort.consolidate('neurons',{'PD','LP'},'DataDir',[data_root filesep exp_ids{i}],'ChunkSize',20);
 
     end
 
-    save('cache/spike_times.mat','data','-v7.3')
+    save(['cache/'  hash '.mat'],'data','-v7.3')
 
 else
-    load('cache/spike_times.mat')
+    load(['cache/'  hash '.mat'])
 end
 
-return
+
+data(cellfun(@isempty,data)) = [];
 
 % add all of this to the ISI database
 for i = 1:length(data)
