@@ -22,10 +22,8 @@ if isempty(experiments)
 	experiments = dir(isi_data_dir);
 	experiments = {experiments.name};
 else
-	% remove all underscores from experiment names
-	for i = 1:length(experiments)
-		experiments{i} = strrep(experiments{i},'_','');
-	end
+
+
 end
 
 
