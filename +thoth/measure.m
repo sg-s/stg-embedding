@@ -1,4 +1,9 @@
 % measures distances for all data
+% Usage:
+%
+% thoth.measure
+%
+
 function measure()
 
 isi_data_dir = getpref('thoth','isi_data_dir');

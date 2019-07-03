@@ -3,6 +3,8 @@ function plotLP_PD(ax, data)
 data = reshape(data,length(data)/2,2);
 
 
+keyboard
+
 cla(ax)
 hold(ax,'on')
 

@@ -63,7 +63,20 @@ end
 
 [D, isis] = thoth.getDistances(exp_ids, {'PD_PD','PD_LP','LP_LP','LP_PD'});
 
+
+return
+
 D = sum(D,3);
 u = umap; u.metric = 'precomputed';
 R = u.fit(D);
 
+
+
+mdata = struct;
+mdata.LP = data{1}.LP;
+mdata.PD = data{1}.PD;
+
+for i = 2:length(data)
+    mdata.LP = [mdata.LP, data{1}.LP];
+    mdata.PD = [mdata.PD, data{1}.PD];
+end
