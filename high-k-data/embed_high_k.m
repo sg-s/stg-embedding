@@ -51,8 +51,6 @@ R = t.fit;
 
 
 
-
-
 % measure firing rates in every sample
 for i = 1:length(data)
     data(i).firing_rates = zeros(length(data(i).mask),1);
@@ -64,8 +62,34 @@ end
 
 
 
+% make some metadata vectors
+for i = 1:length(data)
+    data(i).after_ptx = logical(0*data(i).mask);
+    data(i).before_highk = logical(0*data(i).mask);
+    data(i).after_highk = logical(0*data(i).mask);
+    data(i).after_ptx(ptx_start(i):end) = true;
+    data(i).before_highk(1:high_k_start(i)) = true;
+    data(i).after_highk(high_k_end(i):end) = true;
+end
 
-return
+
+all_before_high_k = vertcat(data.before_highk);
+all_after_high_k = vertcat(data.after_highk);
+all_after_ptx = vertcat(data.after_ptx);
+
+
+% f = figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+% ax = gca;
+
+
+% spiketimes = [data.PD];
+
+% M = clusterlib.manual('ReducedData',R,'RawData',isis); 
+% M.makeUI;
+% M.MouseCallback = @(x) plotRaster(x, ax);
+
+
+
 
 % show coloured by firing rates
 
@@ -105,8 +129,61 @@ pdflib.snap
 
 
 
+% effect of PTX
 
 
+figure('outerposition',[300 300 700 700],'PaperUnits','points','PaperSize',[1200 600]); hold on
+
+C = [.8 .8 .8];
+plot(R(:,1),R(:,2),'.','MarkerFaceColor',C,'MarkerEdgeColor',C,'MarkerSize',20)
+
+% plot before high k in black dots
+plot_this = all_before_high_k & all_after_ptx;
+plot(R(plot_this,1),R(plot_this,2),'.','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',12)
+
+% plot after high k in red
+plot_this = ~all_after_ptx;
+plot(R(plot_this,1),R(plot_this,2),'.','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',12)
+
+
+axis off
+title('Before and after PTX')
+
+figlib.pretty
+pdflib.snap
+
+
+
+
+
+
+
+
+% colour by whether before or after high K
+
+figure('outerposition',[300 300 700 700],'PaperUnits','points','PaperSize',[1200 600]); hold on
+
+C = [.8 .8 .8];
+plot(R(:,1),R(:,2),'.','MarkerFaceColor',C,'MarkerEdgeColor',C,'MarkerSize',20)
+
+% plot before high k in black dots
+plot_this = all_before_high_k & all_after_ptx;
+plot(R(plot_this,1),R(plot_this,2),'.','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',12)
+
+% plot after high k in red
+plot_this = all_after_high_k;
+plot(R(plot_this,1),R(plot_this,2),'.','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',12)
+
+
+axis off
+title('Before and after perturbation')
+
+figlib.pretty
+pdflib.snap
+
+
+
+return
 
 
 % plot time in high K
