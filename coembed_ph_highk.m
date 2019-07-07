@@ -282,24 +282,31 @@ figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[120
 
 
 
-x_pos = 0;
-y_pos = 0;
+end_here = 2;
+n_layers = 3;
 
-n_levels = 3
+cutoff = .05; % 5%
 
-for i = 1:n_levels
+N = length(S);
 
-    this_state = find(labels == categorical({'regular-bursting'}));
-    prev_states_prob = J(:,this_state);
-    prev_states_prob = prev_states_prob/sum(prev_states_prob);
-    prev_states_prob(prev_states_prob < .05) = 0;
+set(gca,'XLim',[-n_layers - 1, 1],'YLim',[0 9]);
 
 
-    text(x_pos, y_pos, S{this_state},'FontSize',24,'FontWeight','bold')
+drawArrowsFromPrevLayer(J, S, 0, 2, n_layers, cutoff);
 
-    % plot prev states
+% first plot the final node
+text(0, end_here, S{end_here},'FontWeight','bold');
+
+for i = 1:n_layers
+
+    for j = 1:N
+        text(-i, j, S{j},'FontWeight','bold');
+    end
 
 end
+
+
+
 
 
 
