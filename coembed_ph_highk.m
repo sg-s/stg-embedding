@@ -282,7 +282,7 @@ figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[120
 
 
 
-end_here = 2;
+end_here = 1;
 n_layers = 3;
 
 cutoff = .05; % 5%
@@ -292,7 +292,7 @@ N = length(S);
 set(gca,'XLim',[-n_layers - 1, 1],'YLim',[0 9]);
 
 
-drawArrowsFromPrevLayer(J, S, 0, 2, n_layers, cutoff);
+drawArrowsFromPrevLayer(J, S, 0, end_here, n_layers, cutoff);
 
 % first plot the final node
 text(0, end_here, S{end_here},'FontWeight','bold');
@@ -305,6 +305,8 @@ for i = 1:n_layers
 
 end
 
+axis off
+figlib.pretty
 
 
 
