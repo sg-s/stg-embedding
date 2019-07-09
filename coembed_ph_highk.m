@@ -133,6 +133,46 @@ R = t.fit;
 load('labels.mat')
 
 
+
+
+% figure out time after high k
+data.time_in_high_k = NaN*data.mask;
+preps =  unique(data.experiment_idx);
+
+for i = 1:length(preps)
+    this_prep = data.experiment_idx == preps(i);
+    if any(~isnan(data.pH(this_prep)))
+        continue
+    end
+
+    temp = (data.after_highk == false & data.before_highk == false);
+    temp = temp(this_prep);
+    time_in_high_k = (1:length(temp)) - find(temp,1,'first');
+    time_in_high_k(find(temp,1,'last'):end) = NaN;
+
+    data.time_in_high_k(this_prep) = time_in_high_k;
+
+end
+
+data.time_in_high_k = data.time_in_high_k*20; % now in seconds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % colour by "state"
 
 figure('outerposition',[300 300 951 901],'PaperUnits','points','PaperSize',[951 900]); hold on
@@ -147,9 +187,20 @@ for i = length(labels):-1:1
 end
 
 axis off
-ch.Position = [.88 .12 .01 .3];
 axis tight
 figlib.pretty;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -168,10 +219,19 @@ figlib.pretty;
 
 
 
+
+
+
+
+
+
+
+
+
+
 % plot, colour by prep IDX
 figure('outerposition',[300 300 951 901],'PaperUnits','points','PaperSize',[951 900]); hold on
 
-preps =  unique(data.experiment_idx);
 C = [lines(8); colormaps.linspecer(6)];
 
 for i = 1:length(preps)
@@ -183,6 +243,15 @@ end
 axis off
 axis tight
 figlib.pretty;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -216,14 +285,29 @@ figlib.pretty;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % before and after high K
 
 figure('outerposition',[300 300 951 901],'PaperUnits','points','PaperSize',[951 900]); hold on
 
-
 C = [.8 .8 .8];
 ch = plot(R(:,1),R(:,2),'.','MarkerFaceColor',C,'MarkerEdgeColor',C,'MarkerSize',20);
-
 
 % plot before high k in black dots
 plot_this = data.before_highk == true & data.after_ptx == true;
@@ -244,53 +328,37 @@ pdflib.snap
 
 
 
-% colour by experiment
 
 
-figure('outerposition',[300 300 951 901],'PaperUnits','points','PaperSize',[951 900]); hold on
-all_exp_id = (data.experiment_idx);
-u = unique(all_exp_id);
-c = colormaps.linspecer(length(u));
-for i = 1:length(u)
-    plot(R(all_exp_id==u(i),1),R(all_exp_id==u(i),2),'.','MarkerFaceColor',c(i,:),'MarkerEdgeColor',c(i,:),'MarkerSize',20)
-end
-axis off
-title('Coloured by experiment ID')
 
-figlib.pretty
-pdflib.snap
+
+
 
 
 
 
 
 % show trajectories prep-by-prep (pH)
-preps =  unique(data.experiment_idx);
-
 
 figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[951 900]); hold on
 
-
-
-idx = 1;
+plotidx = 1;
 for i = 1:length(preps)
 
     if ~any(~isnan(data.pH(data.experiment_idx == preps(i))))
         continue
     end
 
-    subplot(2,3,idx); hold on
+    subplot(2,3,plotidx); hold on
     C = [.8 .8 .8];
     plot(R(:,1),R(:,2),'.','MarkerFaceColor',C,'MarkerEdgeColor',C,'MarkerSize',20)
-
-
 
     plot(R(data.experiment_idx==preps(i),1),R(data.experiment_idx==preps(i),2),'Color',[1 .7 .7])
     plot(R(data.experiment_idx==preps(i),1),R(data.experiment_idx==preps(i),2),'.','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',10)
     axis square
     axis off
 
-    idx = idx + 1;
+    plotidx = plotidx + 1;
 
 
 end
@@ -305,8 +373,10 @@ pdflib.snap()
 
 
 
+
+
 % show trajectories prep-by-prep (high K)
-preps =  unique(data.experiment_idx);
+
 
 figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[951 900]); hold on
 
@@ -336,8 +406,6 @@ figlib.pretty()
 pdflib.snap()
 
 
-return
-
 
 
 % build transition matrix for all data
@@ -346,11 +414,6 @@ return
 
 
 labels = unique(idx);
-N = length(labels);
-J = zeros(N);
-J_ph = 0*J;
-J_k = 0*J;
-
 idx2 = circshift(idx,1);
 
 
@@ -358,20 +421,15 @@ J = embedding.computeTransitionMatrix(idx);
 
 
 % only high K
-temp = idx;
-temp(~isnan(data.pH)) = categorical({'Undefined'});
-J_k = embedding.computeTransitionMatrix(temp);
+rm_this = ~isnan(data.pH) | data.time_in_high_k < 0 | isnan(data.time_in_high_k);
+J_k = embedding.computeTransitionMatrix(idx(~rm_this));
 
 % only pH
-temp = idx;
-temp(isnan(data.pH)) = categorical({'Undefined'});
-J_ph = embedding.computeTransitionMatrix(temp);
+J_ph = embedding.computeTransitionMatrix(idx(~isnan(data.pH)));
 
 % compute per-prep-transition matrices
-for i = 1:length(preps)
-    temp = idx;
-    temp(data.experiment_idx == preps(i)) = [];
-    J_prep(:,:,i) = embedding.computeTransitionMatrix(temp);
+for i = length(preps):-1:1
+    J_prep(:,:,i) = embedding.computeTransitionMatrix(idx(data.experiment_idx == preps(i)));
 end
 
 
@@ -415,10 +473,10 @@ ax(1).Position(1) = .37;
 figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 
 subplot(2,1,1); hold on
-embedding.plotSankey(J_ph, find(labels == 'regular-bursting'), labels)
+embedding.plotSankey(J_ph, find(labels == 'regular-bursting'), labels);
 
 subplot(2,1,2); hold on
-embedding.plotSankey(J_k, find(labels == 'regular-bursting'), labels)
+embedding.plotSankey(J_k, find(labels == 'regular-bursting'), labels);
 
 figlib.pretty
 
@@ -486,6 +544,62 @@ end
 
 
 
+
+
+
+
+% show prep-by-prep variation in going silent
+% now the high K preps
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+
+clear ax
+plotidx = 1;
+for i = 1:length(preps)
+    if ~any(isnan(data.pH(data.experiment_idx == preps(i))))
+        continue
+    end
+
+
+    ax(plotidx) = subplot(3,3,plotidx); hold on
+    [th_feeder, th_end] = embedding.plotSankey(J_prep(:,:,i), find(labels == 'silent'), labels);
+
+    if rem(plotidx,3) == 1
+
+    else
+        delete(th_feeder)
+    end
+
+    if rem(plotidx,3) == 0
+    else
+        delete(th_end)
+    end
+
+    plotidx = plotidx + 1;
+end
+
+
+figlib.pretty;
+
+for i = 1:length(ax)
+    ax(i).Position(3) = .25;
+    ax(i).XLim = [-3 0];
+    drawnow
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % does crash trajectroy depend on pH?
 % compare pH<6 and ph>9.5 (two extreme groups)
 
@@ -516,6 +630,35 @@ figlib.pretty
 
 
 
+% does crash trajectroy depend on pH?
+% compare pH<6 and ph>9.5 (two extreme groups)
+
+% build transition matrices based on pH
+temp = idx;
+temp(data.pH > 6) = [];
+J_low_ph = embedding.computeTransitionMatrix(temp);
+
+temp = idx;
+temp(data.pH < 9.5) = [];
+J_hi_ph = embedding.computeTransitionMatrix(temp);
+
+
+
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+
+subplot(2,1,1); hold on
+embedding.plotSankey(J_low_ph, find(labels == 'regular-bursting'), labels);
+
+subplot(2,1,2); hold on
+embedding.plotSankey(J_hi_ph, find(labels == 'regular-bursting'), labels);
+
+figlib.pretty
+
+
+
+
+
+
 
 
 
@@ -523,30 +666,31 @@ figlib.pretty
 
 % measure switching rates by pH
 % plot state by pH
-all_ph = data.pH;
 
-N = 31; % how many bins along pH?
-ph_space =  linspace(5.5,10,N);
+
+ph_space = 5.5:.02:10;
+
+N = length(ph_space);
+
+ % this matrix counts states
+state_dist = zeros(N-1,length(labels));
 
 switching_rate = NaN*ph_space;
 
-
-% this matrix counts states
-state_dist = zeros(N-1,length(labels));
-
+buffer_overflow = .25;
 
 for i = 1:N-1
-    this_ph = all_ph >= ph_space(i) & all_ph <= ph_space(i+1);
+    this_time = data.pH >= ph_space(i) - buffer_overflow & data.pH <= ph_space(i+1) + buffer_overflow;
 
     % find states in this ph bin
     for j = 1:length(labels)
-        state_dist(i,j) = sum(idx(this_ph) == labels(j));
+        state_dist(i,j) = sum(idx(this_time) == labels(j));
     end
 
     % norm
     state_dist(i,:) = state_dist(i,:)/sum(state_dist(i,:));
 
-    these_states = idx(this_ph);
+    these_states = idx(this_time);
     these_states2 = circshift(these_states,1);
 
     switching_rate(i) = 1 -  mean(these_states == these_states2);
@@ -557,6 +701,117 @@ end
 
 
 
+
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+
+clear ax
+ax(1) = subplot(2,1,1); hold on
+plot(ph_space, switching_rate,'ko')
+set(gca,'XTickLabel',{})
+ylabel('Switching rate')
+
+ax(2) = subplot(2,1,2); hold on
+
+bh = bar(ph_space(2:end), state_dist,'stacked');
+for i = 1:length(bh)
+    bh(i).EdgeColor = bh(i).FaceColor;
+    bh(i).BarWidth = 1;
+end
+bh(end).EdgeColor = 'k';
+bh(end).FaceColor = 'k';
+
+set(gca,'YLim',[0 1])
+xlabel('pH')
+ylabel('States')
+set(gca,'YTickLabel',{})
+
+
+legend(corelib.categorical2cell(labels),'Location','eastoutside')
+
+figlib.pretty()
+
+ax(1).Position(3) = ax(2).Position(3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% plot states as a funciton of time in high K
+time_in_high_k_space = -500:20:6000;
+
+N = length(time_in_high_k_space);
+
+ % this matrix counts states
+state_dist = zeros(N-1,length(labels));
+
+switching_rate = NaN*time_in_high_k_space;
+
+buffer_overflow = 100;
+
+for i = 1:N-1
+    this_time = data.time_in_high_k >= time_in_high_k_space(i) - buffer_overflow & data.time_in_high_k <= time_in_high_k_space(i+1) + buffer_overflow;
+
+    % find states in this ph bin
+    for j = 1:length(labels)
+        state_dist(i,j) = sum(idx(this_time) == labels(j));
+    end
+
+    % norm
+    state_dist(i,:) = state_dist(i,:)/sum(state_dist(i,:));
+
+    these_states = idx(this_time);
+    these_states2 = circshift(these_states,1);
+
+    switching_rate(i) = 1 -  mean(these_states == these_states2);
+
+end
+
+
+
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+
+clear ax
+ax(1) = subplot(2,1,1); hold on
+plot(time_in_high_k_space, switching_rate,'ko')
+set(gca,'XTickLabel',{})
+ylabel('Switching rate')
+
+ax(2) = subplot(2,1,2); hold on
+
+bh = bar(time_in_high_k_space(2:end)/60, state_dist,'stacked');
+for i = 1:length(bh)
+    bh(i).EdgeColor = bh(i).FaceColor;
+    bh(i).BarWidth = 1;
+end
+bh(end).EdgeColor = 'k';
+bh(end).FaceColor = 'k';
+
+set(gca,'YLim',[0 1])
+xlabel('Time since high K onset (min)')
+ylabel('States')
+set(gca,'YTickLabel',{})
+
+
+legend(corelib.categorical2cell(labels),'Location','eastoutside')
+
+figlib.pretty()
+
+ax(1).Position(3) = ax(2).Position(3);
 
 
 
