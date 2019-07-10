@@ -173,23 +173,48 @@ data.time_in_high_k = data.time_in_high_k*20; % now in seconds
 
 
 
-% colour by "state"
-
-figure('outerposition',[300 300 951 901],'PaperUnits','points','PaperSize',[951 900]); hold on
-
+% colour by "state" and show example rasters of each state
 
 labels = (unique(idx));
-C = colormaps.linspecer(9);
+C = lines;
+C(8,:) = [0 0 0];
 
-for i = length(labels):-1:1
-    plot_this = idx == labels(i);
-    plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',30,'Color',C(i,:))
+examples = [11, 120, 138, 30; 8057, 8462, 8177, 6250; 5393, 1349, 583, 559; 1055, 911, 3340, 961; 6372, 2177, 1598, 1599; 4729, 2201, 2129, 7713; 4671, 1561, 2174, 1552]; 
+
+for j = 1:size(examples,1)
+
+
+
+    figure('outerposition',[300 300 1200 900],'PaperUnits','points','PaperSize',[1200 900]); hold on
+
+    subplot(4,1,1:3); hold on
+    axis square
+
+
+
+    for i = length(labels):-1:1
+        plot_this = idx == labels(i);
+        plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',30,'Color',C(i,:))
+    end
+
+    axis off
+    axis tight
+
+    % show examples
+    subplot(4,1,4); hold on
+
+    this_color = find(labels == idx(examples(j,1)));
+    this_color = C(this_color,:);
+    this_color = repmat(this_color,4,1);
+
+    neurolib.raster(data.PD(:,examples(j,:)),'split_rows',true,'Color',this_color,'deltat',1,'LineWidth',2)
+
+    axis off
+    figlib.pretty;
+
+
+
 end
-
-axis off
-axis tight
-figlib.pretty;
-
 
 
 
@@ -319,7 +344,6 @@ plot(R(plot_this,1),R(plot_this,2),'.','MarkerFaceColor','r','MarkerEdgeColor','
 
 
 axis off
-title('Before and after high K')
 
 figlib.pretty
 pdflib.snap
