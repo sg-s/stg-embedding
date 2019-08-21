@@ -1,82 +1,91 @@
 
+
+%% In this document, I will embed spikes from PD and LP
+% during perturbations into a single map
+
+%%
+% The data I will use is from the following experiments:
+
+
+data_dirs = {'877_093','887_005','887_049','887_081','889_142','892_147','897_005','897_037','901_151','901_154','904_018','906_126','930_045'};
+
+data_root = '/Volumes/HYDROGEN/srinivas_data';
+all_dirs = filelib.getAllFolders(data_root);
+
 % make sure data directory exists
 filelib.mkdir('cache')
 
 
-data_root = '/Volumes/HYDROGEN/srinivas_data/temperature-data-for-embedding';
-avail_exps = dir(data_root);
-exp_ids = {};
-neurons = {'PD','LP'};
-
-    
-% automatically figure out the usable data
-for i = 1:length(avail_exps)
-    if strcmp(avail_exps(i).name(1),'.')
-        continue
-    end
-    allfiles = dir([avail_exps(i).folder filesep avail_exps(i).name filesep '*.crabsort']);
-
-    if length(allfiles) < 3
-        % can't be any data here
-        continue
-    end
-
-    not_sorted = crabsort.checkSorted(allfiles, neurons, true);
-
-    if ~not_sorted
-        exp_ids{end+1} = avail_exps(i).name;
-    end
-
-end
-
-hash = hashlib.md5hash([exp_ids{:}]);
-
-
-if exist(['cache/'  hash '.mat'],'file') ~= 2
+if exist('cache/PD_LP.mat','file') ~= 2
 
     disp('Assembling data from source...')
+  
+    for i = length(data_dirs):-1:1
+
+        disp(data_dirs{i})
+
+        % find out where this file is
+        this_dir = all_dirs(filelib.find(all_dirs,data_dirs{i}));
+        [~, pick_this] = max(cellfun(@(x) strfind(x, data_dirs{i})-length(x),this_dir));
+        
 
 
-    for i = length(exp_ids):-1:1
-
-        data{i} = crabsort.consolidate('neurons',{'PD','LP'},'DataDir',[data_root filesep exp_ids{i}],'ChunkSize',20);
-
+        data(i) = crabsort.consolidate('neurons',{'PD','LP'},'stack',false,'DataDir',this_dir{pick_this},'ChunkSize',20);
     end
 
-    save(['cache/'  hash '.mat'],'data','-v7.3')
+    save('cache/PD_LP.mat','data','-v7.3')
 
 else
-    load(['cache/'  hash '.mat'])
+    load('cache/PD_LP.mat')
 end
 
 
-data(cellfun(@isempty,data)) = [];
 
 % add all of this to the ISI database
 for i = 1:length(data)
-    thoth.add(data{i},'neurons',{'PD','LP'});
+    thoth.add(data(i),'neurons',{'PD','LP'});
 end
+
+
+
+
+
 
 
 % Assume that the distances are computed on a cluster, and you have access
 % to the data...
 
-[D, isis] = thoth.getDistances(exp_ids, {'PD_PD','PD_LP','LP_LP','LP_PD'});
+[D, isis] = thoth.getDistances(data_dirs, {'PD_PD','PD_LP','LP_LP','LP_PD'});
 
 
-return
+% exxagerate delays between neurons 
+D2 = D;
+D2(:,:,2) = 1*D(:,:,2);
+D2(:,:,4) = 1*D(:,:,4);
 
-D = sum(D,3);
-u = umap; u.metric = 'precomputed';
-R = u.fit(D);
+eD = sum(D2,3);
+
+SubSample = 10;
+
+eD = eD(1:SubSample:end,1:SubSample:end);
 
 
+t = TSNE; 
+t.distance_matrix = eD;
+t.n_iter  = 1000;
+t.implementation = TSNE.implementation.vandermaaten;
+R = t.fit;
 
 mdata = struct;
-mdata.LP = data{1}.LP;
-mdata.PD = data{1}.PD;
+mdata.LP = data(1).LP';
+mdata.PD = data(1).PD';
 
 for i = 2:length(data)
-    mdata.LP = [mdata.LP, data{1}.LP];
-    mdata.PD = [mdata.PD, data{1}.PD];
+    mdata.LP = vertcat(mdata.LP, data(i).LP');
+    mdata.PD = vertcat(mdata.PD, data(i).PD');
 end
+
+mdata.LP = mdata.LP(1:SubSample:end,:);
+mdata.PD = mdata.PD(1:SubSample:end,:);
+
+explore

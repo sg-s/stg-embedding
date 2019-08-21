@@ -32,7 +32,7 @@ for i = 1:length(neurons)
 		N = size(data.(neurons{i}),2);
 
 		if i == j
-			spiketimes = data.(neurons{i});
+			spiketimes = sort(data.(neurons{i}));
 			isis = [diff(spiketimes);  NaN(1,N)] ;
 		else
 			% cross ISIs
@@ -88,7 +88,11 @@ for i = 1:length(neurons)
 
 		end
 
+		% check that all isis are +ve
+		assert(min(isis(:))>=0,'Some ISIs are negative, which makes no sense')
+
 		data.(fn) = isis;
 
 	end
 end
+
