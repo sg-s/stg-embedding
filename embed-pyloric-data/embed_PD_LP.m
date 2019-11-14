@@ -41,10 +41,10 @@ end
 
 
 
-% add all of this to the ISI database
-for i = 1:length(data)
-    thoth.add(data(i),'neurons',{'PD','LP'});
-end
+% % add all of this to the ISI database
+% for i = 1:length(data)
+%     thoth.add(data(i),'neurons',{'PD','LP'});
+% end
 
 
 
@@ -55,24 +55,35 @@ end
 % Assume that the distances are computed on a cluster, and you have access
 % to the data...
 
+
 [D, isis] = thoth.getDistances(data_dirs, {'PD_PD','PD_LP','LP_LP','LP_PD'});
 
 
-% exxagerate delays between neurons 
-D2 = D;
-D2(:,:,2) = 1*D(:,:,2);
-D2(:,:,4) = 1*D(:,:,4);
+% cutoff large distances
+D(D>10) = 10;
 
-eD = sum(D2,3);
+% also add a distance that depends on the firing rate
+LP_inverse_f = 1./sum(~isnan([data.LP]));
+PD_inverse_f = 1./sum(~isnan([data.PD]));
 
-SubSample = 10;
+Df = squareform(pdist([LP_inverse_f; PD_inverse_f]'));
+Df(isinf(Df)) = max(Df(~isinf(Df)));
+Df(isnan(Df)) = max(Df(~isinf(Df)));
 
-eD = eD(1:SubSample:end,1:SubSample:end);
+SubSample = 2;
+SD = D(1:SubSample:end,1:SubSample:end,:);
+Df = Df(1:SubSample:end,1:SubSample:end,:);
+
+
+
+eD = (sum(SD,3));
+
 
 
 t = TSNE; 
+t.perplexity = 120;
 t.distance_matrix = eD;
-t.n_iter  = 1000;
+t.n_iter  = 500;
 t.implementation = TSNE.implementation.vandermaaten;
 R = t.fit;
 
@@ -89,3 +100,67 @@ mdata.LP = mdata.LP(1:SubSample:end,:);
 mdata.PD = mdata.PD(1:SubSample:end,:);
 
 explore
+
+
+
+%%
+% now we bin ISIs and simply t-SNE them and see what we get
+n_bins = 50;
+binned_isis = zeros(n_bins,size(isis,2),4);
+bin_edges = linspace(0,1,n_bins+1);
+bin_centers = bin_edges(1:end-1) + mean(diff(bin_edges))/2;
+for i = 1:size(isis,2)
+    for j = 1:4
+        binned_isis(:,i,j) = histcounts(isis(:,i,j),bin_edges);
+    end
+end
+
+% weight each bin by the center of the bin
+for i = 1:4
+    for j = 1:size(binned_isis,2)
+        binned_isis(:,j,i) = (binned_isis(:,j,i)').*bin_centers;
+    end
+end
+
+
+% normalize 
+% for i = 1:4
+%     for j = 1:size(binned_isis,2)
+%         binned_isis(:,j,i) = binned_isis(:,j,i)/sum(binned_isis(:,j,i));
+%     end
+% end
+
+% rearranged isis and stack different dimensions
+temp = zeros(n_bins*4,size(isis,2));
+for i = 1:4
+    temp(n_bins*(i-1)+1:n_bins*i,:) = binned_isis(:,:,i);
+end
+binned_isis = temp;
+
+% subsample
+binned_isis = binned_isis(:,1:SubSample:end);
+
+
+% remove NaNs
+binned_isis(isnan(binned_isis)) = 0;
+
+t = TSNE; 
+t.perplexity = 120;
+t.raw_data = binned_isis;
+t.n_iter  = 500;
+t.implementation = TSNE.implementation.vandermaaten;
+R = t.fit;
+
+
+
+
+% now let's try NMF
+[W,H] = nnmf(binned_isis,10);
+
+
+t = TSNE; 
+t.perplexity = 30;
+t.raw_data = H;
+t.n_iter  = 500;
+t.implementation = TSNE.implementation.vandermaaten;
+R = t.fit;
