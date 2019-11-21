@@ -16,5 +16,6 @@ spiketimes = spiketimes';
 spiketimes = spiketimes(:);
 spiketimes = spiketimes + randn(length(spiketimes),1)*SpiketimeJitter*mean(diff(spiketimes));
 
+spiketimes = sort(spiketimes);
 spiketimes = spiketimes - spiketimes(1);
 spiketimes(spiketimes>BinSize) = [];

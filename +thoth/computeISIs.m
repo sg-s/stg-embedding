@@ -32,17 +32,18 @@ for i = 1:length(neurons)
 		N = size(data.(neurons{i}),2);
 
 		if i == j
+			% simple ISIs, easy to compute
 			spiketimes = sort(data.(neurons{i}));
 			isis = [diff(spiketimes);  NaN(1,N)] ;
 		else
 			% cross ISIs
-			spiketimesA = data.(neurons{i});
-			spiketimesB = data.(neurons{j});
+			spiketimesA = sort(data.(neurons{i}));
+			spiketimesB = sort(data.(neurons{j}));
 
 			% do it for each row separately
 			all_isis = NaN(1e3,size(spiketimesA,2));
 
-			for ii = 1:size(spiketimesA,2)
+			parfor ii = 1:size(spiketimesA,2)
 
 				sA = spiketimesA(:,ii);
 				sB = spiketimesB(:,ii);
