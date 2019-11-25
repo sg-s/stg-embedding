@@ -1,3 +1,4 @@
+*.cache
 *.mat
 *DS_Store
 *.crabsort

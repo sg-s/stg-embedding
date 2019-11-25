@@ -86,8 +86,6 @@ Df = Df(1:SubSample:end,1:SubSample:end,:);
 
 eD = (sum(SD,3));
 
-=======
-
 
 SubSample = 2;
 
