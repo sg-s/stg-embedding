@@ -47,6 +47,11 @@ min_isi = 5e-3; % 5 ms
 data.PD_PD(data.PD_PD<min_isi) = NaN;
 data.LP_LP(data.LP_LP<min_isi) = NaN;
 
+% colormap for clusters
+c = lines(9);
+c(8,:) = [0 0 0];
+c(9,:) = [1 0 0];
+
 % note that cross ISIs can be arbitrarily small, and we want our distance
 % function to work with that 
 
@@ -69,8 +74,6 @@ for figidx = 1:3
 
 		idx = i;
 
-
-
 		subplot(5,3,idx); hold on
 
 		% show the spike times
@@ -79,10 +82,10 @@ for figidx = 1:3
 		neurolib.raster(data.PD(:,plot_this(idx)),data.LP(:,plot_this(idx)),'split_rows',true,'deltat',1,'center',false); 
 		title(char(this_cat))
 		set(gca,'XLim',[0 5],'YLim',[0 2])
+		axis off
 
 
-
-		% show PD isis
+		% show all isis
 		for j = 1:4
 			idx = idx + 3;
 			subplot(5,3,idx); hold on
@@ -96,8 +99,14 @@ for figidx = 1:3
 			set(gca,'YScale','log','YLim',[1e-2 1e1])
 			if i == 1
 				ylabel(things_to_show{j},'interpreter','none')
+			elseif i > 1
+				set(gca,'YTick',[],'YTickLabel',{})
+			end
+			if j < 4
+				set(gca,'XTick',[])
 			end
 		end
+		
 
 	end
 
@@ -105,16 +114,184 @@ for figidx = 1:3
 
 end
 
-close all
-drawnow
+
+
+% Now I discretize the ISIs into ISI histograms
+fn = {'PD_PD','LP_LP','PD_LP','LP_PD'};
+
+n_bins = 30;
+isi_bin_edges = logspace(-2,log10(5),n_bins+1);
+binned_isis = zeros(n_bins,size(data.PD,2),4);
+bin_centers = isi_bin_edges(1:end-1)+diff(isi_bin_edges)/2;
+for i = 1:4
+	these_isis = data.(fn{i});
+    for j = 1:size(these_isis,2)
+        binned_isis(:,j,i) = histcounts(these_isis(:,j),isi_bin_edges);
+        %binned_isis(:,j,i) = bin_centers(:).*binned_isis(:,j,i);
+        % normalize
+        binned_isis(:,j,i) =  binned_isis(:,j,i)/sum( binned_isis(:,j,i));
+    end
+end
+
+% reshape
+temp = zeros(n_bins*4,size(data.PD,2));
+for i = 1:4
+    temp(n_bins*(i-1)+1:n_bins*i,:) = binned_isis(:,:,i);
+end
+binned_isis = temp;
+binned_isis(isnan(binned_isis)) = 0;
+
+
+
+
+% clustering on binned ISIs
+
+
+
+figure('outerposition',[300 300 1801 600],'PaperUnits','points','PaperSize',[1801 600]); hold on
+
+
+% simple clustering on binned_isis
+subplot(1,3,1); hold on
+idx = clusterdata(binned_isis','Maxclust',9);
+stairs(linspace(1,9,9),'r-')
+plot(linspace(1,9,1e4),idx,'k.')
+xlabel('True cluster ID')
+ylabel('Inferred cluster ID')
+set(gca,'XLim',[0 10],'YLim',[0 10])
+for i = 1:9
+	plotlib.vertline(i,'k:');
+end
+title('Hierarchical clustering')
+
+% k-means
+subplot(1,3,2); hold on
+idx = kmeans(binned_isis',9);
+stairs(linspace(1,9,9),'r-')
+plot(linspace(1,9,1e4),idx,'k.')
+xlabel('True cluster ID')
+ylabel('Inferred cluster ID')
+set(gca,'XLim',[0 10],'YLim',[0 10])
+for i = 1:9
+	plotlib.vertline(i,'k:');
+end
+title('k-means')
+
+subplot(1,3,3); hold on
+idx = clusterlib.densityPeaks(binned_isis,'NClusters',9);
+stairs(linspace(1,9,9),'r-')
+plot(linspace(1,9,1e4),idx,'k.')
+xlabel('True cluster ID')
+ylabel('Inferred cluster ID')
+set(gca,'XLim',[0 10],'YLim',[0 10])
+for i = 1:9
+	plotlib.vertline(i,'k:');
+end
+title('density peaks')
+
+figlib.pretty()
+
+
+
+
+% embedding of binned ISIs
+
+% PCA
+[coeff,score,latent,tsquared,explained,mu] = pca(binned_isis);
+
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+subplot(2,2,1); hold on
+plot(cumsum(explained),'k')
+xlabel('# components')
+ylabel('Fraction explained')
+grid on
+set(gca,'YLim',[0 100])
+subplot(2,2,2); hold on
+
+
+clear l L
+for i = 1:length(cats)-1
+	plot_this = data.experiment_idx == cats(i);
+	plot(coeff(plot_this,1),coeff(plot_this,2),'.','MarkerSize',10,'Color',c(i,:));
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
+
+legend(l,corelib.categorical2cell(cats(1:end-1)),'Location','eastoutside')
+
+axis off
+axis square
+
+
+for i = 1:3
+	subplot(2,3,i+3); hold on
+	plot(score(:,i),'k')
+	title(['PC' strlib.oval(i)])
+	axis off
+end
+
+
+figlib.pretty()
+
+
+
+% NMF
+
+[W,H] = nnmf(binned_isis,9);
+idx = kmeans(H',9);
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+
+
+subplot(1,2,1); hold on
+imagesc(W)
+axis xy
+axis off
+
+subplot(1,2,2); hold on
+plot(linspace(1,9,1e4),idx,'k.')
+xlabel('True cluster ID')
+ylabel('Inferred cluster ID')
+plotlib.drawDiag();
+figlib.pretty()
+
+
+% t-SNE on the binned ISI histograms
+t = TSNE;
+t.n_iter = 500;
+t.implementation = TSNE.implementation.vandermaaten;
+t.raw_data = binned_isis;
+R = t.fit;
+
+
+figure('outerposition',[300 300 700 600],'PaperUnits','points','PaperSize',[700 600]); hold on
+
+clear l L
+for i = 1:length(cats)-1
+	plot_this = data.experiment_idx == cats(i);
+	plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',10,'Color',c(i,:));
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
+
+legend(l,corelib.categorical2cell(cats(1:end-1)),'Location','eastoutside')
+
+axis off
+
+figlib.pretty()
+
+
+
+
+
 
 
 % now we measure distances for all the different ISI distance metrics
 
-fn = {'PD_PD','LP_LP','PD_LP','LP_PD'};
+
 
 if exist('all_distances.mat','file') == 2
-	load('all_distances.mat','D')
+	if ~exist('D','var') 
+		load('all_distances.mat','D')
+	end
 else
 
 	D = struct;
@@ -217,15 +394,13 @@ end
 
 
 % plot and colour by label
-figure('outerposition',[300 300 1801 601],'PaperUnits','points','PaperSize',[1801 601]); hold on
+figure('outerposition',[300 300 1200 601],'PaperUnits','points','PaperSize',[1200 601]); hold on
 
-c = lines(9);
-c(8,:) = [0 0 0];
-c(9,:) = [1 0 0];
 
+clear ax
 for Variant = 1:2
 
-	subplot(1,2,Variant); hold on
+	ax(Variant) = subplot(1,2,Variant); hold on
 
 	clear l L
 	for i = 1:length(cats)-1
@@ -238,13 +413,15 @@ for Variant = 1:2
 	end
 	axis off
 	axis square
+	title(['Variant ' strlib.oval(Variant)])
 
 
 end
 
 figlib.pretty()
 
-
+ax(2).Position(3:4) = ax(1).Position(3:4);
+axlib.move(ax,'left',.05)
 
 % effect of perplexity (only Variant 1)
 all_perplexity = linspace(20,200,10);
@@ -270,3 +447,109 @@ for i = length(all_perplexity):-1:1
 	Y(:,i) = R(:,2);
 
 end
+
+% plot all perplexities 
+
+figure('outerposition',[300 300 1200 999],'PaperUnits','points','PaperSize',[1200 999]); hold on
+
+clear ax
+
+for i = 1:9
+
+	ax(i) = subplot(3,3,i); hold on
+
+	clear l L
+	for j = 1:length(cats)-1
+		plot_this = data.experiment_idx == cats(j);
+		plot(X(plot_this,i),Y(plot_this,i),'.','MarkerSize',10,'Color',c(j,:));
+		l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+	end
+	axis off
+	title(['perplexity = ' strlib.oval(all_perplexity(i))])
+	axis square
+
+
+end
+
+figlib.pretty
+
+for i = 1:9
+	ax(i).Position([3 4]) = [.22 .22];
+end
+
+
+
+
+% Now we have the distance matrix, we will try to cluster directly on that. 
+
+
+
+Variant = 1;
+embed_distance = 0*D(1).PD_PD;
+for j = 1:length(fn)
+	embed_distance = embed_distance + D(Variant).(fn{j});
+end
+embed_distance = mathlib.symmetrize(embed_distance);
+
+embed_distance = sum(embed_distance,3);
+
+% heirarchical clustering on the distance matrix
+Y = squareform(embed_distance,'tovector');
+Z = linkage(Y);
+
+idx = cluster(Z,'Maxclust',9);
+
+figure('outerposition',[300 300 1201 600],'PaperUnits','points','PaperSize',[1201 600]); hold on
+subplot(1,2,1); hold on
+stairs(linspace(1,9,9),'r-')
+plot(linspace(1,9,1e4),idx,'k.')
+xlabel('True cluster ID')
+ylabel('Inferred cluster ID')
+set(gca,'XLim',[0 10],'YLim',[0 10])
+for i = 1:9
+	plotlib.vertline(i,'k:');
+end
+title('Hierarchical clustering')
+
+
+% density peaks on distance matrix
+idx = clusterlib.densityPeaks(embed_distance,'Distance','precomputed','NClusters',9); 
+
+subplot(1,2,2); hold on
+stairs(linspace(1,9,9),'r-')
+plot(linspace(1,9,1e4),idx,'k.')
+xlabel('True cluster ID')
+ylabel('Inferred cluster ID')
+set(gca,'XLim',[0 10],'YLim',[0 10])
+for i = 1:9
+	plotlib.vertline(i,'k:');
+end
+
+title('density Peaks clustering')
+
+figlib.pretty()
+
+
+
+
+
+% UMAP embedding of distance matrix
+u = umap('metric','precomputed');
+R = u.fit(embed_distance);
+
+
+
+figure('outerposition',[300 300 700 600],'PaperUnits','points','PaperSize',[700 600]); hold on
+
+clear l L
+for i = 1:length(cats)-1
+	plot_this = data.experiment_idx == cats(i);
+	plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',10,'Color',c(i,:));
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
+
+legend(l,corelib.categorical2cell(cats(1:end-1)),'Location','eastoutside')
+
+axis off
+
+figlib.pretty()
