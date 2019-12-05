@@ -2,6 +2,28 @@
 
 function data = computeISIs(data, neurons)
 
+% use parallel pool to accelerate computation on more than 1 dataset
+if length(data) > 1
+
+	% add placeholder fields
+	for k = 1:length(data)
+		for i = 1:length(neurons)
+			for j = 1:length(neurons)
+				fn = [neurons{i} '_' neurons{j}];
+				data(k).(fn) = [];
+			end
+		end
+	end
+
+
+	parfor i = 1:length(data)
+		data(i) = thoth.computeISIs(data(i),neurons);
+	end
+
+	return
+end
+
+
 assert(length(data) == 1,'This function only works on scalar structures')
 
 % check that everything in the neuron list is there in the data
@@ -18,8 +40,6 @@ for i = 1:length(neurons)
 	end
 end
 
-
-disp('Measuring ISIs:')
 % compute isis and cross isis
 for i = 1:length(neurons)
 	for j = 1:length(neurons)

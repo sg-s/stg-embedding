@@ -7,8 +7,7 @@
 % The data I will use is from the following experiments:
 
 
-data_dirs = {'877_093','887_005','887_049','887_081','889_142','892_147','897_005','897_037','901_151','901_154','904_018','906_126','930_045'};
-
+data_dirs = {'828_001_1','828_034_1','828_104_1','828_128','857_010','857_012','857_052','857_080','857_104','877_093','887_005','887_049','887_081','889_142','892_147','897_005','897_037','901_151','901_154','904_018','906_126','930_045','857_006','828_136_1','828_042_2'};
 
 
 % make sure data directory exists
@@ -17,7 +16,7 @@ filelib.mkdir('cache')
 
 if exist('cache/PD_LP.mat','file') ~= 2
 
-    data_root = '/Volumes/HYDROGEN/srinivas_data';
+    data_root = getpref('crabsort','store_spikes_here');
     all_dirs = filelib.getAllFolders(data_root);
 
     disp('Assembling data from source...')
@@ -32,7 +31,7 @@ if exist('cache/PD_LP.mat','file') ~= 2
         
 
 
-        data(i) = crabsort.consolidate('neurons',{'PD','LP'},'stack',false,'DataDir',this_dir{pick_this},'ChunkSize',20);
+        data(i) = crabsort.consolidate('neurons',{'PD','LP'},'stack',true,'DataDir',this_dir{pick_this},'ChunkSize',20);
     end
 
     save('cache/PD_LP.mat','data','-v7.3')
@@ -42,11 +41,25 @@ else
 end
 
 
+
+% measure ISIs
+data = thoth.computeISIs(data, {'LP','PD'});
+
+% disallow ISIs below 10ms
+for i = 1:length(data)
+    data(i).PD_PD(data(i).PD_PD<.01) = NaN;
+    data(i).LP_LP(data(i).LP_LP<.01) = NaN;
+end
+
+
+
+
+
 % add all of this to the ISI database
 
-% for i = 1:length(data)
-%     thoth.add(data(i),'neurons',{'PD','LP'});
-% end
+for i = 1:length(data)
+    thoth.add(data(i),'neurons',{'PD','LP'});
+end
 
 
 

@@ -4,7 +4,13 @@
 % thoth.measure
 %
 
-function measure()
+function measure(Variant)
+
+if nargin == 0
+	Variant = 1;
+end
+
+
 
 isi_data_dir = getpref('thoth','isi_data_dir');
 isi_distance_dir = getpref('thoth','isi_distance_dir');
@@ -72,14 +78,14 @@ for i = 1:length(allexp)
 			else
 				disp('Hash mismatch! Will recompute distances')
 				clear D
-				D = neurolib.ISIDistance(isis);
+				D = neurolib.ISIDistance(isis,[],Variant);
 				save(dist_file,'D','H');
 				disp('DONE saving.')
 			end
 		else
 			disp('No distance file, will compute...')
 			clear D
-			D = neurolib.ISIDistance(isis);
+			D = neurolib.ISIDistance(isis,[],Variant);
 			save(dist_file,'D','H');
 			disp('DONE saving.')
 		end
@@ -164,7 +170,7 @@ for i = 1:length(all_isis_types)
 				else
 					disp('Hash mismatch! Will recompute distances')
 					clear D
-					D = neurolib.ISIDistance(isisA,isisB);
+					D = neurolib.ISIDistance(isisA,isisB,Variant);
 					save(dist_file,'D','H');
 					disp('DONE saving.')
 				end
@@ -174,7 +180,7 @@ for i = 1:length(all_isis_types)
 				corelib.cprintf('green','Computing...')
 
 				% measure distances
-				D = neurolib.ISIDistance(isisA,isisB);
+				D = neurolib.ISIDistance(isisA,isisB,Variant);
 
 				corelib.cprintf('green','\b\b\b\b\b\b\b\b\b\b\b\b')
 

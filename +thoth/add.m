@@ -18,9 +18,6 @@ assert(~isempty(options.neurons),'Neurons not defined')
 
 neurons = options.neurons;
 
-% compute ISIs for all data
-
-data = thoth.computeISIs(data, neurons);
 
 
 filelib.mkdir(isi_data_dir)
