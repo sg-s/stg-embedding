@@ -7,7 +7,7 @@
 function measure(Variant)
 
 if nargin == 0
-	Variant = 1;
+	Variant = 4;
 end
 
 
