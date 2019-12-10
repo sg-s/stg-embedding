@@ -49,6 +49,8 @@ structlib.packUnpack(options)
 PD = NaN(1e3,NSamples);
 LP = PD;
 experiment_idx = categorical(NaN(NSamples,1));
+burst_period = NaN(NSamples,1);
+firing_rate = NaN(NSamples,1);
 
 
 NPerCategory = floor(NSamples/length(categories));
@@ -75,6 +77,8 @@ for i = 1:NPerCategory
 	LP(1:length(this_LP),i) = this_LP;
 end
 
+burst_period(1:NPerCategory) = all_T;
+
 experiment_idx(1:NPerCategory) = categories(1);
 
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
@@ -93,6 +97,8 @@ for i = 1:NPerCategory
 	PD(1:length(this_PD),i+NPerCategory) = this_PD;
 
 end
+
+firing_rate(NPerCategory+1:NPerCategory*2) = all_f;
 experiment_idx(NPerCategory+1:NPerCategory*2) = categories(2);
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
@@ -118,6 +124,9 @@ for i = 1:NPerCategory
 	LP(1:length(this_LP),i+2*NPerCategory) = this_LP;
 
 end
+
+firing_rate(NPerCategory*2+1:NPerCategory*3) = all_f;
+burst_period(NPerCategory*2+1:NPerCategory*3) = all_T;
 experiment_idx(NPerCategory*2+1:NPerCategory*3) = categories(3);
 
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
@@ -145,6 +154,9 @@ for i = 1:NPerCategory
 	LP(1:length(this_LP),i+3*NPerCategory) = this_LP;
 
 end
+
+firing_rate(NPerCategory*3+1:NPerCategory*4) = all_f;
+burst_period(NPerCategory*3+1:NPerCategory*4) = all_T;
 experiment_idx(NPerCategory*3+1:NPerCategory*4) = categories(4);
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
@@ -171,6 +183,8 @@ for i = 1:NPerCategory
 	LP(1:length(this_LP),i+4*NPerCategory) = this_LP;
 
 end
+
+firing_rate(NPerCategory*4+1:NPerCategory*5) = all_f;
 experiment_idx(NPerCategory*4+1:NPerCategory*5) = categories(5);
 
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
@@ -238,6 +252,8 @@ for i = 1:NPerCategory
 	PD(1:length(this_PD),i+7*NPerCategory) = this_PD;
 
 end
+
+burst_period(NPerCategory*7+1:NPerCategory*8) = all_T;
 experiment_idx(NPerCategory*7+1:NPerCategory*8) = categories(8);
 
 if min(PD(:)) < 0
@@ -272,13 +288,9 @@ for i = 1:NPerCategory
 	LP(1:length(this_LP),i+8*NPerCategory) = this_LP;
 
 end
+
+burst_period(NPerCategory*8+1:NPerCategory*9) = all_T;
 experiment_idx(NPerCategory*8+1:NPerCategory*9) = categories(9);
-
-
-if min(PD(:)) < 0
-	keyboard
-end
-
 
 
 
@@ -287,7 +299,6 @@ end
 
 data.PD = PD;
 data.LP = LP;
-
-
-
 data.experiment_idx = experiment_idx;
+data.burst_period = burst_period;
+data.firing_rate = firing_rate;

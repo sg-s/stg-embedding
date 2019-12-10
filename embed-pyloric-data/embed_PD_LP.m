@@ -71,7 +71,6 @@ end
 % to the data...
 
 
-[D, isis] = thoth.getDistances(data_dirs, {'PD_PD','PD_LP','LP_LP','LP_PD'});
 
 if exist('cache/distances_isis.mat','file') ~= 2
     [D, isis] = thoth.getDistances(data_dirs, {'PD_PD','PD_LP','LP_LP','LP_PD'});
@@ -80,31 +79,11 @@ elseif exist('D','var') ~= 1
     load('cache/distances_isis.mat','D','isis')
 end
 
-% cutoff large distances
-D(D>10) = 10;
 
-% also add a distance that depends on the firing rate
-LP_inverse_f = 1./sum(~isnan([data.LP]));
-PD_inverse_f = 1./sum(~isnan([data.PD]));
+eD = sum(D,3);
 
-Df = squareform(pdist([LP_inverse_f; PD_inverse_f]'));
-Df(isinf(Df)) = max(Df(~isinf(Df)));
-Df(isnan(Df)) = max(Df(~isinf(Df)));
-
-SubSample = 2;
-SD = D(1:SubSample:end,1:SubSample:end,:);
-Df = Df(1:SubSample:end,1:SubSample:end,:);
-
-
-
-eD = (sum(SD,3));
-
-
-SubSample = 2;
-
-SD = D(1:SubSample:end,1:SubSample:end,:);
-
-eD = sum(SD,3);
+% cut off very large distances
+eD(eD>10) = 10;
 
 t = TSNE; 
 t.perplexity = 120;

@@ -55,6 +55,7 @@ c(9,:) = [1 0 0];
 % note that cross ISIs can be arbitrarily small, and we want our distance
 % function to work with that 
 
+return
 
 %%
 % In the following figure, I plot all the ISIs for all the states so we can get a sense of how the ISI-based distance functions will work
@@ -336,33 +337,30 @@ end
 figlib.pretty()
 
 
-% Now we look at the actual matrices
+% Now we look at the actual matrices (just show variant 4)
 
 figure('outerposition',[300 300 1200 1201],'PaperUnits','points','PaperSize',[1200 1201]); hold on
 
-idx = 1;
-for Variant = 1:4
-	for i = 1:length(fn)
-		subplot(4,4,idx); idx = idx + 1;
+Variant = 4;
 
-		imagesc(mathlib.symmetrize(D(Variant).(fn{i})(1:10:end,1:10:end)))
-		caxis([0 5])
+clear ax
+for i = 1:length(fn)
+	ax(i) = subplot(2,2,i); 
 
-		if Variant == 1
-			title(fn{i},'interpreter','none')
-		end
+	imagesc(mathlib.symmetrize(D(Variant).(fn{i})(1:10:end,1:10:end)))
+	caxis([0 5])
 
-		if i == 1
-			ylabel(['Variant' mat2str(Variant)])
-		end
-		axis square
-		set(gca,'XTick',[],'YTick',[])
 
-	end
+	title(fn{i},'interpreter','none')
+	axis square
+	axis off
+	set(gca,'XTick',[],'YTick',[])
+	caxis([0 2])
 
 end
 
 figlib.pretty
+
 
 
 %%
@@ -370,14 +368,15 @@ figlib.pretty
 
 
 clear R X Y
-for Variant = 1:2
+for Variant = 4:-1:1
 	embed_distance = 0*D(1).PD_PD;
 	for i = 1:length(fn)
 		embed_distance = embed_distance + D(Variant).(fn{i});
 	end
 	embed_distance = mathlib.symmetrize(embed_distance);
 
-	embed_distance = sum(embed_distance,3);
+	% remove last element
+	embed_distance = embed_distance(1:end-1,1:end-1);
 
 	t = TSNE; 
 	t.perplexity = 120;
@@ -394,13 +393,13 @@ end
 
 
 % plot and colour by label
-figure('outerposition',[300 300 1200 601],'PaperUnits','points','PaperSize',[1200 601]); hold on
+figure('outerposition',[300 300 1111 902],'PaperUnits','points','PaperSize',[1111 902]); hold on
 
 
 clear ax
-for Variant = 1:2
+for Variant = 1:4
 
-	ax(Variant) = subplot(1,2,Variant); hold on
+	ax(Variant) = subplot(2,2,Variant); hold on
 
 	clear l L
 	for i = 1:length(cats)-1
@@ -423,9 +422,51 @@ figlib.pretty()
 ax(2).Position(3:4) = ax(1).Position(3:4);
 axlib.move(ax,'left',.05)
 
-% effect of perplexity (only Variant 1)
+
+
+
+
+
+
+% can we color dots by firing rate and burst period
+
+
+
+
+C = zeros(1e4,3);
+C(:,1) = data.burst_period;
+C(:,1) = C(:,1) - nanmin(C(:,1));
+C(:,1) = C(:,1)/nanmax(C(:,1));
+C(isnan(C(:,1)),1) = 0;
+
+
+C(:,3) = data.firing_rate;
+C(:,3) = C(:,3) - nanmin(C(:,3));
+C(:,3) = C(:,3) + .2*nanmax(C(:,3));
+C(:,3) = C(:,3)/nanmax(C(:,3));
+C(isnan(C(:,3)),3) = 0;
+
+C(:,3) = 1 - C(:,3);
+
+C(end,:) = [];
+
+C(:,2) = .3;
+
+
+figure('outerposition',[300 300 901 902],'PaperUnits','points','PaperSize',[901 902]); hold on
+sh = scatter(X(:,Variant),Y(:,Variant),91,C,'filled','MarkerFaceAlpha',.4);
+axis off
+figlib.pretty
+
+
+
+
+
+
+
+% effect of perplexity (only Variant 4)
 all_perplexity = linspace(20,200,10);
-Variant = 1;
+Variant = 4;
 
 clear R X Y
 for i = length(all_perplexity):-1:1
