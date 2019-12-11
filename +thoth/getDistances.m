@@ -28,12 +28,17 @@ end
 
 
 % figure out how many points there are in each experiment
+
+disp('Determining data size...')
+fprintf('\n')
+
 N = 0;
 
 data_starts = NaN(length(experiments),1);
 data_ends = NaN(length(experiments),1);
 
 for i = 1:length(experiments)
+	corelib.textbar(i,length(experiments))
 	if strcmp(experiments{i}(1),'.')
 		continue
 	end
@@ -46,15 +51,25 @@ for i = 1:length(experiments)
 	data_ends(i) = N;
 end
 
+disp(['N = ' strlib.oval(N)]);
+
 D = zeros(N,N,length(isi_types));
 isis = NaN(1e3,N,length(isi_types));
+
 
 % now assemble the matrix
 
 for i = 1:length(isi_types)
 
+	disp(isi_types{i})
+	fprintf('\n')
+
+	this_isi_type = isi_types{i};
+
 	for ii = 1:length(experiments)
 
+		this_exp = experiments{ii};
+		corelib.textbar(ii,length(experiments))
 
 		if strcmp(experiments{ii}(1),'.')
 			continue
@@ -62,31 +77,42 @@ for i = 1:length(isi_types)
 
 
 		% load isis
-		m = matfile([isi_data_dir filesep experiments{ii} filesep isi_types{i} filesep 'isis.mat']);
+		m = matfile([isi_data_dir filesep this_exp filesep this_isi_type filesep 'isis.mat']);
 		isis(:,data_starts(ii):data_ends(ii),i) = m.isis;
 
 
-		for jj = 1:length(experiments)
+		loadme = cell(length(experiments),1);
+
+		parfor jj = 1:length(experiments)
 
 
 			if strcmp(experiments{jj}(1),'.')
 				continue
 			end
 
-			dist_file = [isi_distance_dir filesep experiments{ii} filesep isi_types{i} filesep experiments{jj} '.mat'];
+			dist_file = [isi_distance_dir filesep this_exp filesep this_isi_type filesep experiments{jj} '.mat'];
 
 			assert(exist(dist_file,'file')==2,'dist_file not found!')
 
+
 			m = matfile(dist_file);
 
-			if ii == jj
-				D(data_starts(ii):data_ends(ii),data_starts(jj):data_ends(jj),i) = (m.D);
-			else
-				D(data_starts(jj):data_ends(jj),data_starts(ii):data_ends(ii),i) = transpose(m.D);
-			end
 
+			loadme{jj} = m.D;
+	
 
 		end
+		
+
+		% now load it into the matrix
+		for jj = 1:length(experiments)
+			if ii == jj
+				D(data_starts(ii):data_ends(ii),data_starts(jj):data_ends(jj),i) = (loadme{jj});
+			else
+				D(data_starts(jj):data_ends(jj),data_starts(ii):data_ends(ii),i) = transpose(loadme{jj});
+			end
+		end
+			
 
 	end
 
