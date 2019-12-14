@@ -41,7 +41,9 @@ for ii = 1:length(neurons)
 
 		isis = data.(fn);
 
-		save([exp_dir filesep fn filesep 'isis.mat'],'isis','-nocompression')
+		H = hashlib.md5hash(isis);
+
+		save([exp_dir filesep fn filesep H '.mat'],'isis','-nocompression')
 
 	end
 end
