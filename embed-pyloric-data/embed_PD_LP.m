@@ -51,19 +51,16 @@ for i = 1:length(data)
     data(i).LP_LP(data(i).LP_LP<.01) = NaN;
 end
 
+return
 
 
 
 
 % add all of this to the ISI database
-
 for i = 1:length(data)
     thoth.add(data(i),'neurons',{'PD','LP'});
 end
 
-
-
-return
 
 
 
@@ -82,8 +79,6 @@ end
 
 eD = sum(D,3);
 
-% cut off very large distances
-eD(eD>10) = 10;
 
 t = TSNE; 
 t.perplexity = 120;
@@ -101,8 +96,6 @@ for i = 2:length(data)
     mdata.PD = vertcat(mdata.PD, data(i).PD');
 end
 
-mdata.LP = mdata.LP(1:SubSample:end,:);
-mdata.PD = mdata.PD(1:SubSample:end,:);
 
 
 explore
@@ -129,15 +122,6 @@ for i = 1:4
 end
 
 
-% normalize 
-% for i = 1:4
-%     for j = 1:size(binned_isis,2)
-%         binned_isis(:,j,i) = binned_isis(:,j,i)/sum(binned_isis(:,j,i));
-%     end
-% end
-
-% rearranged isis and stack different dimensions
-%explore
 
 
 
