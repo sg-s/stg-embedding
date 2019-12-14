@@ -90,22 +90,73 @@ end
 
 
 % check if these files need doing, and if they do, do them
+% make headers for verbose reporting
+fprintf('\n')
+fprintf(strlib.fix('Exp A',20))
+fprintf(strlib.fix('Exp B',20))
+fprintf(strlib.fix('Type',20))
+fprintf(strlib.fix('STATUS',30))
+fprintf('\n')
+for i = 1:80
+	fprintf('-')
+end
+
+
+tic;
+actually_done_counter = 1;
+
 for i = 1:idx-1
+
+	fprintf('\n')
+	fprintf(strlib.fix(use_isisA{i},20))
+	fprintf(strlib.fix(use_isisB{i},20))
+	fprintf(strlib.fix(use_type{i},20))
+
 	if exist([isi_distance_dir filesep D_filenames{i}],'file') == 2
+		fprintf(strlib.fix('Already done',30))
 		continue
 	end
 
 	% need to measure this
+	
+
+
+	% estimate time remaining
+
+    t_elapsed = toc;
+    t_total = (t_elapsed/actually_done_counter)*(idx-actually_done_counter);
+    t_rem = t_total - t_elapsed;
+    fprintf(strlib.fix(['Computing...,' strlib.oval(t_rem) 's left'],30))
+
+
 
 	% load isisA
+	load_me = dir([isi_data_dir filesep use_isisA{i} filesep use_type{i} filesep '*.mat']);
+	assert(length(load_me)==1,'More than one ISI file found!')
+	load([load_me.folder filesep load_me.name],'isis')
+	isisA = isis;
 
-	
 
 	% load isisB
+	load_me = dir([isi_data_dir filesep use_isisB{i} filesep use_type{i} filesep '*.mat']);
+	assert(length(load_me)==1,'More than one ISI file found!')
+	load([load_me.folder filesep load_me.name],'isis')
+	isisB = isis;
+
+
+	% measure distances
+	D = neurolib.ISIDistance(isisA,isisB,Variant);
+	save([isi_distance_dir filesep D_filenames{i}],'D');
+
+	for j = 1:30
+		fprintf('\b')
+	end
 
 	
 
-	keyboard
+	fprintf(strlib.fix('DONE!',30))
+
+	actually_done_counter = actually_done_counter + 1;
 
 
 end
