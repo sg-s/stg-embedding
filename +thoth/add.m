@@ -43,6 +43,12 @@ for ii = 1:length(neurons)
 
 		H = hashlib.md5hash(isis);
 
+		% check that no file already exists there
+		old_files = dir([exp_dir filesep fn filesep '*.mat']);
+		for i = 1:length(old_files)
+			delete([old_files(i).folder filesep old_files(i).name])
+		end
+
 		save([exp_dir filesep fn filesep H '.mat'],'isis','-nocompression')
 
 	end

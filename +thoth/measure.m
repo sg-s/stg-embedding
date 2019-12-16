@@ -124,8 +124,7 @@ for i = 1:idx-1
 	% estimate time remaining
 
     t_elapsed = toc;
-    t_total = (t_elapsed/actually_done_counter)*(idx-actually_done_counter);
-    t_rem = t_total - t_elapsed;
+    t_rem = (t_elapsed/actually_done_counter)*(idx-i);
     fprintf(strlib.fix(['Computing...,' strlib.oval(t_rem) 's left'],30))
 
 
@@ -162,7 +161,7 @@ for i = 1:idx-1
 end
 
 
-
+fprintf('\n')
 
 
 return
