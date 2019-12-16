@@ -1,10 +1,7 @@
 % returns precomputed distances
 % for the chosen experiments and ISI types
 
-function [D, isis] = getDistances(experiments, isi_types)
-
-
-
+function [D, isis] = getDistances(varargin)
 
 isi_data_dir = getpref('thoth','isi_data_dir');
 isi_distance_dir = getpref('thoth','isi_distance_dir');
@@ -13,22 +10,37 @@ isi_distance_dir = getpref('thoth','isi_distance_dir');
 assert(~isempty(isi_data_dir),'isi_data_dir not set')
 assert(~isempty(isi_distance_dir),'isi_distance_dir not set')
 
+temp = dir(isi_data_dir);
+options.experiments = {temp.name};
+options.Variant = 4;
+options.isi_types = {'PD_PD','PD_LP','LP_LP','LP_PD'};
+
+options = corelib.parseNameValueArguments(options,varargin{:});
+
+
+% unpack
+experiments = options.experiments;
+isi_types = options.isi_types;
 
 assert(iscell(experiments),'experiments should be a cell array')
 assert(iscell(isi_types),'isi_types should be a cell array')
 
-if isempty(experiments)
-	% get all experiments
-	experiments = dir(isi_data_dir);
-	experiments = {experiments.name};
-else
+
+
+% make lists of hashes of ISIs for every experiment
+isi_hashes = repmat(experiments,length(isi_types),1);
+for i = 1:length(experiments)
+	for j = 1:length(isi_types)
+		isi_files = dir([isi_data_dir filesep experiments{i} filesep isi_types{j} filesep '*.mat']);
+		assert(length(isi_files)==1,'More than one ISI file found!')
+		isi_hashes{j,i} = isi_files.name;
+	end
 
 
 end
 
 
 % figure out how many points there are in each experiment
-
 disp('Determining data size...')
 fprintf('\n')
 
@@ -43,18 +55,23 @@ for i = 1:length(experiments)
 		continue
 	end
 
-	
-	m = matfile([isi_data_dir filesep experiments{i} filesep isi_types{1} filesep 'isis.mat']);
+	% it doesn't matter which type we measure...the data size should be the same
+	m = matfile([isi_data_dir filesep experiments{i} filesep isi_types{1} filesep isi_hashes{1,i} ]);
+
 
 	data_starts(i) = N+1;
 	N = N + size(m.isis,2);
 	data_ends(i) = N;
 end
 
+
+
 disp(['N = ' strlib.oval(N)]);
+
 
 D = zeros(N,N,length(isi_types));
 isis = NaN(1e3,N,length(isi_types));
+
 
 
 % now assemble the matrix
@@ -77,20 +94,29 @@ for i = 1:length(isi_types)
 
 
 		% load isis
-		m = matfile([isi_data_dir filesep this_exp filesep this_isi_type filesep 'isis.mat']);
+		m = matfile([isi_data_dir filesep this_exp filesep this_isi_type filesep isi_hashes{i, ii}]);
 		isis(:,data_starts(ii):data_ends(ii),i) = m.isis;
 
 
+
+		% now load the distances in parallel
 		loadme = cell(length(experiments),1);
 
-		parfor jj = 1:length(experiments)
+		parfor jj = 1:length(experiments) % parallelize this
 
 
 			if strcmp(experiments{jj}(1),'.')
 				continue
 			end
 
-			dist_file = [isi_distance_dir filesep this_exp filesep this_isi_type filesep experiments{jj} '.mat'];
+
+			% this hash comes from the hashes of the two constituent ISI files
+			H = hashlib.md5hash([isi_hashes{i,ii} isi_hashes{i,jj}]);
+			H = H(1:6);
+
+
+
+			dist_file = [isi_distance_dir filesep this_exp '_' experiments{jj} '_' this_isi_type  '_' mat2str(options.Variant) '_' H '.mat'];
 
 			assert(exist(dist_file,'file')==2,'dist_file not found!')
 
