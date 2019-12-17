@@ -51,8 +51,6 @@ for i = 1:length(data)
     data(i).LP_LP(data(i).LP_LP<.01) = NaN;
 end
 
-return
-
 
 
 
@@ -64,26 +62,22 @@ end
 
 
 
-% Assume that the distances are computed on a cluster, and you have access
-% to the data...
+% Assume that the distances are precomputed....
 
-
-
-if exist('cache/distances_isis.mat','file') ~= 2
-    [D, isis] = thoth.getDistances(data_dirs, {'PD_PD','PD_LP','LP_LP','LP_PD'});
-    save('cache/distances_isis.mat','D','isis')
-elseif exist('D','var') ~= 1
-    load('cache/distances_isis.mat','D','isis')
-end
+[D, isis] = thoth.getDistances('isi_types', {'PD_PD','PD_LP','LP_LP','LP_PD'},'experiments',data_dirs,'Variant',4);
 
 
 eD = sum(D,3);
 
 
+
+SubSample = 1;
+
 t = TSNE; 
-t.perplexity = 120;
-t.distance_matrix = eD;
-t.n_iter  = 500;
+t.perplexity = 30;
+t.Alpha = .75;
+t.DistanceMatrix = eD(1:SubSample:end,1:SubSample:end);
+t.NIter  = 1e3;
 t.implementation = TSNE.implementation.vandermaaten;
 R = t.fit;
 
@@ -96,9 +90,17 @@ for i = 2:length(data)
     mdata.PD = vertcat(mdata.PD, data(i).PD');
 end
 
-
+% subsample
+mdata.LP = mdata.LP(1:SubSample:end,:);
+mdata.PD = mdata.PD(1:SubSample:end,:);
 
 explore
+
+
+return
+
+
+
 
 
 

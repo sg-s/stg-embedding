@@ -25,14 +25,15 @@ isi_types = options.isi_types;
 assert(iscell(experiments),'experiments should be a cell array')
 assert(iscell(isi_types),'isi_types should be a cell array')
 
-
+% clean up experiment list
+experiments(cellfun(@(x) strcmp(x(1),'.'),experiments)) = []; 
 
 % make lists of hashes of ISIs for every experiment
 isi_hashes = repmat(experiments,length(isi_types),1);
 for i = 1:length(experiments)
 	for j = 1:length(isi_types)
 		isi_files = dir([isi_data_dir filesep experiments{i} filesep isi_types{j} filesep '*.mat']);
-		assert(length(isi_files)==1,'More than one ISI file found!')
+		assert(length(isi_files)==1,['More than one ISI file found here: ' experiments{i}])
 		isi_hashes{j,i} = isi_files.name;
 	end
 
@@ -79,7 +80,7 @@ isis = NaN(1e3,N,length(isi_types));
 for i = 1:length(isi_types)
 
 	disp(isi_types{i})
-	fprintf('\n')
+	fprintf('\n\n')
 
 	this_isi_type = isi_types{i};
 
