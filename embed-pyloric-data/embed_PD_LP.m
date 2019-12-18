@@ -71,11 +71,11 @@ eD = sum(D,3);
 
 
 
-SubSample = 1;
+SubSample = 10;
 
 t = TSNE; 
-t.perplexity = 30;
-t.Alpha = .75;
+t.perplexity = 240;
+t.Alpha = .5;
 t.DistanceMatrix = eD(1:SubSample:end,1:SubSample:end);
 t.NIter  = 1e3;
 t.implementation = TSNE.implementation.vandermaaten;
@@ -94,6 +94,12 @@ end
 mdata.LP = mdata.LP(1:SubSample:end,:);
 mdata.PD = mdata.PD(1:SubSample:end,:);
 
+
+% measure the burst metrics of LP and PD for every point here
+mdata = measureBurstMetrics(mdata);
+
+
+
 explore
 
 
@@ -101,6 +107,12 @@ return
 
 
 
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+plot(R(:,1),R(:,2),'.','Color',[.5 .5 .5])
+
+ok = mdata.LP_burst_period > .5 & mdata.LP_burst_period < 1.5 & mdata.PD_burst_period > .5 & mdata.PD_burst_period < 1.5;
+plot(R(ok,1),R(ok,2),'r.')
 
 
 

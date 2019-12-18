@@ -1,25 +1,38 @@
 % load thing to embed
 
-load('embed_this.mat')
+load('embed_this.mat','eD')
 
 
-all_perplexity = [30:30:120];
-all_Alpha = [.5:.1:1];
+perplexity_range = 200:100:500;
+Alpha_range = .5;
+
+all_Alpha = NaN(length(perplexity_range)*length(Alpha_range),1);
+all_perplexity = NaN(length(perplexity_range)*length(Alpha_range),1);
+
+
+idx = 1;
+for i = 1:length(Alpha_range)
+	for j = length(perplexity_range):-1:1
+		all_Alpha(idx) = Alpha_range(i);
+		all_perplexity(idx) = perplexity_range(j);
+		idx = idx +1;
+	end
+end
 
 
 for i = 1:length(all_Alpha)
 
-	for j = 1:length(all_perplexity)
+	disp(all_Alpha(i))
+	disp(all_perplexity(i))
 
-		t = TSNE; 
-		t.perplexity = all_perplexity(j);
-		t.Alpha = all_Alpha(i);
-		t.DistanceMatrix = eD;
-		t.NIter  = 1e3;
-		t.implementation = TSNE.implementation.vandermaaten;
-		R = t.fit;
 
-	end
+	t = TSNE; 
+	t.perplexity = all_perplexity(i);
+	t.Alpha = all_Alpha(i);
+	t.DistanceMatrix = eD;
+	t.NIter  = 1e3;
+	t.implementation = TSNE.implementation.vandermaaten;
+	R = t.fit;
+
 
 end
-
