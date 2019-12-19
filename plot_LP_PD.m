@@ -10,7 +10,10 @@ hold(ax,'on')
 a = min(data(:));
 data = data - a;
 
-for i = 1:2
-	neurolib.raster(ax,data(:,i),'yoffset',i+1,'deltat',1,'center',false)
-end
-set(ax,'YLim',[2 4],'XLim',[0 20])
+
+
+
+neurolib.raster(ax,data(:,1),'yoffset',0,'deltat',1,'center',false,'Color','k')	
+neurolib.raster(ax,data(:,2),'yoffset',1,'deltat',1,'center',false,'Color','r')	
+
+set(ax,'YLim',[0 2],'XLim',[0 20],'YTickLabel',{'LP','PD'},'YTick',[.5 1.5])
