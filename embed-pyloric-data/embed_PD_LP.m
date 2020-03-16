@@ -49,6 +49,8 @@ for i = 1:length(data_dirs)
 end
 
 
+
+
 % fill in empty metadata
 fn = fieldnames(data);
 for i = 1:length(data)
@@ -61,19 +63,133 @@ for i = 1:length(data)
 end
 
 
+% clean up the potassium
+for i = 1:length(data)
+    data(i).Potassium(isnan(data(i).Potassium)) = 1;
+    data(i).Potassium((data(i).Potassium)==0) = 1;
+    data(i).TimeInHighK = NaN*data(i).Potassium;
+end
+
+% create time in high K vectors
+for i = 1:length(data)
+    K = data(i).Potassium;
+
+    if all(K==1)
+        continue
+    end
+
+
+
+    [ons, offs]=veclib.computeOnsOffs(K);
+
+
+    K_time = NaN*K;
+
+    for j = 1:length(ons)
+        K_time(ons(j)-20:offs(j)) = (1:(offs(j) -  ons(j) + 21)) - 20;
+    end
+
+    data(i).TimeInHighK = K_time*20; % now in seconds
+    
+
+end
+
+
+
+% approximate temperatures using linear interpolation
+for i = 1:length(data)
+    if all(isnan(data(i).temperature))
+        continue
+    end
+    temp = data(i).temperature;
+    x = 1:length(temp);
+    temp(isnan(temp)) = interp1(x(~isnan(temp)),temp(~isnan(temp)),x(isnan(temp)));
+    data(i).temperature = temp;
+
+end
+
+
+
 return
 
 
-% % measure ISIs
-% data = thoth.computeISIs(data, {'LP','PD'});
+% measure ISIs
+data = thoth.computeISIs(data, {'LP','PD'});
 
-% % disallow ISIs below 10ms
-% for i = 1:length(data)
-%     data(i).PD_PD(data(i).PD_PD<.01) = NaN;
-%     data(i).LP_LP(data(i).LP_LP<.01) = NaN;
-% end
+% disallow ISIs below 10ms
+for i = 1:length(data)
+    data(i).PD_PD(data(i).PD_PD<.01) = NaN;
+    data(i).LP_LP(data(i).LP_LP<.01) = NaN;
+end
 
 
+
+% combine all data
+types = {'PD_PD','LP_LP','LP_PD','PD_LP'};
+cdata = struct;
+cdata.LP = data(1).LP';
+cdata.PD = data(1).PD';
+
+for j = 1:length(types)
+    cdata.(types{j}) = data(1).(types{j})';
+end
+
+for i = 2:length(data)
+    cdata.LP = vertcat(cdata.LP, data(i).LP');
+    cdata.PD = vertcat(cdata.PD, data(i).PD');
+
+    for j = 1:length(types)
+        cdata.(types{j}) = vertcat(cdata.(types{j}), data(i).(types{j})');
+    end
+
+end
+
+
+
+
+
+
+% compute cumulative histograms for all ISIs
+clear cdfs
+N = size(cdata.LP,1);
+nbins = 100;
+bins = logspace(-3,1,nbins+1);
+for i = 1:length(types)
+    cdfs.(types{i}) = NaN(N,nbins);
+
+    for j = 1:N
+        temp = cdata.(types{i})(j,:);
+        temp(isnan(temp)) = [];
+        if isempty(temp)
+            continue
+        end
+
+        cdfs.(types{i})(j,:) = histcounts(temp,bins,'Normalization','cdf');
+    end
+
+end
+
+
+% measure distances using earth mover distance
+% naive form of earth-mover distance
+D = zeros(N,N);
+W = diff(bins);
+tic
+for isi = 1:4
+    disp(types{isi})
+    A = cdfs.(types{isi});
+    D = D + thoth.EarthMoverDistance(A);
+    
+end
+toc
+
+
+
+t = TSNE('implementation',TSNE.implementation.fitsne);
+t.DistanceMatrix = D;
+t.perplexity = 500;
+t.Alpha = .7;
+R = t.fit;
 
 
 % % add all of this to the ISI database
@@ -187,6 +303,27 @@ title(ch,'pH')
 
 
 
+% color map by temperature
+temperature = vertcat(data.temperature);
+bin_edges = linspace(11,31,21);
+
+figure('outerposition',[300 300 902 901],'PaperUnits','points','PaperSize',[902 901]); hold on
+
+plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerFaceColor',[.8 .8 .8],'MarkerSize',35)
+
+
+C = colormaps.redula(20);
+for i = 1:length(bin_edges)-1
+    plot_this = temperature >= bin_edges(i) & temperature < bin_edges(i+1);
+    plot(R(plot_this,1),R(plot_this,2),'Color',C(i,:),'MarkerSize',10,'LineStyle','none','Marker','.')
+end
+ch = colorbar;
+colormap(C)
+figlib.pretty()
+axis off
+ch.Position = [.1 .5 .02 .4];
+caxis([11 31])
+
 % color points by experiment ID
 
 exp_idx = vertcat(data.experiment_idx);
@@ -212,6 +349,16 @@ axis off
 
 % color points by decentralized or not
 decentralized = vertcat(data.decentralized);
+oxotremorine = vertcat(data.oxotremorine);
+proctolin = vertcat(data.proctolin);
+serotonin = vertcat(data.serotonin);
+
+decentralized(isnan(decentralized)) = 0;
+oxotremorine(isnan(oxotremorine)) = 0;
+proctolin(isnan(proctolin)) = 0;
+serotonin(isnan(serotonin)) = 0;
+
+decentralized = logical(decentralized) & oxotremorine == 0 & proctolin == 0 & serotonin == 0;
 
 figure('outerposition',[300 300 902 901],'PaperUnits','points','PaperSize',[902 901]); hold on
 
@@ -226,9 +373,7 @@ axis off
 
 
 % color points by neuromodulator IDX
-oxotremorine = vertcat(data.oxotremorine);
-proctolin = vertcat(data.proctolin);
-serotonin = vertcat(data.serotonin);
+
 
 figure('outerposition',[300 300 902 901],'PaperUnits','points','PaperSize',[902 901]); hold on
 
@@ -245,6 +390,93 @@ ph = plot(R(plot_this,1),R(plot_this,2),'+','Color',[0 0 1],'MarkerFaceColor',[0
 
 figlib.pretty()
 axis off
+
+
+
+
+
+% time in high K -- switching rate and state distribution
+
+N = 80;
+bin_edges = linspace(-380,5400,N);
+bin_centers = bin_edges(2:end) + mean(diff(bin_edges));
+
+% this matrix counts states
+labels = categories(idx);
+
+switching_rate = NaN(N-1,1);
+state_dist = zeros(N-1, length(categories(idx)));
+
+K_time = vertcat(data.TimeInHighK);
+
+for i = 1:N-1
+    this_time = K_time >= bin_edges(i) & K_time <= bin_edges(i+1);
+
+    % find states in this ph bin
+    for j = 1:length(labels)
+        state_dist(i,j) = sum(idx(this_time) == labels(j));
+    end
+
+    % norm
+    state_dist(i,:) = state_dist(i,:)/sum(state_dist(i,:));
+
+    these_states = idx(this_time);
+    these_states2 = circshift(these_states,1);
+
+    switching_rate(i) = 1 -  mean(these_states == these_states2);
+
+end
+
+
+
+
+
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+
+clear ax
+ax(1) = subplot(2,1,1); hold on
+bar(bin_centers, switching_rate,'EdgeColor','w','FaceColor',[.7 .7 .7])
+set(gca,'XTickLabel',{})
+ylabel('Switching rate')
+
+ax(2) = subplot(2,1,2); hold on
+
+C = colormaps.dcol(13);
+
+bh = bar(bin_centers/60, state_dist,'stacked');
+for i = 1:length(bh)
+    bh(i).EdgeColor = C(i,:);
+    bh(i).FaceColor = C(i,:);
+    bh(i).BarWidth = 1;
+end
+bh(end).EdgeColor = 'k';
+bh(end).FaceColor = 'k';
+
+set(gca,'YLim',[0 1])
+xlabel('Time in high K (min)')
+ylabel('States')
+set(gca,'YTickLabel',{})
+
+
+legend(labels,'Location','eastoutside')
+
+figlib.pretty()
+
+ax(1).Position(3) = ax(2).Position(3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -341,91 +573,232 @@ ax(1).Position(3) = ax(2).Position(3);
 
 
 
+
+
+
+
+% show the likelihood of being in different states for different neuromodulators 
+
+all_labels = unique(idx);
+C = colormaps.dcol(length(unique(idx)));
+
+
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+
+% decentralized
+subplot(2,2,1); hold on
+title('decentralized')
+plot_this = decentralized > 0;
+labels = unique(idx(plot_this));
+y = histcounts(idx(plot_this));
+y = y/sum(y);
+for i = 1:length(all_labels)
+    barh(i,y(i),'FaceColor',C(i,:))
+end
+set(gca,'YTick',1:length(all_labels),'YTickLabel',categories(all_labels),'XLim',[0 .8])
+
+
+% serotonin
+subplot(2,2,2); hold on
+title('serotonin')
+plot_this = serotonin > 0;
+labels = unique(idx(plot_this));
+y = histcounts(idx(plot_this));
+y = y/sum(y);
+for i = 1:length(all_labels)
+    barh(i,y(i),'FaceColor',C(i,:))
+end
+set(gca,'YTick',1:length(all_labels),'YTickLabel','','XLim',[0 .8])
+
+% proctolin
+subplot(2,2,3); hold on
+title('proctolin')
+plot_this = proctolin > 0;
+labels = unique(idx(plot_this));
+y = histcounts(idx(plot_this));
+y = y/sum(y);
+for i = 1:length(all_labels)
+    barh(i,y(i),'FaceColor',C(i,:))
+end
+set(gca,'YTick',1:length(all_labels),'YTickLabel',categories(all_labels),'XLim',[0 .8])
+
+
+% oxotremorine
+subplot(2,2,4); hold on
+title('oxotremorine')
+plot_this = oxotremorine > 0;
+labels = unique(idx(plot_this));
+y = histcounts(idx(plot_this));
+y = y/sum(y);
+for i = 1:length(all_labels)
+    barh(i,y(i),'FaceColor',C(i,:))
+end
+set(gca,'YTick',1:length(all_labels),'YTickLabel','','XLim',[0 .8])
+
+
+figlib.pretty()
+
+
+
+
 labels = unique(idx);
+% show how we go PD-silent due to different neuromodulators 
+
+figure('outerposition',[300 300 1333 999],'PaperUnits','points','PaperSize',[1333 999]); hold on
 
 
-
-
-
-% show how we go silent due to different neuromodulators 
-
-figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
-
+% decentralized 
 subplot(2,2,1); hold on
+J = embedding.computeTransitionMatrix(idx(decentralized > 0));
+embedding.plotSankey(J, find(labels == 'PD-silent'), labels);
+title('decentralized')
+
 
 % only serotonin 
-serotonin = vertcat(data.serotonin);
-rm_this = ~isnan(serotonin);
-J = embedding.computeTransitionMatrix(idx(~rm_this));
-
-embedding.plotSankey(J, find(labels == 'silent'), labels);
-
-
-
 subplot(2,2,2); hold on
-
-% only oxo 
-oxotremorine = vertcat(data.oxotremorine);
-rm_this = ~isnan(oxotremorine);
-J = embedding.computeTransitionMatrix(idx(~rm_this));
-
-embedding.plotSankey(J, find(labels == 'silent'), labels);
-
-
-subplot(2,2,3); hold on
+J = embedding.computeTransitionMatrix(idx(serotonin>0));
+embedding.plotSankey(J, find(labels == 'PD-silent'), labels);
+title('serotonin')
 
 % only proctolin 
-proctolin = vertcat(data.proctolin);
-rm_this = ~isnan(proctolin);
-J = embedding.computeTransitionMatrix(idx(~rm_this));
+subplot(2,2,3); hold on
+J = embedding.computeTransitionMatrix(idx(proctolin>0));
+embedding.plotSankey(J, find(labels == 'PD-silent'), labels);
+title('proctolin')
 
-embedding.plotSankey(J, find(labels == 'silent'), labels);
 
-
+% only oxo 
+subplot(2,2,4); hold on
+J = embedding.computeTransitionMatrix(idx(oxotremorine>0));
+embedding.plotSankey(J, find(labels == 'PD-silent'), labels);
+title('oxotremorine')
 
 figlib.pretty
 
 
 
 
-% show how we recover due to different neuromodulators 
+% show how we recover due to different neuromodulators + decentralized 
 
-figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 
+
+figure('outerposition',[300 300 1333 999],'PaperUnits','points','PaperSize',[1333 999]); hold on
+
+
+% decentralized 
 subplot(2,2,1); hold on
+J = embedding.computeTransitionMatrix(idx(decentralized > 0));
+embedding.plotSankey(J, find(labels == 'normal'), labels);
+title('decentralized')
+
 
 % only serotonin 
-serotonin = vertcat(data.serotonin);
-rm_this = ~isnan(serotonin);
-J = embedding.computeTransitionMatrix(idx(~rm_this));
-
-embedding.plotSankey(J, find(labels == 'normal'), labels);
-
-
-
 subplot(2,2,2); hold on
-
-% only oxo 
-oxotremorine = vertcat(data.oxotremorine);
-rm_this = ~isnan(oxotremorine);
-J = embedding.computeTransitionMatrix(idx(~rm_this));
-
+J = embedding.computeTransitionMatrix(idx(serotonin>0));
 embedding.plotSankey(J, find(labels == 'normal'), labels);
-
-
-subplot(2,2,3); hold on
+title('serotonin')
 
 % only proctolin 
-proctolin = vertcat(data.proctolin);
-rm_this = ~isnan(proctolin);
-J = embedding.computeTransitionMatrix(idx(~rm_this));
-
+subplot(2,2,3); hold on
+J = embedding.computeTransitionMatrix(idx(proctolin>0));
 embedding.plotSankey(J, find(labels == 'normal'), labels);
+title('proctolin')
 
 
+% only oxo 
+subplot(2,2,4); hold on
+J = embedding.computeTransitionMatrix(idx(oxotremorine>0));
+embedding.plotSankey(J, find(labels == 'normal'), labels);
+title('oxotremorine')
 
 figlib.pretty
 
 
 
 
+
+
+
+
+
+% compare how preps go silent due to different perurbations
+
+
+
+figure('outerposition',[300 300 1333 999],'PaperUnits','points','PaperSize',[1333 999]); hold on
+
+subplot(2,2,1); hold on
+K_time = vertcat(data.TimeInHighK);
+J = embedding.computeTransitionMatrix(idx(K_time > 0));
+embedding.plotSankey(J, find(unique(idx) == 'silent'), labels);
+title('High extracellular K')
+
+subplot(2,2,2); hold on
+J = embedding.computeTransitionMatrix(idx(decentralized));
+embedding.plotSankey(J, find(unique(idx) == 'silent'), labels);
+title('Decentralization')
+
+
+pH = vertcat(data.pH);
+altered_pH = (0*pH);
+altered_pH(isnan(altered_pH)) = 0;
+altered_pH = logical(altered_pH);
+altered_pH(pH<7.5) = true;
+altered_pH(pH>8.5) = true;
+
+
+subplot(2,2,3); hold on
+J = embedding.computeTransitionMatrix(idx(altered_pH));
+embedding.plotSankey(J, find(unique(idx) == 'silent'), labels);
+title('Altered pH')
+
+
+% high temperature, intact prep
+all_temp = vertcat(data.temperature);
+
+
+subplot(2,2,4); hold on
+J = embedding.computeTransitionMatrix(idx(all_temp > 20 & ~decentralized));
+embedding.plotSankey(J, find(unique(idx) == 'silent'), labels);
+title('>20C')
+
+figlib.pretty()
+
+
+
+
+
+% prep to variability in going silent with pH 
+prep_idx = vertcat(data.experiment_idx);
+pH_preps = unique(prep_idx(altered_pH));
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+
+for i = 1:length(pH_preps)
+    subplot(2,3,i); hold on
+    J = embedding.computeTransitionMatrix(idx(prep_idx == pH_preps(i)));
+    embedding.plotSankey(J, find(unique(idx) == 'normal'), labels);
+    title(['Prep #' mat2str(i)])
+end
+
+figlib.pretty()
+
+
+
+
+% prep to prep variability in decentralized preps 
+prep_idx = vertcat(data.experiment_idx);
+decentralized_preps = unique(prep_idx(decentralized));
+
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+show_these = [1 2 4 7 9 10];
+for i = 1:length(show_these)
+    subplot(2,3,i); hold on
+    J = embedding.computeTransitionMatrix(idx(prep_idx == decentralized_preps(show_these(i))));
+    th_feeder = embedding.plotSankey(J, find(unique(idx) == 'silent'), labels);
+    title(['Prep #' mat2str(i)])
+
+end
+
+figlib.pretty()

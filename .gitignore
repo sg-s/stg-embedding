@@ -1,3 +1,5 @@
+vae/
+*.dat
 *.cache
 *.mat
 *DS_Store

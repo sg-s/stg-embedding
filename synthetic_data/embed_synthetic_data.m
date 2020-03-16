@@ -47,10 +47,79 @@ min_isi = 5e-3; % 5 ms
 data.PD_PD(data.PD_PD<min_isi) = NaN;
 data.LP_LP(data.LP_LP<min_isi) = NaN;
 
+
+
 % colormap for clusters
 c = lines(9);
 c(8,:) = [0 0 0];
 c(9,:) = [1 0 0];
+
+
+
+
+% compute cumulative histograms for all ISIs
+clear cdfs
+types = {'PD_PD','LP_LP','LP_PD','PD_LP'};
+nbins = 100;
+bins = logspace(-3,1,nbins+1);
+for i = 1:length(types)
+	cdfs.(types{i}) = NaN(1e4,nbins);
+
+	for j = 1:1e4
+		temp = data.(types{i})(:,j);
+		temp(isnan(temp)) = [];
+		if isempty(temp)
+			continue
+		end
+
+		cdfs.(types{i})(j,:) = histcounts(temp,bins,'Normalization','cdf');
+	end
+
+end
+
+
+
+% naive form of earth-mover distance
+D = zeros(1e4,1e4);
+W = diff(bins);
+tic
+for isi = 1:4
+	disp(types{isi})
+	A = cdfs.(types{isi});
+	D = D + thoth.EarthMoverDistance(A);
+	
+end
+toc
+
+figure, hold on
+imagesc(D)
+
+t = TSNE('implementation',TSNE.implementation.fitsne);
+t.DistanceMatrix = D(1:end-1,1:end-1);
+R = t.fit;
+
+
+
+figure('outerposition',[300 300 700 600],'PaperUnits','points','PaperSize',[700 600]); hold on
+
+clear l L
+for i = 1:length(cats)-1
+	plot_this = data.experiment_idx == cats(i);
+	plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',10,'Color',c(i,:));
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
+
+legend(l,corelib.categorical2cell(cats(1:end-1)),'Location','eastoutside')
+
+axis off
+
+figlib.pretty()
+
+
+
+
+
+
 
 % note that cross ISIs can be arbitrarily small, and we want our distance
 % function to work with that 
@@ -542,14 +611,15 @@ idx = cluster(Z,'Maxclust',9);
 
 figure('outerposition',[300 300 1201 600],'PaperUnits','points','PaperSize',[1201 600]); hold on
 subplot(1,2,1); hold on
-stairs(linspace(1,9,9),'r-')
 plot(linspace(1,9,1e4),idx,'k.')
 xlabel('True cluster ID')
 ylabel('Inferred cluster ID')
 set(gca,'XLim',[0 10],'YLim',[0 10])
+spacing = 8/9;
 for i = 1:9
-	plotlib.vertline(i,'k:');
+    plotlib.vertline((i*spacing) + 1,'k:');
 end
+
 title('Hierarchical clustering')
 
 
@@ -557,13 +627,13 @@ title('Hierarchical clustering')
 idx = clusterlib.densityPeaks(embed_distance,'Distance','precomputed','NClusters',9); 
 
 subplot(1,2,2); hold on
-stairs(linspace(1,9,9),'r-')
 plot(linspace(1,9,1e4),idx,'k.')
 xlabel('True cluster ID')
 ylabel('Inferred cluster ID')
 set(gca,'XLim',[0 10],'YLim',[0 10])
+spacing = 8/9;
 for i = 1:9
-	plotlib.vertline(i,'k:');
+    plotlib.vertline((i*spacing) + 1,'k:');
 end
 
 title('density Peaks clustering')
