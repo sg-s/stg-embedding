@@ -1,4 +1,7 @@
 
+% keep the raw data around so we can re-embed if need be
+RawData = [cdfs.PD_PD, cdfs.LP_LP, cdfs.LP_LP, cdfs.PD_LP];
+RawData(isnan(RawData)) = 0;
 
 temp = [alldata.LP, alldata.PD];
 
@@ -21,10 +24,10 @@ if exist('idx','var') == 1 && all(isundefined(m.idx))
 	m.labels = unique(idx);
 end
 
-m.makeUI
-m.handles.ax(1).Position = [0 .4 .55 .55];
+m.makeUI;
+m.handles.ax(1).Position = [0 .3 .6 .6];
 axis(m.handles.ax(2),'normal')
-m.handles.ax(2).Position = [0.02 0.25 .9 .1];
+m.handles.ax(2).Position = [.05 .05 .9 .1];
 
 m.handles.ax(2).Position(1) = .05;
 
@@ -37,6 +40,7 @@ title(m.handles.ax(1),'')
 m.handles.ax(1).XColor = 'w';
 m.handles.ax(1).YColor = 'w';
 
-for i = 1:length(m.handles.ReducedData)
-	m.handles.ReducedData(i).MarkerSize = 10;
-end
+
+embed_button = uicontrol(m.handles.main_fig,'Units','normalized','Style','pushbutton','String','Embed using uMAP','FontSize',24,'Position',[.75 .4 .2 .1]);
+
+embed_button.Callback = @embed;
