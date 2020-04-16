@@ -3,32 +3,17 @@
 % make sure data directory exists
 filelib.mkdir('cache')
 
-data_root = '/Volumes/DATA/philipp/';
+% make sure you tell the script
+% where the data is located using
+% setpref('embedding','data_root','/Volumes/DATA/')
 
-all_exps = dir(data_root);
-all_exps(cellfun(@(x) strcmp(x(1),'.'),{all_exps.name})) = [];
-all_exps = {all_exps.name};
-
-if exist('cache/PD_LP.mat','file') ~= 2
-
-    
-
-    disp('Assembling data from source...')
-  
-    for i = length(all_exps):-1:1
-
-        disp(all_exps{i})
-
-        data{i} = crabsort.consolidate('neurons',{'PD','LP'},'stack',true,'DataDir',[data_root all_exps{i}],'ChunkSize',20);
-    end
-
-    data = structlib.cell2array(data);
-
-    save('cache/PD_LP.mat','data','-v7.3')
-
-else
-    load('cache/PD_LP.mat')
+if  isempty(getpref('embedding'))
+    error('You need to say where the data is located')
 end
+
+
+data = sourcedata.get('modulators')
+
 
 
 % manually fill in some metadata by eyeballing data
