@@ -1,13 +1,12 @@
 
 
-% make sure data directory exists
-filelib.mkdir('cache')
+
 
 % make sure you tell the script
 % where the data is located using
 % setpref('embedding','data_root','/Volumes/DATA/')
 
-if  isempty(getpref('embedding'))
+if isempty(getpref('embedding'))
     error('You need to say where the data is located')
 end
 
@@ -15,34 +14,58 @@ end
 data = sourcedata.get('modulators')
 
 
+% get metadata for the Cronin data
+data = metadata.cronin(data,pathlib.join(getpref('embedding','data_root'),'cronin-metadata'));
 
-% manually fill in some metadata by eyeballing data
+
+% % manually fill in some metadata by eyeballing data
+% all_exps = unique(vertcat(data.experiment_idx));
+
 % for i = 1:length(all_exps)
 
-%     f = figure; neurolib.raster(data{i}.LP,'split_rows',true); title(char(data{i}.experiment_idx(1)),'interpreter','none'); set(gcf,'WindowButtonDownFcn',@temp_mouse_callback)
+%     f = figure('outerposition',[300 300 1200 1000],'PaperUnits','points','PaperSize',[1200 1000]); hold on
+%     f.WindowButtonDownFcn =  @metadata.mouseCallback;
+%     c = lines;
+%     filebreaks = [];
+%     ii=1;
+%     for j = 2:size(data(i).LP,2)
+%         if data(i).filename(j) ~= data(i).filename(j-1)
+%             ii = ii +1;
+%             filebreaks = [filebreaks j];
+%         end
 
-%     plotlib.horzline(find(data{i}.decentralized,1,'first'),'LineWidth',2);
+%         neurolib.raster(data(i).LP(:,j),'split_rows',true,'yoffset',j,'Color',c(ii,:),'LineWidth',5)
 
-%     fn = fieldnames(data{i});
-%     mod_name = setdiff(fn,{'PD','LP','experiment_idx','mask','filename','temperature','decentralized','time_offset'});
+%     end
 
-%     plotlib.horzline(find(data{i}.(mod_name{1}),1,'first'),'LineWidth',2);
+%     time = (1:size(data(i).LP,2))*20;
+%     for j = 1:length(filebreaks)
+%         time(filebreaks(j):end) = time(filebreaks(j):end) - time(filebreaks(j));
+%     end
+
+%     f.UserData.time = time;
+%     f.UserData.filename = data(i).filename;
+
+%     f.UserData.ph = plotlib.horzline(10,'Color','k','Tag','horzline');
+
+%     f.UserData.data_idx = i;
+
+%     % add buttons for marking decentralized and modulator 
+%     uicontrol('Parent',f,'Style','pushbutton','String','Mark decentralized','Units','normalized','Position',[0.1 .01 .2 .1],'Callback',@metadata.markDecentralized);
+
+
+%     uicontrol('Parent',f,'Style','pushbutton','String','Mark modulator+','Units','normalized','Position',[0.5 .01 .2 .1],'Callback',@metadata.markModulatorOn);
+
+
+%     % open up the metadata file
+%     edit(pathlib.join(getpref('embedding','data_root'),'cronin-metadata',[char(all_exps(i)),'.txt']))
+
+%     f.Name = char(all_exps(i));
 
 %     uiwait(f)
 
 % end
 
-
-% fill in empty metadata
-fn = fieldnames(data);
-for i = 1:length(data)
-    for j = 1:length(fn)
-        if isempty(data(i).(fn{j}))
-            N = size(data(i).LP,2);
-            data(i).(fn{j}) = NaN(N,1);
-        end
-    end
-end
 
 
 % load the manually annotated metadata and combine with all data
@@ -73,14 +96,6 @@ for i = 1:length(data)
 end
 
 
-% measure ISIs
-data = thoth.computeISIs(data, {'LP','PD'});
-
-% disallow ISIs below 10ms
-for i = 1:length(data)
-    data(i).PD_PD(data(i).PD_PD<.01) = NaN;
-    data(i).LP_LP(data(i).LP_LP<.01) = NaN;
-end
 
 
 % combine all data
