@@ -101,55 +101,17 @@ end
 
 
 
+[alldata, data] = sourcedata.combine(data);
+
+
+cdfs = sourcedata.cdfs(alldata);
+
+
+
+
 return
 
 
-% combine all data
-for i = 1:length(data)
-    data(i).PD = data(i).PD';
-    data(i).LP = data(i).LP';
-    data(i).PD_PD = data(i).PD_PD';
-    data(i).PD_LP = data(i).PD_LP';
-    data(i).LP_LP = data(i).LP_LP';
-    data(i).LP_PD = data(i).LP_PD';
-    data(i).time_offset = data(i).time_offset';
-end
-
-fn = fieldnames(data);
-for i = 1:length(fn)
-    alldata.(fn{i}) = vertcat(data.(fn{i}));
-end
-
-% purge masked data
-rm_this = ~alldata.mask;
-for i = 1:length(fn)
-    alldata.(fn{i}) = alldata.(fn{i})(~rm_this,:);
-end
-
-
-
-
-N = length(alldata.mask);
-
-% compute cumulative histograms for all ISIs
-clear cdfs
-types = {'PD_PD','LP_LP','LP_PD','PD_LP'};
-nbins = 100;
-bins = logspace(-2,1,nbins+1);
-for i = 1:length(types)
-    cdfs.(types{i}) = NaN(N,nbins);
-
-    for j = 1:N
-        temp = alldata.(types{i})(j,:);
-        temp(isnan(temp)) = [];
-        if isempty(temp)
-            continue
-        end
-
-        cdfs.(types{i})(j,:) = histcounts(temp,bins,'Normalization','cdf');
-    end
-
-end
 
 % directly t-sne them, using a firing rate ansatz
 
