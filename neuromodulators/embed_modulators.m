@@ -11,7 +11,8 @@ if isempty(getpref('embedding'))
 end
 
 
-data = sourcedata.get('modulators')
+% get data
+data = sourcedata.get('modulators');
 
 
 % get metadata for the Cronin data
@@ -74,6 +75,9 @@ load('manual_modulator_metadata.mat','mmm');
 for i = 1:length(data)
     this_exp = data(i).experiment_idx(1);
     idx = find(mmm.all_exp_idx == this_exp,1,'last');
+    if isempty(idx)
+        continue
+    end
     data(i).modulator = logical(0*data(i).mask);
     data(i).modulator(mmm.modulator_start(idx):end) = true;
 end
@@ -96,6 +100,8 @@ for i = 1:length(data)
 end
 
 
+
+return
 
 
 % combine all data

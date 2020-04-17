@@ -21,3 +21,8 @@ start_idx = find(ok,1,'first');
 assert(~isempty(start_idx),'Could not determine start_loc location')
 
 data(idx).(fieldname)(start_idx:end) = value;
+
+
+if ~strcmp(fieldname,'decentralized')
+	data(idx).modulator = data(idx).(fieldname);
+end
