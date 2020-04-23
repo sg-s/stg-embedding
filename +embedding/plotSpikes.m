@@ -1,4 +1,6 @@
-function plotLP_PD(ax, data)
+% callback function used in manual clustering and labeling
+% plots PD and LP spikes from the raw data
+function plotSpikes(ax, data)
 
 data = data';
 data = reshape(data,length(data)/2,2);

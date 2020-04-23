@@ -13,7 +13,7 @@ assignin('base','annotation',idx2);
 evalin('base','u.labels = annotation;')
 
 R = evalin('base','u.fit(RawData);');
-
+assignin('base','R',R)
 
 
 m.ReducedData = R;

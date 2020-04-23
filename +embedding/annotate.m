@@ -1,17 +1,28 @@
 
 % keep the raw data around so we can re-embed if need be
-RawData = [cdfs.PD_PD, cdfs.LP_LP, cdfs.LP_LP, cdfs.PD_LP];
-RawData(isnan(RawData)) = 0;
-
+Exxagerate = 1;
+RawData = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_LP]);
+RawData(isnan(RawData)) = -10;
 
 % this is passed to the interactive labeller so we can look at the spikes
 raw_spike_data = [alldata.LP, alldata.PD];
 
+if 	exist('u','var') && isa(u,'umap')
+else
+	u = umap('min_dist',0, 'metric','euclidean','n_neighbors',50,'negative_sample_rate',15);
+	R = u.fit(RawData);
+end
+
+if exist('m','var') && isa(m,'clusterlib.manual') 
+else
+	m = clusterlib.manual;
+end
 
 
-if ~exist('idx','var')
+if all(isundefined(m.idx))
 	% attempt to find the "normal" data in this automatically
 
+	disp('Guessing normal states...')
 
 	clear LP_metrics PD_metrics
 
@@ -32,30 +43,23 @@ if ~exist('idx','var')
 
 	normal = PDok & LPok;
 
-	idx = embedding.makeCategoricalArray(length(normal));
-	idx(normal) = 'normal';
+	m.idx = embedding.makeCategoricalArray(length(normal));
+	m.idx(normal) = 'normal';
+
+	disp([mat2str(sum(normal)) ' points labelled normal'])
 	
 
 end
 
 
-if exist('m','var') && isa(m,'clusterlib.manual') && ~all(isundefined(m.idx))
-	idx = m.idx;
-end
-
-
-m = clusterlib.manual;
-
 m.RawData = raw_spike_data;
 m.ReducedData = R;
-m.DisplayFcn = @plot_LP_PD;
+m.DisplayFcn = @embedding.plotSpikes;
+m.labels = categories(m.idx);
 
 
 
-if exist('idx','var') == 1 && all(isundefined(m.idx))
-	m.idx = idx;
-	m.labels = unique(idx);
-end
+
 
 m.makeUI;
 m.handles.ax(1).Position = [0 .3 .6 .6];

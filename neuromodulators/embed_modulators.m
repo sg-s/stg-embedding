@@ -103,136 +103,52 @@ end
 
 [alldata, data] = sourcedata.combine(data);
 
-
-cdfs = sourcedata.cdfs(alldata);
-
+p = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
 
 
 
-return
-
-
-
-% directly t-sne them, using a firing rate ansatz
-
-
-% re-intialize
-% cats = categories(m.idx);
-% for i = 1:length(cats)
-%     R(m.idx == cats{i},1) = i;
-%     R(m.idx == cats{i},1) = rem(i,4);
-% end
-
-
-% t = TSNE('implementation',TSNE.implementation.fitsne);
-% RawData = [cdfs.PD_PD, cdfs.LP_LP, cdfs.LP_LP, cdfs.PD_LP];
-% RawData(isnan(RawData)) = 0;
-% t.RawData = RawData;
-% t.InitialSolution = R;
-% t.perplexity = 500;
-% t.NIter = 1e3;
-% t.Alpha = .75;
-% R = t.fit;
-
-load('embedding.mat','R','idx')
+% assuming you have annotated the data and made the supervised embedding...
+load('cronin_22_april.mat','idx','R')
 
 
 
 
 
-% figure out the modulator used in each prep
-modnames = {'CCAP','CabTrp1a','RPCH','dopamine','octopamine','oxotremorine','pilocarpine','proctolin','serotonin'};
-modulator_used = {};
-for i = length(data):-1:1
-    for j = 1:length(modnames)
-        if any(data(i).(modnames{j})>0)
-            modulator_used{i} = modnames{j};
-        end
-    end
-end
-
-[~,sidx] = sort(lower(modulator_used));
-sorted_mods = modulator_used(sidx);
-
-% make a figure summarizing all the states in all the experiments, arranged by prep
-
-
-return
 
 
 
-% now show the map with the states identified in it and examples of each state
 
-cats = categories(idx);
+% make a colorscheme
+cats = unique(idx);
+C = colormaps.dcol(length(cats));
 
-clear ax
-figure('outerposition',[300 300 2000 999],'PaperUnits','points','PaperSize',[2000 999]); hold on
-
-pidx = 1;
-for i = 1:3
-    for j = 1:7
-        ax.examples(pidx) = subplot(7,3,pidx); hold on
-        
-        set(ax.examples(pidx),'YLim',[-.01 2.01],'XLim',[-.5 10])
-        pidx = pidx + 1;
-    end
-end
-
-ax.main = subplot(1,3,1); hold on
-axis off
-ax.examples = ax.examples(isvalid(ax.examples));
-
-
-plot(ax.main,R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
+colors = dictionary;
 for i = 1:length(cats)
-    plot(ax.main,R(idx==cats{i},1),R(idx==cats{i},2),'.','Color',C(i,:),'MarkerSize',10)
-    axis square
+    colors.(cats(i)) = C(i,:);
 end
 
+colors('normal') = color.aqua('blue');
+colors('LP-weak-skipped') = color.aqua('brown');
+colors('PD-weak-skipped') = color.aqua('green');
+colors('sparse-irregular') = color.aqua('indigo');
+colors('LP-silent-PD-bursting') = color.aqua('orange');
+colors('LP-silent') = color.aqua('pink');
 
-show_these = [ 520 5261 1061 4337 3958 5937 2412 47 3334  4028 5189 1554 6449 562];
+% color points by whether they are phillip's or cronin's 
 
-for i = 1:length(show_these)
-    axes(ax.examples(i))
-    PD = alldata.PD(show_these(i),:);
-    LP = alldata.LP(show_these(i),:);
-    offset = nanmin([LP(:); PD(:)]);
-    PD = PD - offset;
-    LP = LP - offset;
-    neurolib.raster(PD,'deltat',1,'center',false)
-    neurolib.raster(LP,'deltat',1,'center',false,'yoffset',1,'Color','r')
-    title(char(idx(show_these(i))),'FontWeight','normal')
-
-    ax.examples(i).YTick = [];
-    ax.examples(i).XTick = [];
-    ax.examples(i).Box = 'on';
-    axis(ax.examples(i),'on')
-    this_color = C(find(strcmp(cats,char(idx(show_these(i))))),:);
-    plotlib.vertline(ax.examples(i),-.45,'Color',this_color,'LineWidth',10);
-    ax.examples(i).Color = [.95 .95 .95];
-
+temp = alldata.experiment_idx;
+for i = length(temp):-1:1
+    exp_num(i) = str2double(strrep(char(temp(i)),'_',''));
 end
 
-
-figlib.pretty('LineWidth',1)
-
-
-axlib.move(ax.examples,'right',.05)
-axlib.move(ax.examples(1:2:end),'right',.05)
-
-ax.main.Position = [.06 .1 .4 .8];
-ax.examples(1).YTick = [.5 1.5];
-ax.examples(1).YTickLabel = {'PD','LP'};
-
-
-
-
-
-
-
-
-
-
+figure('outerposition',[300 300 1200 1200],'PaperUnits','points','PaperSize',[1200 1200]); hold on
+plot(R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
+clear l
+l(1) = plot(R(exp_num>8e5,1),R(exp_num>8e5,2),'.','Color',[245, 150, 142]/255,'MarkerSize',10);
+l(2) = plot(R(exp_num<8e5,1),R(exp_num<8e5,2),'.','Color','b','MarkerSize',10);
+legend(l,{'Philipp R','Liz C'})
+figlib.pretty
+axis off
 
 
 
@@ -251,64 +167,7 @@ return
 
 
 
-
-
-
-
-
-
-
-% % add all of this to the ISI database
-% for i = 1:length(data)
-%     thoth.add(data(i),'neurons',{'PD','LP'});
-% end
-
-
-
-% [D, isis] = thoth.getDistances('isi_types', {'PD_PD','PD_LP','LP_LP','LP_PD'},'experiments',all_exps,'Variant',5);
-
-
-D = sum(D,3);
-
-% purge elements that are masked
-mask = logical(vertcat(data.mask));
-D = D(mask,mask);
-isis = isis(:,mask,:);
-
-
-mdata = struct;
-mdata.LP = data(1).LP';
-mdata.PD = data(1).PD';
-
-for i = 2:length(data)
-    mdata.LP = vertcat(mdata.LP, data(i).LP');
-    mdata.PD = vertcat(mdata.PD, data(i).PD');
-end
-
-
-% purge useless data
-mdata.LP = mdata.LP(mask,:);
-mdata.PD = mdata.PD(mask,:);
-
-
-% initialize t-SNE with firing rate solution
-LPf = sum(~isnan(mdata.LP)');
-PDf = sum(~isnan(mdata.PD)');
-
-% use this
-t = TSNE; 
-t.perplexity = 400;
-t.Alpha = .7;
-t.InitialSolution = [zscore(LPf); zscore(PDf)]';
-t.DistanceMatrix = D;
-t.NIter  = 1e3;
-t.implementation = TSNE.implementation.vandermaaten;
-R = t.fit;
-
-
-return
-
-
+mask = vertcat(alldata.mask);
 
 % show centralized and well into decentralized
 time_since_mod_on = vertcat(data.time_since_mod_on);
