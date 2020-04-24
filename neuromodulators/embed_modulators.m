@@ -110,7 +110,14 @@ p = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
 % assuming you have annotated the data and made the supervised embedding...
 load('cronin_22_april.mat','idx','R')
 
-
+% clean up cats
+cats = unique(idx);
+cats = corelib.categorical2cell(unique(idx));
+all_cats = categories(idx);
+remove_cats =  setdiff(all_cats,cats);
+for i = 1:length(remove_cats)
+    idx = removecats(idx,remove_cats{i});
+end
 
 
 
@@ -153,7 +160,7 @@ axis off
 
 
 
-
+%
 
 
 
