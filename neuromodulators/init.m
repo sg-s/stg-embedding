@@ -1,6 +1,9 @@
 
 
+% this function gets all the data, gets the embedding, the labelling
+% and presents this data to other scripts
 
+function init()
 
 % make sure you tell the script
 % where the data is located using
@@ -125,48 +128,17 @@ end
 
 
 
-% make a colorscheme
-cats = unique(idx);
-C = colormaps.dcol(length(cats));
-
-colors = dictionary;
-for i = 1:length(cats)
-    colors.(cats(i)) = C(i,:);
-end
-
-colors('normal') = color.aqua('blue');
-colors('LP-weak-skipped') = color.aqua('brown');
-colors('PD-weak-skipped') = color.aqua('green');
-colors('sparse-irregular') = color.aqua('indigo');
-colors('LP-silent-PD-bursting') = color.aqua('orange');
-colors('LP-silent') = color.aqua('pink');
-
-% color points by whether they are phillip's or cronin's 
-
-temp = alldata.experiment_idx;
-for i = length(temp):-1:1
-    exp_num(i) = str2double(strrep(char(temp(i)),'_',''));
-end
-
-figure('outerposition',[300 300 1200 1200],'PaperUnits','points','PaperSize',[1200 1200]); hold on
-plot(R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
-clear l
-l(1) = plot(R(exp_num>8e5,1),R(exp_num>8e5,2),'.','Color',[245, 150, 142]/255,'MarkerSize',10);
-l(2) = plot(R(exp_num<8e5,1),R(exp_num<8e5,2),'.','Color','b','MarkerSize',10);
-legend(l,{'Philipp R','Liz C'})
-figlib.pretty
-axis off
-
 
 
 
 %
 
+alldata.idx = idx;
+alldata.R = R;
 
-
-
-
-
+assignin('base','data',data)
+assignin('base','alldata',alldata)
+assignin('base','p',p)
 
 
 return

@@ -2,6 +2,10 @@
 % this script makes an ethogram of all experiments, and wordclouds for differnet regions
 
 
+% unpack
+idx = alldata.idx;
+cats = categories(idx);
+colors = display.colorscheme(cats);
 
 
 close all
@@ -196,3 +200,8 @@ plot(ax.main,[-750 -650],[0 0],'k','LineWidth',4,'HandleVisibility','off')
 
 axes(ax.main);
 th = text(-800,-3,'100 s','FontSize',20);
+
+
+
+% clean up worksapce
+clearvars -except alldata data p

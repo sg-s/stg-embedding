@@ -2,7 +2,13 @@
 % assuming it exists, and shows illustrative examples from
 % each class 
 
-cats = corelib.categorical2cell(unique(idx));
+% unpack
+idx = alldata.idx;
+R = alldata.R;
+
+cats = categories(idx);
+
+colors = display.colorscheme(cats);
 
 clear ax
 figure('outerposition',[300 300 2000 999],'PaperUnits','points','PaperSize',[2000 999]); hold on
@@ -63,3 +69,7 @@ ax.main.Position = [.06 .1 .4 .8];
 ax.examples(1).YTick = [.5 1.5];
 ax.examples(1).YTickLabel = {'PD','LP'};
 
+
+
+% clean up workspace
+clearvars -except alldata p
