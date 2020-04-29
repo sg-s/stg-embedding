@@ -19,7 +19,6 @@ for i = 1:length(cats)
 	dwell_times(dwell_times==0) = 20;
 	all_y = [all_y; log10(dwell_times)];
 	all_x = [all_x; repmat(categorical(cats(i)),length(dwell_times),1)];
-
 end
 
 
