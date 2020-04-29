@@ -17,7 +17,7 @@ for i = 1:max(sub_idx)
 	b = boundary(this_x,this_y);
 	
 	this_color = colors(alldata.idx(find(sub_idx==i,1,'first')));
-	fh(i) = fill(this_x(b),this_y(b),this_color,'EdgeColor',this_color,'LineWidth',1);
+	fh(i) = fill(ax,this_x(b),this_y(b),this_color,'EdgeColor',this_color,'LineWidth',1);
 	fh(i).FaceAlpha = .1;
 	fh(i).EdgeAlpha = .2;
 end
