@@ -18,9 +18,6 @@ figlib.pretty('LineWidth',1)
 
 sub_idx = embedding.watersegment(alldata);
 
-
-J = embedding.computeTransitionMatrix(categorical(sub_idx));
-
 % find burstmetrics by subcluster
 PD_dc = NaN*(1:max(sub_idx));
 PD_period = NaN*(1:max(sub_idx));
