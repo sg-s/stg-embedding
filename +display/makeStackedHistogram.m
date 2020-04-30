@@ -1,9 +1,18 @@
 
+
+function makeStackedHistogram(alldata)
+
 close all
 figure('outerposition',[300 300 1400 1111],'PaperUnits','points','PaperSize',[1400 1111]); hold on
 
+
 clear ax
 modnames = {'proctolin','CabTrp1a','RPCH','oxotremorine',};
+
+idx = alldata.idx;
+
+cats = categories(idx);
+colors = display.colorscheme(cats);
 
 preps = categories(alldata.experiment_idx);
 time = -600:20:600;
@@ -38,10 +47,10 @@ for mi = 1:length(modnames)
 
 	end
 
-	state_hist = zeros(length(time),length(categories(state_matrix(:))));
+	state_hist = zeros(length(time),length(cats));
 
 	for i = 1:length(time)
-		state_hist(i,:) = histcounts(state_matrix(i,:))/sum(~isundefined(state_matrix(i,:)));
+		state_hist(i,:) = histcounts(state_matrix(i,:),categories(idx))/sum(~isundefined(state_matrix(i,:)));
 	end
 
 	% compute switching rates across population
@@ -53,8 +62,6 @@ for mi = 1:length(modnames)
 
 
 	a = area(time,state_hist);
-
-	cats = categories(state_matrix);
 
 	all_cats = [all_cats; cats];
 
