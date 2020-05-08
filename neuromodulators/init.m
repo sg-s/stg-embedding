@@ -15,12 +15,14 @@ end
 
 
 % get data
-data = sourcedata.get('modulators');
+data = sourcedata.get('cronin','rosenbaum','haddad');
 
 
 % get metadata for the Cronin data
 data = metadata.cronin(data,pathlib.join(getpref('embedding','data_root'),'cronin-metadata'));
 
+% mark modulator start for haddad data
+data = metadata.haddad(data);
 
 % % manually fill in some metadata by eyeballing data
 % all_exps = unique(vertcat(data.experiment_idx));
@@ -102,16 +104,32 @@ for i = 1:length(data)
     data(i).mask(mask_me) = 0;
 end
 
-
+% ignore data that is at a temperature other than 11
+for i = 1:length(data)
+    if data(i).experimenter_name(1) == 'haddad'
+        data(i).mask(data(i).temperature ~= 11) = 0;
+    end
+end
 
 [alldata, data] = sourcedata.combine(data);
 
 p = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
 
 
+Exxagerate = 1;
+RawData = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_LP]);
+RawData(isnan(RawData)) = -10;
 
-% assuming you have annotated the data and made the supervised embedding...
-load('cronin_22_april.mat','idx','R')
+
+load('haddad_idx.mat','idx')
+
+u = umap;
+u.n_neighbors = 100;
+u.min_dist = .75;
+u.negative_sample_rate = 25;
+u.labels = idx;
+
+R = u.fit(RawData);
 
 % clean up cats
 cats = unique(idx);
@@ -124,6 +142,22 @@ end
 
 
 
+alldata.idx = idx;
+alldata.R = R;
+
+assignin('base','data',data)
+assignin('base','alldata',alldata)
+assignin('base','p',p)
+
+
+return
+
+
+
+
+
+
+
 
 
 
@@ -133,12 +167,6 @@ end
 
 %
 
-alldata.idx = idx;
-alldata.R = R;
-
-assignin('base','data',data)
-assignin('base','alldata',alldata)
-assignin('base','p',p)
 
 
 return

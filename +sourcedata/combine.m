@@ -16,7 +16,7 @@ for i = 1:length(data)
 end
 
 fn = fieldnames(data);
-	for i = 1:length(fn)
+for i = 1:length(fn)
 	alldata.(fn{i}) = vertcat(data.(fn{i}));
 end
 

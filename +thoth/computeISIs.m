@@ -45,8 +45,6 @@ for i = 1:length(neurons)
 	for j = 1:length(neurons)
 		fn = [neurons{i} '_' neurons{j}];
 
-		disp(fn)
-
 		data.(fn) = [];
 
 		N = size(data.(neurons{i}),2);
