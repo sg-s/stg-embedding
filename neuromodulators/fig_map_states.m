@@ -72,4 +72,4 @@ ax.examples(1).YTickLabel = {'PD','LP'};
 
 
 % clean up workspace
-clearvars -except alldata p
+clearvars -except alldata p data

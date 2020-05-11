@@ -1,6 +1,9 @@
 
 % this script makes an ethogram of all experiments, and wordclouds for differnet regions
 
+if ~exist('alldata','var')
+    init()
+end
 
 % unpack
 idx = alldata.idx;
@@ -27,14 +30,42 @@ end
 [~,sidx] = sort(lower(modulator_used));
 sorted_mods = modulator_used(sidx);
 
+clearvars ax
 
-clear ax
-ax.main = subplot(4,3,[4 5 7 8 10 11]); hold on
-ax.normal = subplot(4,3,1); 
-ax.decentralized = subplot(4,3,2);
-ax.oxotremorine = subplot(4,3,9);
-ax.RPCH = subplot(4,3,6);
-ax.CabTrp1a = subplot(4,3,12);
+
+ax.control = subplot(1,4,1); hold on
+set(ax.control,'XLim',[0 600]) % 10 minutes
+
+ax.decentralized = subplot(1,4,2); hold on
+set(ax.decentralized,'XLim',[-600 1200]) % 10 minutes before and after mod addition
+
+
+
+axis(ax.control,'off')
+axis(ax.decentralized,'off')
+
+ax.control.Position = [.05 .05 .15 .73];
+ax.decentralized.Position = [.21 .05 .45 .73];
+
+ax.base = axes;
+ax.base.Position = [0 0 1 1];
+axis(ax.base,'off');
+ax.base.XLim = [0 1];
+ax.base.YLim = [0 1];
+
+show_these = {'control','decentralized','RPCH','proctolin','oxotremorine'};
+
+for i = 1:length(show_these)
+    ax.tree.(show_these{i}) = axes;
+    axis(ax.tree.(show_these{i}),'off')
+end
+
+ax.tree.control.Position = [.05 .85 .15 .11];
+ax.tree.decentralized.Position = [.21 .85 .15 .11];
+ax.tree.RPCH.Position = [.8 .56 .15 .11];
+ax.tree.proctolin.Position = [.8 .39 .15 .11];
+ax.tree.oxotremorine.Position = [.8 .24 .15 .11];
+
 
 preps = categories(alldata.experiment_idx);
 preps = preps(sidx);
@@ -58,44 +89,73 @@ for i = 1:length(preps)
 
     y = time_since_mod_on*0 + yoffset;
 
-    time_since_mod_on(time_since_mod_on == -600) = NaN;
-
-    for j = 1:length(cats)
-
-        yy = y;
-        yy(states ~= cats{j}) = NaN;
-
-        if all(isnan(yy))
-            continue
-        end
-
-        % this effectively plots lines of continuous blocks
-        plot(ax.main,time_since_mod_on,yy,'Color',colors(cats{j}),'LineWidth',4)
-
-        % now what about single pts? 
-        yy1 = circshift(yy,1);
-        yy2 = circshift(yy,-1);
-
-        isolated_pts = ~isnan(yy) & isnan(yy1) & isnan(yy2);
-
-        plot(ax.main,time_since_mod_on(isolated_pts),yy(isolated_pts),'.','MarkerSize',10,'Color',colors(cats{j}),'LineStyle','none')
+    % plot 10 minutes of decentralized just before neuromod is added
+    display.plotStates(ax.decentralized, cats, states, time_since_mod_on, y);
 
 
-    end
+
+
+    % plot 10 minutes of control
+    time_since_mod_on(time_since_mod_on>-600) = NaN;
+    time_since_mod_on = time_since_mod_on - time_since_mod_on(1);
+    display.plotStates(ax.control, cats, states, time_since_mod_on, y);
+
+
 
 
     yoffset = yoffset + 1;
 
     if i < length(preps)
         if ~strcmp(sorted_mods{i},sorted_mods{i+1})
-            plotlib.horzline(ax.main,yoffset + 1,'k:');
+            plotlib.horzline(ax.control,yoffset + 1,'k:');
+            plotlib.horzline(ax.decentralized,yoffset + 1,'k:');
             linepos = [linepos; yoffset+1];
             yoffset = yoffset + 3;
 
-            
         end
     end
 
+
+end
+
+
+% plot control states
+axes(ax.tree.control)
+states = alldata.idx(alldata.decentralized == false);
+h = histcounts(states);
+c = categories(states);
+h = treemap.treemap(h);
+p = treemap.plotRectangles(h);
+for i = 1:length(p)
+    p(i).FaceColor = colors(c{i});
+    p(i).EdgeColor = [1 1 1];
+end
+
+
+% plot decentralized
+axes(ax.tree.decentralized)
+states = alldata.idx(alldata.decentralized == true & alldata.time_since_mod_on < 0);
+h = histcounts(states);
+c = categories(states);
+h = treemap.treemap(h);
+p = treemap.plotRectangles(h);
+for i = 1:length(p)
+    p(i).FaceColor = colors(c{i});
+    p(i).EdgeColor = [1 1 1];
+end
+
+% show treemaps for modulators
+for j = 3:length(show_these)
+    axes(ax.tree.(show_these{j}))
+    states = alldata.idx(alldata.(show_these{j}) > 0);
+    h = histcounts(states);
+    c = categories(states);
+    h = treemap.treemap(h);
+    p = treemap.plotRectangles(h);
+    for i = 1:length(p)
+        p(i).FaceColor = colors(c{i});
+        p(i).EdgeColor = [1 1 1];
+    end
 
 end
 
@@ -104,13 +164,13 @@ end
 % make fake plots for a legend
 clear lh
 for i = 1:length(cats)
-    lh(i) = plot(ax.main,NaN,NaN,'.','MarkerSize',50,'DisplayName',cats{i},'Color',colors(cats{i}));
+    lh(i) = plot(ax.control,NaN,NaN,'.','MarkerSize',50,'DisplayName',cats{i},'Color',colors(cats{i}));
 end
 
 
 L = legend(lh);
-L.NumColumns = 2;
-L.Position = [0.6597 0.7487 0.2806 0.2025];
+L.NumColumns = 3;
+L.Position = [0.55 0.84 0.4 0.15];
 
 
 [~,temp]=unique(lower(sorted_mods));
@@ -118,29 +178,39 @@ umods = sorted_mods(temp);
 linepos = [0; linepos] + diff([0; linepos; yoffset])/2;
 
 for i = 1:length(umods)
-    text(ax.main,1.1e3,linepos(i),umods{i},'HorizontalAlignment','left')
+    text(ax.decentralized,1.3e3,linepos(i),umods{i},'HorizontalAlignment','left','FontSize',20)
 end
 
-text(ax.main,-2500,yoffset+3,'control','FontSize',20,'Color',[0 0 0]);
-text(ax.main,-660,yoffset+3,'decentralized','FontSize',20,'Color',[.6 .6 .6]);
-text(ax.main,100,yoffset+5,'+modulator','FontSize',24,'Color',[1 .5 .5]);
-
-r1 = rectangle(ax.main,'Position',[-600 -1 1.6e3 yoffset+1],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
+r1 = rectangle(ax.base,'Position',[.205 .04 .46 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
 uistack(r1,'bottom');
-r2 = rectangle(ax.main,'Position',[0 yoffset 1e3 2],'FaceColor',[1 0 0  .25],'EdgeColor',[1 0 0  .25]);
+uistack(ax.base,'bottom')
+
+
+r2 = rectangle(ax.base,'Position',[.36 .79 .305 .018],'FaceColor',[1 0 0  .25],'EdgeColor',[1 0 0  .25]);
 uistack(r1,'bottom');
 
-set(ax.main,'XLim',[-2500 1000],'YLim',[-5 yoffset+7])
+
+
+
+th = text(ax.base,0.1,.8,'control','FontSize',20,'Color',[0 0 0]);
+th = text(ax.base,.23,.8,'decentralized','FontSize',20,'Color',[.6 .6 .6]);
+th = text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
+
+figlib.pretty()
+
+return
+
+
 
 
 % wordcloud of normal
-axes(ax.normal)
+axes(ax.controlword)
 w = wordcloud(gcf,idx(~alldata.decentralized));
 display.configureWordCloud(w,colors);
 
 w_normal = w;
 
-
+return
 
 % decentralized
 axes(ax.decentralized)
@@ -163,7 +233,7 @@ end
 
 ax.main.Position = [.02 .05 .6 .7];
 
-figlib.pretty()
+
 axis(ax.main,'off')
 
 

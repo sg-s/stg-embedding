@@ -4,7 +4,7 @@ function [alldata, data] = combine(data)
 
 
 
-% combine all data
+% rotate arrays
 for i = 1:length(data)
 	data(i).PD = data(i).PD';
 	data(i).LP = data(i).LP';
