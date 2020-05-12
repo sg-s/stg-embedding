@@ -17,17 +17,9 @@ figure('outerposition',[300 300 1333 900],'PaperUnits','points','PaperSize',[133
 
 
 % figure out the modulator used in each prep
-modnames = {'CCAP','CabTrp1a','RPCH','dopamine','octopamine','oxotremorine','pilocarpine','proctolin','serotonin'};
-modulator_used = {};
-for i = length(data):-1:1
-    for j = 1:length(modnames)
-        if any(data(i).(modnames{j})>0)
-            modulator_used{i} = modnames{j};
-        end
-    end
-end
+modulator_used = sourcedata.modulatorUsed(data);
 
-[~,sidx] = sort(lower(modulator_used));
+[~,sidx] = sort(lower(corelib.categorical2cell(modulator_used)));
 sorted_mods = modulator_used(sidx);
 
 clearvars ax
@@ -37,15 +29,19 @@ ax.control = subplot(1,4,1); hold on
 set(ax.control,'XLim',[0 600]) % 10 minutes
 
 ax.decentralized = subplot(1,4,2); hold on
-set(ax.decentralized,'XLim',[-600 1200]) % 10 minutes before and after mod addition
+set(ax.decentralized,'XLim',[-600 0]) % 10 minutes before and after mod addition
 
+ax.modulator = subplot(1,4,3:4); hold on
+set(ax.modulator,'XLim',[0 1200]) % 10 minutes before and after mod addition
 
 
 axis(ax.control,'off')
 axis(ax.decentralized,'off')
+axis(ax.modulator,'off')
 
 ax.control.Position = [.05 .05 .15 .73];
-ax.decentralized.Position = [.21 .05 .45 .73];
+ax.decentralized.Position = [.21 .05 .15 .73];
+ax.modulator.Position = [.37 .05 .3 .73];
 
 ax.base = axes;
 ax.base.Position = [0 0 1 1];
@@ -67,9 +63,6 @@ ax.tree.proctolin.Position = [.8 .39 .15 .11];
 ax.tree.oxotremorine.Position = [.8 .24 .15 .11];
 
 
-preps = categories(alldata.experiment_idx);
-preps = preps(sidx);
-
 
 cats = corelib.categorical2cell(unique(idx));
 
@@ -77,10 +70,10 @@ yoffset = 1;
 
 linepos = [];
 
-for i = 1:length(preps)
+for i = 1:length(data)
 
-
-    use_these = (alldata.experiment_idx == preps{i});
+    prep = data(sidx(i)).experiment_idx(1);
+    use_these = (alldata.experiment_idx == prep);
     decentralized = alldata.decentralized(use_these);
     time_since_mod_on = alldata.time_since_mod_on(use_these);
 
@@ -89,26 +82,36 @@ for i = 1:length(preps)
 
     y = time_since_mod_on*0 + yoffset;
 
-    % plot 10 minutes of decentralized just before neuromod is added
+    % plot 10 minutes of decentralized just before ANY neuromod is added
     display.plotStates(ax.decentralized, cats, states, time_since_mod_on, y);
 
+    
 
+    % plot neuromodulator at the highest concentration
+    this_mod = alldata.(char(sorted_mods(i)))(use_these);
+    a = find(this_mod == max(this_mod),1,'first');
+    if  length(unique(this_mod)) > 2
+        % cronin data with more than 1 conc
+         display.plotStates(ax.modulator, cats, states,  time_since_mod_on -  time_since_mod_on(a), y);
+    else
+        % should be OK, just plot
+        display.plotStates(ax.modulator, cats, states, time_since_mod_on, y);
+    end
 
 
     % plot 10 minutes of control
-    time_since_mod_on(time_since_mod_on>-600) = NaN;
-    time_since_mod_on = time_since_mod_on - time_since_mod_on(1);
-    display.plotStates(ax.control, cats, states, time_since_mod_on, y);
+    display.plotStates(ax.control, cats, states, time_since_mod_on - time_since_mod_on(1), y);
 
 
 
 
     yoffset = yoffset + 1;
 
-    if i < length(preps)
-        if ~strcmp(sorted_mods{i},sorted_mods{i+1})
+    if i < length(data)
+        if sorted_mods(i) ~=  sorted_mods(i+1)
             plotlib.horzline(ax.control,yoffset + 1,'k:');
             plotlib.horzline(ax.decentralized,yoffset + 1,'k:');
+            plotlib.horzline(ax.modulator,yoffset + 1,'k:');
             linepos = [linepos; yoffset+1];
             yoffset = yoffset + 3;
 
@@ -122,40 +125,18 @@ end
 % plot control states
 axes(ax.tree.control)
 states = alldata.idx(alldata.decentralized == false);
-h = histcounts(states);
-c = categories(states);
-h = treemap.treemap(h);
-p = treemap.plotRectangles(h);
-for i = 1:length(p)
-    p(i).FaceColor = colors(c{i});
-    p(i).EdgeColor = [1 1 1];
-end
-
+display.mondrian(states,colors);
 
 % plot decentralized
 axes(ax.tree.decentralized)
 states = alldata.idx(alldata.decentralized == true & alldata.time_since_mod_on < 0);
-h = histcounts(states);
-c = categories(states);
-h = treemap.treemap(h);
-p = treemap.plotRectangles(h);
-for i = 1:length(p)
-    p(i).FaceColor = colors(c{i});
-    p(i).EdgeColor = [1 1 1];
-end
+display.mondrian(states,colors);
 
 % show treemaps for modulators
 for j = 3:length(show_these)
     axes(ax.tree.(show_these{j}))
     states = alldata.idx(alldata.(show_these{j}) > 0);
-    h = histcounts(states);
-    c = categories(states);
-    h = treemap.treemap(h);
-    p = treemap.plotRectangles(h);
-    for i = 1:length(p)
-        p(i).FaceColor = colors(c{i});
-        p(i).EdgeColor = [1 1 1];
-    end
+    display.mondrian(states,colors);
 
 end
 
@@ -173,20 +154,20 @@ L.NumColumns = 3;
 L.Position = [0.55 0.84 0.4 0.15];
 
 
-[~,temp]=unique(lower(sorted_mods));
+[~,temp] = unique(lower(corelib.categorical2cell(sorted_mods)));
 umods = sorted_mods(temp);
 linepos = [0; linepos] + diff([0; linepos; yoffset])/2;
 
 for i = 1:length(umods)
-    text(ax.decentralized,1.3e3,linepos(i),umods{i},'HorizontalAlignment','left','FontSize',20)
+    text(ax.decentralized,1.3e3,linepos(i),char(umods(i)),'HorizontalAlignment','left','FontSize',20)
 end
 
-r1 = rectangle(ax.base,'Position',[.205 .04 .46 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
+r1 = rectangle(ax.base,'Position',[.205 .04 .47 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
 uistack(r1,'bottom');
 uistack(ax.base,'bottom')
 
 
-r2 = rectangle(ax.base,'Position',[.36 .79 .305 .018],'FaceColor',[1 0 0  .25],'EdgeColor',[1 0 0  .25]);
+r2 = rectangle(ax.base,'Position',[.37 .79 .305 .018],'FaceColor',[1 0 0  .25],'EdgeColor',[1 0 0  .25]);
 uistack(r1,'bottom');
 
 
@@ -196,81 +177,7 @@ th = text(ax.base,0.1,.8,'control','FontSize',20,'Color',[0 0 0]);
 th = text(ax.base,.23,.8,'decentralized','FontSize',20,'Color',[.6 .6 .6]);
 th = text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
 
-figlib.pretty()
-
-return
-
-
-
-
-% wordcloud of normal
-axes(ax.controlword)
-w = wordcloud(gcf,idx(~alldata.decentralized));
-display.configureWordCloud(w,colors);
-
-w_normal = w;
-
-return
-
-% decentralized
-axes(ax.decentralized)
-w = wordcloud(gcf,idx(alldata.decentralized & alldata.time_since_mod_on < 0));
-display.configureWordCloud(w,colors);
-w_decentralized = w;
-
-
-show_these = {'RPCH','oxotremorine','CabTrp1a'};
-for j = 1:length(show_these)
-
-    axes(ax.(show_these{j}))
-    w(j) = wordcloud(gcf,idx(alldata.(show_these{j})>0));
-
-    display.configureWordCloud(w(j),colors);
-
-
-
-end
-
-ax.main.Position = [.02 .05 .6 .7];
-
-
-axis(ax.main,'off')
-
-
-
-w(1).Position = [.75 .5 .2 .15];
-w(2).Position = [.75 .25 .2 .15];
-w(3).Position = [.75 .05 .2 .15];
-
-
-a = annotation('textarrow');
-a.Position = [0.7495   0.315  -0.024 0];
-
-
-a = annotation('textarrow');
-a.Position = [.75 .125 -.050 0];
-
-
-a = annotation('textarrow');
-a.Position = [.75 .585 -.07 0];
-
-
-
-w_normal.Position = [.01 .77 .2 .15];
-w_decentralized.Position = [.3 .77 .2 .15];
-
-
-a = annotation('textarrow');
-a.Position = [.04 .77 0 -.03];
-
-a = annotation('textarrow');
-a.Position = [.39 .77 0 -.03];
-
-plot(ax.main,[-750 -650],[0 0],'k','LineWidth',4,'HandleVisibility','off')
-
-axes(ax.main);
-th = text(-800,-3,'100 s','FontSize',20);
-
+figlib.pretty('PlotLineWidth',1)
 
 
 % clean up worksapce

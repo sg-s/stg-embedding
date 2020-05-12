@@ -2,6 +2,10 @@
 % the state is indicated by a shading in the background,
 % and sub-clusters are found using watershed
 
+if ~exist('alldata','var')
+    init()
+end
+
 clearvars -except data alldata p
 
 R = double(alldata.R);
@@ -47,5 +51,5 @@ axlib.move(ax(4:6),'down',.02)
 
 
 
-return
+
 clearvars -except data alldata p

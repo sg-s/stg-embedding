@@ -1,5 +1,14 @@
 % this figure shows dwell times of each state, in each condition
 
+if ~exist('alldata','var')
+    init()
+end
+
+
+idx = alldata.idx;
+cats = categories(idx);
+colors = display.colorscheme(cats);
+
 close all
 
 
@@ -17,9 +26,11 @@ suptitle('decentralized')
 modnames = {'RPCH','proctolin','CabTrp1a','oxotremorine'};
 
 for i = 1:length(modnames)
-	ax = display.plotFirstOrderStats(idx(alldata.(modnames{i}) > 0),colors)
+	ax = display.plotFirstOrderStats(idx(alldata.(modnames{i}) > 0),colors);
 	ax.DwellTimes.Position = [.13 .15 .775 .33];
 	suptitle(modnames{i})
 end
 
 
+
+clearvars -except p alldata data

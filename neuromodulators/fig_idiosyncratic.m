@@ -2,7 +2,10 @@
 % by how many preps they come form
 % this allows us to find idiosyncratic clusters
 
-clearvars -except data alldata p
+
+if ~exist('alldata','var')
+    init()
+end
 
 R = double(alldata.R);
 

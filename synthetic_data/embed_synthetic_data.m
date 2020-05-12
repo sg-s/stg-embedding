@@ -4,11 +4,104 @@
 
 data = synthetic.makeData;
 
+data = thoth.computeISIs(data, {'LP','PD'});
+
+% disallow ISIs below 10ms
+data.PD_PD(data.PD_PD<.01) = NaN;
+data.LP_LP(data.LP_LP<.01) = NaN;
+
+fn = fieldnames(data);
+for i = 1:length(fn)
+	if size(data.(fn{i}),2) > size(data.(fn{i}),1)
+		data.(fn{i}) = data.(fn{i})';
+	end
+end
+
+p = sourcedata.spikes2percentiles(data,'ISIorders',[1 2]);
+
+
+Exxagerate = 2;
+RawData = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_LP]);
+RawData(isnan(RawData)) = -10;
+
+
+u = umap;
+u.n_neighbors = 30;
+u.min_dist = .1;
+u.negative_sample_rate = 25;
+
+R = u.fit(RawData);
+
+cats = unique(data.experiment_idx);
+
+% colormap for clusters
+c = lines(9);
+c(8,:) = [0 0 0];
+c(9,:) = [1 0 0];
+
+
+
+figure('outerposition',[300 300 700 600],'PaperUnits','points','PaperSize',[700 600]); hold on
+
+clear l L
+for i = 1:length(cats)-1
+	plot_this = data.experiment_idx == cats(i);
+	plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',10,'Color',c(i,:));
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
+
+legend(l,corelib.categorical2cell(cats(1:end-1)),'Location','eastoutside')
+
+axis off
+
+figlib.pretty()
+
+
+
+
+
+
+
+% now semi-supervised
+u.labels = data.experiment_idx;
+RandStream.setGlobalStream(RandStream('mt19937ar','Seed',1984)); 
+u.labels(rand(10000,1)>.1) = -1;
+u.labels(end)=-1;
+
+R = u.fit(RawData);
+
+cats = unique(data.experiment_idx);
+
+% colormap for clusters
+c = lines(9);
+c(8,:) = [0 0 0];
+c(9,:) = [1 0 0];
+
+
+
+figure('outerposition',[300 300 700 600],'PaperUnits','points','PaperSize',[700 600]); hold on
+
+clear l L
+for i = 1:length(cats)-1
+	plot_this = data.experiment_idx == cats(i);
+	plot(R(plot_this,1),R(plot_this,2),'.','MarkerSize',10,'Color',c(i,:));
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
+
+legend(l,corelib.categorical2cell(cats(1:end-1)),'Location','eastoutside')
+
+axis off
+
+figlib.pretty()
+
+
+
+
+
 
 figure('outerposition',[300 300 1200 1111],'PaperUnits','points','PaperSize',[1200 1111]); hold on
 
 
-cats = unique(data.experiment_idx);
 
 for i = 1:9
 	subplot(3,3,i); hold on

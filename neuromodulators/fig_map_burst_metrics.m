@@ -1,5 +1,10 @@
 % in this figure, we label sub-clusters by burst metrics
 
+
+if ~exist('alldata','var')
+    init()
+end
+
 clearvars -except data alldata p
 
 R = double(alldata.R);
