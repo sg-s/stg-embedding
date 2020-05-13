@@ -1,8 +1,6 @@
 
-% keep the raw data around so we can re-embed if need be
-Exxagerate = 1;
-RawData = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_LP]);
-RawData(isnan(RawData)) = -10;
+
+
 
 % this is passed to the interactive labeller so we can look at the spikes
 raw_spike_data = [alldata.LP, alldata.PD];
@@ -10,7 +8,7 @@ raw_spike_data = [alldata.LP, alldata.PD];
 if 	exist('u','var') && isa(u,'umap')
 else
 	u = umap('min_dist',0, 'metric','euclidean','n_neighbors',50,'negative_sample_rate',15);
-	R = u.fit(RawData);
+	R = u.fit(VectorisedPercentiles);
 end
 
 if exist('m','var') && isa(m,'clusterlib.manual') 

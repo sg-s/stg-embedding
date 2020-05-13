@@ -113,23 +113,18 @@ end
 
 [alldata, data] = sourcedata.combine(data);
 
-p = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
-
-
-Exxagerate = 1;
-RawData = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_LP]);
-RawData(isnan(RawData)) = -10;
+[p, VectorisedPercentiles] = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
 
 
 load('haddad_idx.mat','idx')
 
 u = umap;
-u.n_neighbors = 100;
+u.n_neighbors = 75;
 u.min_dist = .75;
 u.negative_sample_rate = 25;
 u.labels = idx;
 
-R = u.fit(RawData);
+R = u.fit(VectorisedPercentiles);
 
 % clean up cats
 cats = unique(idx);
@@ -148,7 +143,7 @@ alldata.R = R;
 assignin('base','data',data)
 assignin('base','alldata',alldata)
 assignin('base','p',p)
-
+assignin('base','VectorisedPercentiles',VectorisedPercentiles)
 
 return
 

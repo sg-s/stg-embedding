@@ -5,7 +5,7 @@
 % delays are used. this is not actually computed, and is assumed to 
 % already exist in alldata 
 
-function p = spikes2percentiles(alldata, varargin)
+function [p, VectorisedPercentiles] = spikes2percentiles(alldata, varargin)
 
 options.ISIorders = 1:10;
 options.PercentileVec = linspace(0,100,11);
@@ -73,3 +73,6 @@ for i = 1:length(neurons)
 end
 
 
+Exxagerate = 2;
+VectorisedPercentiles = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_LP]);
+VectorisedPercentiles(isnan(VectorisedPercentiles)) = -10;

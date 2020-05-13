@@ -12,7 +12,7 @@ assignin('base','annotation',idx2);
 
 evalin('base','u.labels = annotation;')
 
-R = evalin('base','u.fit(RawData);');
+R = evalin('base','u.fit(VectorisedPercentiles);');
 assignin('base','R',R)
 
 

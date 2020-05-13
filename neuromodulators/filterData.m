@@ -1,6 +1,6 @@
 % filters data for certain conditions
 
-function only_these = filterdata(alldata, FilterSpec)
+function only_these = filterData(alldata, FilterSpec)
 
 switch FilterSpec
 
