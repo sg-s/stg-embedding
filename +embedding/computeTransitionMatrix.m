@@ -1,37 +1,55 @@
 % given an (ordered) list of states, measure transition matrix
 % and return that 
-function J = computeTransitionMatrix(idx)
+function J = computeTransitionMatrix(idx, time)
 
-assert(iscategorical(idx),'Argument must be a categorical array')
-assert(isvector(idx),'Argument must be a vector')
-idx = idx(:);
-assert(~any(isundefined(idx)),'Categorical array contains undefined elements. cannot proceed.')
+validation.categoricalTime(idx,time);
 
+cats = categories(idx);
 
 
-labels = categories(idx);
 
 
-idx2 = circshift(idx,1);
 
+% find the break points
+breakpts = [0; find((diff(time)) ~= 20)];
 
-N = length(labels);
+N = length(cats);
 J = zeros(N);
 
-for i = 1:N
-    for j = 1:N
-        if i == j
-            continue
-        end
 
-        if sum(idx == labels(i)) == 0
-			continue
+for bi = 1:length(breakpts)-1
+
+
+	this_idx = idx(breakpts(bi)+1:breakpts(bi+1));
+	idx2 = circshift(this_idx,1);
+	
+	for i = 1:N
+	    for j = 1:N
+	        if i == j
+	            continue
+	        end
+
+	        if sum(this_idx == cats(i)) == 0
+				continue
+			end
+
+			J(i,j) = J(i,j) + sum((this_idx == cats(i)).*(idx2 == cats(j)));
+
+
+
+			if J(i,j) == 0
+				continue
+			end
+
 		end
-
-		J(i,j) = sum((idx == labels(i)).*(idx2 == labels(j)));
-		% normalize
-		J(i,j) = J(i,j)/sum(idx == labels(i));
 
 	end
 
 end
+
+
+
+
+
+
+

@@ -15,13 +15,19 @@ clear l
 
 names = unique(alldata.experimenter_name);
 
+c = lines;
+
 for i = 1:length(names)
-	l(i) = plot(alldata.R(alldata.experimenter_name == names(i),1),alldata.R(alldata.experimenter_name == names(i),2),'.','MarkerSize',10);
+	plot(alldata.R(alldata.experimenter_name == names(i),1),alldata.R(alldata.experimenter_name == names(i),2),'.','MarkerSize',10,'Color',c(i,:));
 end
 
+% fake some plots
+for i = 1:length(names)
+	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',c(i,:));
+end
 
 legend(l,categories(alldata.experimenter_name))
-figlib.pretty
+figlib.pretty('FontSize',30)
 axis off
 
 

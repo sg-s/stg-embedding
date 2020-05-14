@@ -18,7 +18,7 @@ for i = 1:length(modnames)
 	display.pairedMondrian(ax(i),alldata, modnames{i})
 end
 
-figlib.pretty()
+figlib.pretty('FontSize',16)
 
 
 

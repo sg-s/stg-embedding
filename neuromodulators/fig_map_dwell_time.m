@@ -19,8 +19,6 @@ figlib.pretty('LineWidth',1)
 sub_idx = embedding.watersegment(alldata);
 
 
-J = embedding.computeTransitionMatrix(categorical(sub_idx));
-
 % find dwelltimes by subcluster
 dwell_times = NaN*(1:max(sub_idx));
 for i = 1:max(sub_idx)

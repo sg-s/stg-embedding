@@ -1,4 +1,4 @@
-function ax = plotFirstOrderStats(idx,colors)
+function ax = plotFirstOrderStats(idx,time)
 
 figure('outerposition',[300 300 801 901],'PaperUnits','points','PaperSize',[801 901]); hold on
 clear ax
@@ -7,7 +7,7 @@ ax.DwellTimes = subplot(2,1,2); hold on
 ax.graph = subplot(2,2,2); hold on
 
 cats = unique(idx);
-
+colors = display.colorscheme(cats);
 
 
 all_x = [];
@@ -44,16 +44,22 @@ for i = 1:length(remove_cats)
 end
 
 
-J = embedding.computeTransitionMatrix(idx);
+J = embedding.computeTransitionMatrix(idx, time);
 
-J2 = J; J2(J<prctile(J(:),80)) = 0; G = digraph(J2); 
+
+G = digraph(J); 
 
 axes(ax.graph)
 
-p = plot(G,'Layout','layered'); 
+p = plot(G,'Layout','force'); 
 
-G.Edges.LWidths = 7*G.Edges.Weight/max(G.Edges.Weight);
-p.LineWidth = G.Edges.LWidths;
+W = 1 + .7*G.Edges.Weight/max(G.Edges.Weight);
+W = W - min(W);
+W = (W/max(W))*.6;
+W = W + .4;
+
+p.LineWidth = W*3;
+p.EdgeColor = 1-repmat(W,1,3);
 
 sz = histcounts(idx);
 sz = sz/sum(sz);
@@ -67,8 +73,7 @@ for i = 1:length(cats)
 end
 
 p.NodeLabel = {};
-p.EdgeColor = [.5 .5 .5];
-p.ArrowSize = 12;
+p.ArrowSize = 10;
 
 ax.Hist.YTickLabel = cats;
 ax.Hist.YTick = 1:length(cats);
@@ -79,8 +84,8 @@ axis(ax.graph,'off')
 ax.DwellTimes.XLim(1) = 0;
 ax.DwellTimes.YLim = [1 4];
 
-ax.graph.XLim(1) = 0.5;
-ax.graph.YLim(1) = 0.5;
+% ax.graph.XLim(1) = 0.5;
+% ax.graph.YLim(1) = 0.5;
 
 ax.DwellTimes.XTickLabelRotation = 45;
 

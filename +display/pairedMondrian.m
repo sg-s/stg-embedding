@@ -9,11 +9,10 @@ axis(frame,'off');
 
 ax(1) = axes();
 ax(1).Position = [Pos(1:2) Pos(3)/4 Pos(4)];
-title(ax(1),'decentralized','FontWeight','normal')
 
 ax(2) = axes();
 ax(2).Position = [Pos(1) + 1.1*(Pos(3)/4) Pos(2) Pos(3)/4 Pos(4)];
-title(ax(2),['+' modulator],'FontWeight','normal')
+
 
 ax(3) = axes();
 ax(3).Position = [Pos(1) + 2.6*(Pos(3)/4) Pos(2) Pos(3)/2 Pos(4)];
@@ -156,31 +155,6 @@ for i = 1:length(p_values)
 	end
 end
 
-% also plot probabilities of state before and after modulator application
-% for i = 1:length(cats)
-% 	xe = std(decentralized_p(:,i))/sqrt(Nexp);
-% 	ye = std(modulator_p(:,i))/sqrt(Nexp);
-% 	x = mean(decentralized_p(:,i));
-% 	y = mean(modulator_p(:,i));
-
-% 	if x < 1e-2
-% 		continue
-% 	end
-
-% 	if y < 1e-2
-% 		continue
-% 	end
-
-% 	errorbar(ax(3),x,y,xe,xe,ye,ye,'o','MarkerFaceColor',colors(cats{i}),'LineStyle','none','MarkerEdgeColor',colors(cats{i}),'Color',colors(cats{i}),'MarkerSize',9)
-% end
-
-% ax(3).XScale = 'log';
-% ax(3).YScale = 'log';
-% ax(3).YLim = [1e-2 1];
-% ax(3).XLim = [1e-2 1];
-% axis(ax(3),'square')
-% plotlib.drawDiag(ax(3));
-
 
 % alternative -- plot fold change 
 fold_change = (mean(modulator_p) - mean(decentralized_p))./(mean(modulator_p) + mean(decentralized_p));
@@ -212,3 +186,8 @@ ax(3).YTick = [-1:.5:1];
 ax(3).YGrid = 'on';
 
 axlib.move(ax(1:2),'left',.02)
+
+
+title(ax(2),{['+' modulator],['(' mat2str((sum(sum(modulator_counts))*20)/3600,2) ' hours)' ]},'FontWeight','normal')
+
+title(ax(1),{'decentralized',['(' mat2str(size(decentralized_p,1)) ' crabs, ' mat2str((sum(sum(decentralized_counts))*20)/3600,2) ' hours) ' ]},'FontWeight','normal')
