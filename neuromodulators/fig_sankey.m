@@ -17,7 +17,7 @@ close all
 
 % how do preps recover in different neuromodualtors? 
 
-figure('outerposition',[300 300 1444 901],'PaperUnits','points','PaperSize',[1444 901]); hold on
+figure('outerposition',[300 300 1901 1111],'PaperUnits','points','PaperSize',[1901 1111]); hold on
 
 condition = {'RPCH','proctolin','serotonin','CabTrp1a'};
 
@@ -36,7 +36,7 @@ for i = 1:length(condition)
 
 	J = J/sum(J(:));
 
-
+	
 	display.plotSankey(J, find(strcmp(cats,'normal')), cats, colors);
 
 	title([condition{i} ' (n=' mat2str(n_transitions) ')'],'FontWeight','normal')

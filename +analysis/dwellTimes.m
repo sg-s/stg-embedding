@@ -1,4 +1,4 @@
-function dwell_times = dwellTimes(idx, time, shuffle)
+function [dwell_times, times_bw_transitions] = dwellTimes(idx, time, shuffle)
 
 if nargin == 2
 	shuffle = false;
@@ -19,10 +19,16 @@ end
 breakpts = [0; find((diff(time)) ~= 20)];
 
 dwell_times = NaN(length(cats),length(breakpts)-1);
-
+times_bw_transitions = [];
 
 for i = 1:length(breakpts)-1
-	dwell_times(:,i) = analysis.dwellTimesInSegment(idx(breakpts(i)+1:breakpts(i+1)));
+
+	this_idx = idx(breakpts(i)+1:breakpts(i+1));
+
+	dwell_times(:,i) = analysis.dwellTimesInSegment(this_idx);
+
+	times_bw_transitions = [times_bw_transitions; diff(find(~(this_idx == circshift(this_idx,1))))];
+
 
 end
 

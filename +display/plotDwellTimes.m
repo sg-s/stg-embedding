@@ -1,4 +1,4 @@
-function plotDwellTimes(idx, time)
+function times_bw_transitions = plotDwellTimes(idx, time)
 
 
 
@@ -7,8 +7,9 @@ colors = display.colorscheme(cats);
 
 
 % compute dwell times 
-dwell_times = 20*analysis.dwellTimes(idx,time);
-
+[dwell_times, times_bw_transitions] = analysis.dwellTimes(idx,time);
+dwell_times = dwell_times*20;
+times_bw_transitions = times_bw_transitions*20;
 
 m = nanmean(dwell_times');
 e = nanstd(dwell_times')/sqrt(size(dwell_times,2));

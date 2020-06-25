@@ -7,7 +7,7 @@ function m = modulatorUsed(data)
 m = repmat(categorical(NaN),length(data),1);
 
 
-mods = setdiff(fieldnames(data),sourcedata.defaultfields);
+mods = sourcedata.modulators;
 
 for i = 1:length(data)
 

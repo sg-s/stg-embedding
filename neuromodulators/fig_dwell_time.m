@@ -19,7 +19,7 @@ for i = 1:length(condition)
 	these = filterData(alldata,condition{i});
 	idx = alldata.idx(these);
 	time = alldata.time_since_mod_on(these);
-	display.plotDwellTimes(idx,time)
+	times_bw_transitions{i} = display.plotDwellTimes(idx,time);
 	if i > 3
 		xlabel('Total time in state (s)')
 	end
@@ -33,3 +33,21 @@ end
 
 
 figlib.pretty
+
+
+
+% now make a histogram showing cdfs of times between transitions
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+all_x  = [];
+all_y = [] ;
+for i = 1:length(condition)
+	all_x = [all_x; repmat(categorical(condition(i)),length(times_bw_transitions{i}),1)];
+	all_y = [all_y; log10(times_bw_transitions{i})];
+end
+
+vs = violinplot(all_y,all_x);
+ylabel('Time between transitions (s)')
+
+figlib.pretty
+set(gca,'XLim',[0 7],'YTick',[1:3],'YTickLabel',{'10','100','1000'})
+set(gca,'YLim',[1 3])

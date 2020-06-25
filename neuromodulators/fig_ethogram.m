@@ -102,7 +102,9 @@ for i = 1:length(data)
     % plot 10 minutes of control
     display.plotStates(ax.control, cats, states, time_since_mod_on - time_since_mod_on(1), y);
 
-
+    if nanmax(data(sidx(i)).RPCH) > 0
+        disp(data(sidx(i)).experiment_idx(1))
+    end
 
 
     yoffset = yoffset + 1;
@@ -179,6 +181,9 @@ th = text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
 
 figlib.pretty('PlotLineWidth',1)
 
+
+
+keyboard
 
 % clean up worksapce
 clearvars -except alldata data p

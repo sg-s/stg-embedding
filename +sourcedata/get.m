@@ -4,7 +4,7 @@
 % preferentially loads from cache 
 function data = get(varargin)
 
-filelib.mkdir(pathlib.join(getpref('embedding','data_root'),'.cache'))
+filelib.mkdir(fullfile(getpref('embedding','data_root'),'.cache'))
 
 
 % first make a list of all experiments across all requested folders
@@ -13,14 +13,14 @@ experimenter_name = categorical.empty;
 for i = 1:length(varargin)
 	folder_name = varargin{i};
 
-	data_root = pathlib.join(getpref('embedding','data_root'),folder_name);
+	data_root = fullfile(getpref('embedding','data_root'),folder_name);
 
 	load_me = dir(data_root);
 	load_me(cellfun(@(x) strcmp(x(1),'.'),{load_me.name})) = [];
 	load_me = {load_me.name};
 
 	for j = 1:length(load_me)
-		load_me{j} = pathlib.join(data_root,load_me{j});
+		load_me{j} = fullfile(data_root,load_me{j});
 	end
 
 	experimenter_name = [experimenter_name; repmat(categorical(varargin(i)),length(load_me),1)];
@@ -34,7 +34,7 @@ for i = length(all_exps):-1:1
 
 
 	[~,this_exp]=fileparts(all_exps{i});
-	cache_path = pathlib.join(getpref('embedding','data_root'),'.cache',[this_exp '.mat']);
+	cache_path = fullfile(getpref('embedding','data_root'),'.cache',[this_exp '.mat']);
 
 	% check the cache
 	if exist(cache_path) ~= 2

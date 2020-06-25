@@ -24,8 +24,6 @@ if length(data) > 1
 end
 
 
-assert(length(data) == 1,'This function only works on scalar structures')
-
 % check that everything in the neuron list is there in the data
 for i = 1:length(neurons)
 	assert(isfield(data,neurons{i}),'Neuron does not exist in data')

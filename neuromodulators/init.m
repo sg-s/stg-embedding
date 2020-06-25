@@ -19,7 +19,7 @@ data = sourcedata.get('cronin','rosenbaum','haddad');
 
 
 % get metadata for the Cronin data
-data = metadata.cronin(data,pathlib.join(getpref('embedding','data_root'),'cronin-metadata'));
+data = metadata.cronin(data,fullfile(getpref('embedding','data_root'),'cronin-metadata'));
 
 % mark modulator start for haddad data
 data = metadata.haddad(data);

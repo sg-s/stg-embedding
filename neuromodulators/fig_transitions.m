@@ -22,7 +22,7 @@ for i = 1:length(condition)
 	subplot(2,4,i); hold on
 	this = filterData(alldata,condition{i});
 	n_transitions = display.plotTransitionGraph(idx(this),time(this));
-	title([condition{i} ' (n=' mat2str(n_transitions) ')'],'FontWeight','normal')
+	title({condition{i} , [' n=' mat2str(n_transitions) ', ' mat2str((sum(this)*20)/3600,2) ,'h']},'FontWeight','normal')
 end
 
 figlib.pretty

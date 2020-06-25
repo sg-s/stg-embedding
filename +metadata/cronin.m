@@ -1,6 +1,7 @@
 function data = cronin(data, metadata_loc)
 
-allfiles = dir(pathlib.join(metadata_loc,'*.txt'));
+allfiles = dir(fullfile(metadata_loc,'*.txt'));
+
 
 assert(~isempty(allfiles),'No metadata files found')
 
@@ -25,6 +26,7 @@ for i = 1:length(allfiles)
 	end
 
 	if isempty(data_idx)
+		disp('Could not locate data...')
 		continue
 	end
 
