@@ -15,14 +15,28 @@ end
 
 
 % get data
-data = sourcedata.get('cronin','rosenbaum','haddad');
+data = sourcedata.getAllData();
 
 
-% get metadata for the Cronin data
-data = metadata.cronin(data,fullfile(getpref('embedding','data_root'),'cronin-metadata'));
+data = sourcedata.filter(data,sourcedata.DataFilter.Neuromodulator);
 
-% mark modulator start for haddad data
-data = metadata.haddad(data);
+
+% create a modulator filed
+
+mod_names = sourcedata.modulators;
+
+for i = 1:length(data)
+    modulator = 0*data(i).mask;
+    for j = 1:length(mod_names)
+        a = find(data(i).(mod_names{j})>0,1,'first');
+        if isempty(a)
+            continue
+        end
+        modulator(a:end) = 1;
+    end
+    data(i).modulator = modulator;
+end
+
 
 % % manually fill in some metadata by eyeballing data
 % all_exps = unique(vertcat(data.experiment_idx));
@@ -97,6 +111,8 @@ for i = 1:length(data)
     data(i).time_since_mod_on = data(i).time_since_mod_on*20; % now in seconds
 end
 
+
+
 % mask decentralized data that is more than 10 minutes before 
 % neuromodulator start
 for i = 1:length(data)
@@ -106,7 +122,7 @@ end
 
 % ignore data that is at a temperature other than 11
 for i = 1:length(data)
-    if data(i).experimenter_name(1) == 'haddad'
+    if data(i).experimenter(1) == 'haddad'
         data(i).mask(data(i).temperature ~= 11) = 0;
     end
 end
@@ -114,6 +130,9 @@ end
 [alldata, data] = sourcedata.combine(data);
 
 [p, VectorisedPercentiles] = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
+
+
+keyboard
 
 
 load('haddad_idx.mat','idx')

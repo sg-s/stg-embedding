@@ -16,3 +16,5 @@ d.decentralized = false;
 d.PTX = 0;
 d.TTX = 0;
 d.tetraethlyammonium = 0;
+d.unusable = 0;
+d.baseline = 1;

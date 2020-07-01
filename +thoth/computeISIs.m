@@ -2,6 +2,8 @@
 
 function data = computeISIs(data, neurons)
 
+
+
 % use parallel pool to accelerate computation on more than 1 dataset
 if length(data) > 1
 
@@ -26,11 +28,12 @@ end
 
 % check that everything in the neuron list is there in the data
 for i = 1:length(neurons)
-	assert(isfield(data,neurons{i}),'Neuron does not exist in data')
+	assert(isfield(data,neurons{i}) || isprop(data,neurons{i}),'Neuron does not exist in data')
 end
 
 % make placeholders
 % compute ISIs for all neurons
+
 for i = 1:length(neurons)
 	for j = 1:length(neurons)
 		fn = [neurons{i} '_' neurons{j}];

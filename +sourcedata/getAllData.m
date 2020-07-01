@@ -43,7 +43,8 @@ for i = length(all_exps):-1:1
         alldata{i} = crabsort.analysis.chunk(alldata{i},options);
 
 
-    	data = alldata{i};
+    	data = embedding.DataStore(alldata{i});
+
 
     	if ~any(data.mask)
             save(cache_path,'data','-v7.3')
@@ -71,37 +72,30 @@ for i = length(all_exps):-1:1
     	% measure ISIs
 		data = thoth.computeISIs(data, {'LP','PD'});
 
-
     	save(cache_path,'data','-v7.3')
 
     else
     	% cache hit
     	load(cache_path,'data')
+
+
+        if isstruct(data)
+            disp('Converting to embedding.DataStore...')
+            data = embedding.DataStore(data);
+            save(cache_path,'data')
+        end
+
     	alldata{i} = data;
 	end
 
 end
 
 
+data = embedding.DataStore.cell2array(alldata);
 
-data = alldata;
-data = structlib.cell2array(data);
-
-
-
-% fill in empty metadata
-fn = fieldnames(data);
-for i = 1:length(data)
-    for j = 1:length(fn)
-        if isempty(data(i).(fn{j}))
-            N = size(data(i).LP,2);
-            data(i).(fn{j}) = NaN(N,1);
-        end
-    end
-end
 
 % need to read metadata for the cronin data because fuck me 
-data = metadata.cronin(data,fullfile(getpref('embedding','data_root'),'cronin-metadata'));
+data = metadata.cronin(data,fullfile(getpref('embedding','cache_loc'),'cronin-metadata'));
 
 
 % use default values for metadata 
