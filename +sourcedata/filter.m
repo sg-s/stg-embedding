@@ -59,7 +59,35 @@ case sourcedata.DataFilter.Neuromodulator
 	outdata = data;
 
 case sourcedata.DataFilter.Baseline
-	keyboard
+
+
+	modulator = sourcedata.modulatorUsed(data);
+
+	% first, remove all pieces of data that are not at 11C
+	for i = 1:length(data)
+		rm_this = data(i).temperature < 10 | data(i).temperature > 12;
+		data(i) = sourcedata.purge(data(i),rm_this);
+	end
+
+
+	% remove anything that has a non-default value
+	defaults = rmfield(metadata.defaults,'temperature');
+	fn = fieldnames(defaults);
+
+	for i = 1:length(data)
+		rm_this = false(length(data(i).mask));
+		for j = 1:length(fn)
+			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
+		end
+		data(i) = sourcedata.purge(data(i),rm_this);
+	end
+
+
+	% remove empty datasets
+	data(cellfun(@sum,{data.mask}) == 0) = [];
+
+	outdata = data;
+
 otherwise
 	error('Unknown FilterSpec')
 

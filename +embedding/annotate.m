@@ -5,58 +5,48 @@
 % this is passed to the interactive labeller so we can look at the spikes
 raw_spike_data = [alldata.LP, alldata.PD];
 
-if 	exist('u','var') && isa(u,'umap')
-else
-	u = umap('min_dist',0, 'metric','euclidean','n_neighbors',50,'negative_sample_rate',15);
-	R = u.fit(VectorisedPercentiles);
-end
-
-if exist('m','var') && isa(m,'clusterlib.manual') 
-else
-	m = clusterlib.manual;
-end
 
 
-if all(isundefined(m.idx))
-	% attempt to find the "normal" data in this automatically
-
-	disp('Guessing normal states...')
-
-	clear LP_metrics PD_metrics
 
 
-	normal = false(size(alldata.LP,1),1);
-
-	for i = size(alldata.LP,1):-1:1
-		LP_metrics(i) = xtools.spiketimes2BurstMetrics(alldata.LP(i,:),'MaxISI',.25);
-		PD_metrics(i) = xtools.spiketimes2BurstMetrics(alldata.PD(i,:),'MaxISI',.25);
-	end
-
-	LP_metrics = structlib.scalarify(LP_metrics);
-	PD_metrics = structlib.scalarify(PD_metrics);
-	
-	LPok = LP_metrics.burst_period_std < .1 & LP_metrics.burst_period_mean < 2 & LP_metrics.duty_cycle_std < .1 & LP_metrics.duty_cycle_mean > .1 & LP_metrics.duty_cycle_mean < .3 & LP_metrics.n_spikes_per_burst_mean > 2 & LP_metrics.n_spikes_per_burst_mean < 10;
-
-	PDok = PD_metrics.burst_period_std < .1 & PD_metrics.burst_period_mean < 2 & PD_metrics.duty_cycle_std < .1 & PD_metrics.duty_cycle_mean > .1 & PD_metrics.duty_cycle_mean < .3 & PD_metrics.n_spikes_per_burst_mean > 2 & PD_metrics.n_spikes_per_burst_mean < 10;
-
-	normal = PDok & LPok;
-
-	m.idx = embedding.makeCategoricalArray(length(normal));
-	m.idx(normal) = 'normal';
-
-	disp([mat2str(sum(normal)) ' points labelled normal'])
-	
-
-end
-
-
+m = clusterlib.manual;
+m.idx = embedding.makeCategoricalArray(size(VectorisedPercentiles,1));
 m.RawData = raw_spike_data;
-m.ReducedData = R;
 m.DisplayFcn = @embedding.plotSpikes;
 m.labels = categories(m.idx);
 
 
 
+
+
+% load saved data
+load('../annotations/labels.cache','H','idx','-mat')
+for i = 1:length(m.idx)
+	corelib.textbar(i,length(m.idx))
+	this_hash = hashlib.md5hash(m.RawData(i,:));
+	loc = find(strcmp(this_hash,H));
+	if ~isempty(loc)
+		loc = loc(1);
+		m.idx(i) = idx(loc);
+	end
+end
+clearvars H idx
+
+
+fitData = VectorisedPercentiles;
+
+% this purges identified states
+% rm_this = ~isundefined(m.idx);
+% m.idx(rm_this) = [];
+% fitData(rm_this,:) = [];
+% raw_spike_data(rm_this,:) = [];
+
+
+
+u = umap('min_dist',0, 'metric','euclidean','n_neighbors',50,'negative_sample_rate',15);
+R = u.fit(fitData);
+m.ReducedData = R;
+m.RawData = raw_spike_data;
 
 
 m.makeUI;

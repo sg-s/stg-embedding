@@ -183,7 +183,5 @@ figlib.pretty('PlotLineWidth',1)
 
 
 
-keyboard
-
 % clean up worksapce
 clearvars -except alldata data p

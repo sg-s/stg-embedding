@@ -22,7 +22,9 @@ DataFrameSize = length(ISIorders)*length(PercentileVec);
 for i = 1:length(neurons)
 	N = size(alldata.(neurons{i}),1);
 	p.([neurons{i} '_' neurons{i}]) = NaN(N,DataFrameSize);
-
+	p.([neurons{i} '_meanISI']) = NaN(N,length(ISIorders));
+	p.([neurons{i} '_stdISI']) = NaN(N,length(ISIorders));
+	p.([neurons{i} '_rangeISI']) = NaN(N,length(ISIorders));
 end
 
 
@@ -46,9 +48,14 @@ for i = 1:length(neurons)
 			spikes2 = circshift(spikes,ISIorders(k));
 
 			isis = spikes-spikes2;
-			isis(isis<0.01) = NaN;
+			isis(isis<0.001) = NaN;
 
-			p.([neurons{i} '_' neurons{i}])(j,a:z) = prctile(isis,PercentileVec);
+			p.([neurons{i} '_' neurons{i}])(j,a:z) = prctile(isis,PercentileVec);;
+
+			% also return some summary statistics
+			p.([neurons{i} '_meanISI'])(j,k) = nanmean(isis);
+			p.([neurons{i} '_stdISI'])(j,k) = nanstd(isis);
+			p.([neurons{i} '_rangeISI'])(j,k) = nanmax(isis) - nanmin(isis);
 
 			a = z + 1;
 			z = a + length(PercentileVec) - 1;
@@ -56,6 +63,7 @@ for i = 1:length(neurons)
 		end
 	end
 end
+
 
 % compute cross ISI percentiles
 for i = 1:length(neurons)

@@ -18,117 +18,10 @@ end
 data = sourcedata.getAllData();
 
 
-data = sourcedata.filter(data,sourcedata.DataFilter.Neuromodulator);
-
-
-% create a modulator filed
-
-mod_names = sourcedata.modulators;
-
-for i = 1:length(data)
-    modulator = 0*data(i).mask;
-    for j = 1:length(mod_names)
-        a = find(data(i).(mod_names{j})>0,1,'first');
-        if isempty(a)
-            continue
-        end
-        modulator(a:end) = 1;
-    end
-    data(i).addprop('modulator');
-    data(i).addprop('time_since_mod_on');
-    data(i).modulator = modulator;
-end
+data = sourcedata.filter(data,sourcedata.DataFilter.Baseline);
 
 
 
-% % manually fill in some metadata by eyeballing data
-% all_exps = unique(vertcat(data.experiment_idx));
-
-% for i = 1:length(all_exps)
-
-%     f = figure('outerposition',[300 300 1200 1000],'PaperUnits','points','PaperSize',[1200 1000]); hold on
-%     f.WindowButtonDownFcn =  @metadata.mouseCallback;
-%     c = lines;
-%     filebreaks = [];
-%     ii=1;
-%     for j = 2:size(data(i).LP,2)
-%         if data(i).filename(j) ~= data(i).filename(j-1)
-%             ii = ii +1;
-%             filebreaks = [filebreaks j];
-%         end
-
-%         neurolib.raster(data(i).LP(:,j),'split_rows',true,'yoffset',j,'Color',c(ii,:),'LineWidth',5)
-
-%     end
-
-%     time = (1:size(data(i).LP,2))*20;
-%     for j = 1:length(filebreaks)
-%         time(filebreaks(j):end) = time(filebreaks(j):end) - time(filebreaks(j));
-%     end
-
-%     f.UserData.time = time;
-%     f.UserData.filename = data(i).filename;
-
-%     f.UserData.ph = plotlib.horzline(10,'Color','k','Tag','horzline');
-
-%     f.UserData.data_idx = i;
-
-%     % add buttons for marking decentralized and modulator 
-%     uicontrol('Parent',f,'Style','pushbutton','String','Mark decentralized','Units','normalized','Position',[0.1 .01 .2 .1],'Callback',@metadata.markDecentralized);
-
-
-%     uicontrol('Parent',f,'Style','pushbutton','String','Mark modulator+','Units','normalized','Position',[0.5 .01 .2 .1],'Callback',@metadata.markModulatorOn);
-
-
-%     % open up the metadata file
-%     edit(pathlib.join(getpref('embedding','data_root'),'cronin-metadata',[char(all_exps(i)),'.txt']))
-
-%     f.Name = char(all_exps(i));
-
-%     uiwait(f)
-
-% end
-
-
-
-% load the manually annotated metadata and combine with all data
-load('manual_modulator_metadata.mat','mmm');
- 
-for i = 1:length(data)
-    this_exp = data(i).experiment_idx(1);
-    idx = find(mmm.all_exp_idx == this_exp,1,'last');
-    if isempty(idx)
-        continue
-    end
-    data(i).modulator = logical(0*data(i).mask);
-    data(i).modulator(mmm.modulator_start(idx):end) = true;
-end
-
-
-% compute time since modulator application for each experiment. 
-for i = 1:length(data)
-    mod_on = find(data(i).modulator,1,'first');
-    data(i).time_since_mod_on = (1:length(data(i).mask))';
-    a = find(data(i).modulator,1,'first');
-    data(i).time_since_mod_on = data(i).time_since_mod_on - a;
-    data(i).time_since_mod_on = data(i).time_since_mod_on*20; % now in seconds
-end
-
-
-
-% mask decentralized data that is more than 10 minutes before 
-% neuromodulator start
-for i = 1:length(data)
-    mask_me = data(i).decentralized == 1 & data(i).time_since_mod_on < -600;
-    data(i).mask(mask_me) = 0;
-end
-
-% ignore data that is at a temperature other than 11
-for i = 1:length(data)
-    if data(i).experimenter(1) == 'haddad'
-        data(i).mask(data(i).temperature ~= 11) = 0;
-    end
-end
 
 % we're going to convert back into a structure array
 [alldata, data] = sourcedata.combine(data);
@@ -293,7 +186,7 @@ axis off
 
 
 
-% show differnet conditions by experiment
+% show different conditions by experiment
 all_exp_idx = categories(exp_idx);
 
 for show_this = 5:62
