@@ -1,20 +1,68 @@
 % converts ISIs to summary statistics in a semi-designed way
 % mean to replace spiketimes2percentiles
 % 
-function [V,M] = spikes2ISIstats(data)
+function [V,M] = spikes2ISIstats(alldata)
 
-DataSize = length(data.mask);
+DataSize = length(alldata.mask);
 
+
+
+% clean up spikes -- remove first spike time from each set
+offset = (nanmin([alldata.PD alldata.LP],[],2));
+for i = 1:DataSize
+	if ~isnan(offset(i))
+		alldata.PD(i,:) = alldata.PD(i,:) - offset(i);
+		alldata.LP(i,:) = alldata.LP(i,:) - offset(i);
+	end
+end
+
+
+% compute delays
+% for i = 1:DataSize
+% 	corelib.textbar(i,DataSize)
+% 	PD = alldata.PD(i,:);
+% 	LP = alldata.LP(i,:);
+
+% 	PD_LP = NaN*PD;
+% 	LP_PD = NaN*PD;
+
+
+% 	z = find(isnan(PD),1,'first');
+
+% 	parfor j = 1:z-1
+
+
+% 		temp = find(LP>PD(j),1,'first');
+% 		if isempty(temp)
+% 			continue
+% 		end
+% 		PD_LP(j) = LP(temp)-PD(j);
+% 	end
+% 	alldata.PD_LP(i,:) = PD_LP;
+
+
+% 	z = find(isnan(PD),1,'first');
+% 	parfor j = 1:z-1
+
+% 		temp = find(PD>LP(j),1,'first');
+% 		if isempty(temp)
+% 			continue
+% 		end
+% 		LP_PD(j) = PD(temp)-LP(j);
+% 	end
+% 	alldata.LP_PD(i,:) = LP_PD;
+	
+% end 
 
 % construct the 2nd order ISIs
 neurons = {'PD','LP'};
 for i = 1:length(neurons)
 
 
-	data.([neurons{i} '_' neurons{i} '2']) = NaN(DataSize,1e3);
+	alldata.([neurons{i} '_' neurons{i} '2']) = NaN(DataSize,1e3);
 
 	for j = 1:DataSize
-		spikes = data.(neurons{i})(j,:);
+		spikes = alldata.(neurons{i})(j,:);
 
 		% check if there is a large empty section
 		maxisi = max(diff(spikes));
@@ -27,92 +75,81 @@ for i = 1:length(neurons)
 
 		isis = spikes-spikes2;
 		isis(isis<0.001) = NaN;
-
-		data.([neurons{i} '_' neurons{i} '2'])(j,:) = isis;
+		alldata.([neurons{i} '_' neurons{i} '2'])(j,:) = isis;
 
 		
 	end
 end
 
 
-fn = {'PD_PD','LP_LP','PD_LP','LP_PD','PD_PD2','LP_LP2'};
-
+isi_types = {'PD_PD','LP_LP','PD_PD2','LP_LP2'};
 M = struct;
 
 
-for i = 1:length(fn)
+for i = length(isi_types):-1:1
 
-	disp(fn{i})
+	disp(isi_types{i})
 
-	X = data.(fn{i});
+	neuron = isi_types{i};
+	z = strfind(neuron,'_');
+	neuron = neuron(1:z-1);
 
 
-	M(i).Minimum = nanmin(X,[],2);
-	M(i).Maximum = nanmax(X,[],2);
-	M(i).Median = nanmedian(X,2);
+	isis = alldata.(isi_types{i});
+	spikes = alldata.(neuron);
 
-	M(i).DominantPeriod = NaN*M(i).Maximum;
-	M(i).Irregularity = NaN*M(i).Maximum;
+	% minimum ISI
+	% minimum dominated by nonsense, so ignore everyhting below a thresh
+	temp = nanmin(isis,[],2);
+	temp(temp<.01) = -1; % -1 is the "undefined" flag
+	%M(i).Minimum = temp;
+
+
+	Maximum = nanmax(isis,[],2);
+	%M(i).Median = nanmedian(X,2);
+
+	M(i).DominantPeriod = NaN*Maximum;
+	%M(i).NormPeriodRange = NaN*Maximum;
+	M(i).DomPeriodLessThanMax = zeros(size(isis,1),1)-1;
+	M(i).FailureMode = zeros(size(isis,1),6);
 	
-	if i < 3 | i > 4
 
-		% compute dominant period from ISIs
-		M(i).DominantPeriod = sourcedata.ISI2DominantPeriod(X);
 
-		% capture irregularity 
-		% very negative values here indicate irregularity 
-		M(i).Irregularity = M(i).DominantPeriod - M(i).Maximum;
-		M(i).Irregularity(isnan(M(i).Irregularity)) = -10;
+	% compute dominant period from ISIs
+	[M(i).DominantPeriod, fm,~, M(i).T_mismatch] = sourcedata.ISI2DominantPeriod(spikes, isis);
 
-		% exxagerate the irregulairty around 0
-		temp = erf(M(i).Irregularity*10);
-		M(i).Irregularity = temp + M(i).Irregularity;
-		clearvars temp
-		
+
+
+	
+	% convert failure mode to one-hot encoding
+	for j= 1:length(fm)
+		if fm(j) == 0
+			continue
+		end
+		M(i).FailureMode(j,fm(j)) = 1;
 	end
 
 
+	% M(i).NormPeriodRange = M(i).NormPeriodRange*10;
+
+
+	% capture irregularity 
+	% very negative values here indicate irregularity 
+	temp = M(i).DominantPeriod - Maximum;
+	temp(M(i).DominantPeriod<0 | isnan(Maximum)) = NaN;
+	M(i).DomPeriodLessThanMax(temp < 0) = 10;
+	M(i).DomPeriodLessThanMax(temp > 0) = 0;
+
+	Maximum(isnan(Maximum)) = 20;
+	M(i).Maximum = Maximum;
+
+
+
 	% capture "burstiness"
-	M(i).MaxMin = M(i).Maximum - M(i).Minimum;
-	M(i).MaxMedian = M(i).Maximum - M(i).Median;
+	% M(i).MaxMin = Maximum - M(i).Minimum;
+	%M(i).MaxMedian = Maximum - M(i).Median;
 
 
-	% capture burst regularity
-	% Max2 = NaN(DataSize,1);
-	% Max3 = NaN(DataSize,1);
-	% Max4 = NaN(DataSize,1);
-	% Max5 = NaN(DataSize,1);
-
-	% parfor j = 1:DataSize
-	% 	Y = sort(X(j,:),'descend');
-	% 	Y(isnan(Y)) = [];
-
-	% 	switch length(Y)
-	% 	case 0
-	% 		continue
-	% 	case 1
-	% 		continue
-	% 	case 2
-	% 		Max2(j) = Y(1) - Y(2);
-	% 	case 3 
-	% 		Max2(j) = Y(1) - Y(2);
-	% 		Max3(j) = Y(1) - Y(3);
-	% 	case 4
-	% 		Max2(j) = Y(1) - Y(2);
-	% 		Max3(j) = Y(1) - Y(3);
-	% 		Max4(j) = Y(1) - Y(4);
-	% 	otherwise
-	% 		Max2(j) = Y(1) - Y(2);
-	% 		Max3(j) = Y(1) - Y(3);
-	% 		Max4(j) = Y(1) - Y(4);
-	% 		Max5(j) = Y(1) - Y(5);
-	% 	end
-	% end
-
-	% M(i).Max2 = Max2;
-	% M(i).Max3 = Max3;
-	% M(i).Max4 = Max4;
-	% M(i).Max5 = Max5;
 
 end
 
@@ -125,10 +162,21 @@ V(isnan(V)) = -1;
 V(:,std(V)==0) = [];
 
 % also add something that scales with the inverse firing rate (so in units of time)
-V2 = [20./sum(~isnan(data.PD),2) 20./sum(~isnan(data.LP),2)];
+V2 = [20./sum(~isnan(alldata.PD),2) 20./sum(~isnan(alldata.LP),2)];
 V2(isinf(V2)) = -1;
 V2(isnan(V2)) = -1;
 
+
+% add metrics of delays
+delays1 = prctile(alldata.LP_PD',[0 25 50 75 100])';
+delays2 =  prctile(alldata.PD_LP',[0 25 50 75 100])';
+delay_var1 = (max(delays1,[],2)-min(delays1,[],2))./nanmean(delays1,2);
+delay_var2 = (max(delays2,[],2)-min(delays2,[],2))./nanmean(delays2,2);
+delay_var2(isnan(delay_var2)) = 10;
+delay_var1(isnan(delay_var1)) = 10;
+delays = [delays1 delays2 delay_var1 delay_var2];
+
+delays(isnan(delays)) = -1;
 
 
 % also measure the maximum time without a spike
@@ -141,14 +189,22 @@ V2(isnan(V2)) = -1;
 % MaxNoPD = 20 - max(PD,[],2); MaxNoPD(isnan(MaxNoPD)) = 20;
 % MaxNoLP = 20 - max(LP,[],2); MaxNoLP(isnan(MaxNoLP)) = 20;
 
-V = [V V2];
 
+% penalize neuron T mismatch
+NeuronMismatch = abs(log([M(1).DominantPeriod./M(2).DominantPeriod]));
+NeuronMismatch(NeuronMismatch>log(1.5)) = 10; 
+NeuronMismatch(M(1).DominantPeriod < 0 ) = 10;
+NeuronMismatch(M(2).DominantPeriod < 0 ) = 10;
 
-% normalize the different columns to correct for scale differnces in dimensions
-for i = 1:length(M)
-	M = mean(V(V(:,i) > 0,i));
-	S = std(V(V(:,i) > 0,i));
+% penalize sudden increases in higher-order ISI maxima --
+% indicative of weak bursts
+WeakPD = 10*erf((M(3).Maximum./M(1).Maximum)-1);
+WeakPD(M(3).Maximum == 20) = 10;
+WeakPD(M(1).Maximum == 20) = 10;
 
-	V(:,i) = V(:,i) - M;
-	V(:,i) = V(:,i)/S;
-end
+WeakLP = 10*erf((M(4).Maximum./M(2).Maximum)-1);
+WeakLP(M(4).Maximum == 20) = 10;
+WeakLP(M(2).Maximum == 20) = 10;
+
+V = [V V2 delays NeuronMismatch WeakPD WeakLP];
+

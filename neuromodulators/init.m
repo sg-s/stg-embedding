@@ -137,7 +137,7 @@ end
 
 
 % load saved data
-load('labels.cache','H','idx','-mat')
+load('../annotations/labels.cache','H','idx','-mat')
 
 clear m
 m.RawData = [alldata.LP, alldata.PD];

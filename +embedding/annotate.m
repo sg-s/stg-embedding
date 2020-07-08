@@ -20,26 +20,13 @@ m.labels = categories(m.idx);
 
 
 % load saved data
+
 load('../annotations/labels.cache','H','idx','-mat')
-for i = 1:length(m.idx)
-	corelib.textbar(i,length(m.idx))
-	this_hash = hashlib.md5hash(m.RawData(i,:));
-	loc = find(strcmp(this_hash,H));
-	if ~isempty(loc)
-		loc = loc(1);
-		m.idx(i) = idx(loc);
-	end
-end
-clearvars H idx
+m.idx = embedding.readAnnotations(idx,H,m.RawData,m.idx);
+clearvars H idx midx
 
 
 fitData = VectorisedPercentiles;
-
-% this purges identified states
-% rm_this = ~isundefined(m.idx);
-% m.idx(rm_this) = [];
-% fitData(rm_this,:) = [];
-% raw_spike_data(rm_this,:) = [];
 
 
 
