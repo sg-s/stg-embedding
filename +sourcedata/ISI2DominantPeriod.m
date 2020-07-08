@@ -1,7 +1,7 @@
 % converts isis to dominant period
 % in a parameter-free manner
 
-function [T, FailureMode, NormRange, T_mismatch] = ISI2DominantPeriod(spikes,isis)
+function [metrics] = ISI2DominantPeriod(spikes,isis)
 
 T = zeros(size(isis,1),1)-1;
 FailureMode = zeros(length(T),1);
@@ -11,10 +11,11 @@ T_mismatch = zeros(length(T),1)+1;
 
 time = linspace(0,20,2e3);
 
-
+NSpikesMean = T;
+NSpikesVar = T;
 
 parfor i = 1:length(T)
-%for i = 4086
+%for i = 214
 
 
 	this_isis = isis(i,~isnan(isis(i,:)));
@@ -33,6 +34,8 @@ parfor i = 1:length(T)
 	assert(max(this_spikes) < 21,'Spikes longer than 20 seconds??')
 
 	Y = interp1(this_spikes,this_isis,time);
+
+	keyboard
 
 	if sum(~isnan(Y)) < 501
 		FailureMode(i) = 2;
@@ -80,11 +83,21 @@ parfor i = 1:length(T)
 
 	T_mismatch(i) = abs(mean(all_T)-T(i))/T(i);
 
+	NSpikesPerBurst = diff(find(this_isis>=min(Y(peak_locs))));
 
 
+	if ~isempty(NSpikesPerBurst)
+		NSpikesMean(i) = mean(NSpikesPerBurst);
+		NSpikesVar(i) = (max(NSpikesPerBurst) - min(NSpikesPerBurst))/median(NSpikesPerBurst);
+	end
 end
 
 % get units right
 T(T>0) = T(T>0)/100; % in seconds
 
 T_mismatch = erf(T_mismatch);
+
+metrics.DominantPeriod = T;
+metrics.T_mismatch = T_mismatch;
+metrics.NSpikesVar = NSpikesVar;
+metrics.NSpikesMean = NSpikesMean;

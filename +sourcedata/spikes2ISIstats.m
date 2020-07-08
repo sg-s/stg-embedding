@@ -17,42 +17,6 @@ for i = 1:DataSize
 end
 
 
-% compute delays
-% for i = 1:DataSize
-% 	corelib.textbar(i,DataSize)
-% 	PD = alldata.PD(i,:);
-% 	LP = alldata.LP(i,:);
-
-% 	PD_LP = NaN*PD;
-% 	LP_PD = NaN*PD;
-
-
-% 	z = find(isnan(PD),1,'first');
-
-% 	parfor j = 1:z-1
-
-
-% 		temp = find(LP>PD(j),1,'first');
-% 		if isempty(temp)
-% 			continue
-% 		end
-% 		PD_LP(j) = LP(temp)-PD(j);
-% 	end
-% 	alldata.PD_LP(i,:) = PD_LP;
-
-
-% 	z = find(isnan(PD),1,'first');
-% 	parfor j = 1:z-1
-
-% 		temp = find(PD>LP(j),1,'first');
-% 		if isempty(temp)
-% 			continue
-% 		end
-% 		LP_PD(j) = PD(temp)-LP(j);
-% 	end
-% 	alldata.LP_PD(i,:) = LP_PD;
-	
-% end 
 
 % construct the 2nd order ISIs
 neurons = {'PD','LP'};
@@ -85,7 +49,7 @@ end
 isi_types = {'PD_PD','LP_LP','PD_PD2','LP_LP2'};
 M = struct;
 
-
+%for i = 3
 for i = length(isi_types):-1:1
 
 	disp(isi_types{i})
@@ -111,23 +75,28 @@ for i = length(isi_types):-1:1
 	M(i).DominantPeriod = NaN*Maximum;
 	%M(i).NormPeriodRange = NaN*Maximum;
 	M(i).DomPeriodLessThanMax = zeros(size(isis,1),1)-1;
-	M(i).FailureMode = zeros(size(isis,1),6);
+	%M(i).FailureMode = zeros(size(isis,1),6);
 	
 
 
 	% compute dominant period from ISIs
-	[M(i).DominantPeriod, fm,~, M(i).T_mismatch] = sourcedata.ISI2DominantPeriod(spikes, isis);
-
+	[metrics] = sourcedata.ISI2DominantPeriod(spikes, isis);
+	M(i).DominantPeriod = metrics.DominantPeriod;
+	M(i).T_mismatch = metrics.T_mismatch;
+	if i < 3
+		M(i).NSpikesVar = metrics.NSpikesVar;
+		M(i).NSpikesMean = metrics.NSpikesMean;
+	end
 
 
 	
 	% convert failure mode to one-hot encoding
-	for j= 1:length(fm)
-		if fm(j) == 0
-			continue
-		end
-		M(i).FailureMode(j,fm(j)) = 1;
-	end
+	% for j= 1:length(fm)
+	% 	if fm(j) == 0
+	% 		continue
+	% 	end
+	% 	M(i).FailureMode(j,fm(j)) = 1;
+	% end
 
 
 	% M(i).NormPeriodRange = M(i).NormPeriodRange*10;
