@@ -63,7 +63,7 @@ for i = length(isi_types):-1:1
 	spikes = alldata.(neuron);
 
 	% minimum ISI
-	% minimum dominated by nonsense, so ignore everyhting below a thresh
+	% minimum dominated by nonsense, so ignore everything below a thresh
 	temp = nanmin(isis,[],2);
 	temp(temp<.01) = -1; % -1 is the "undefined" flag
 	%M(i).Minimum = temp;
@@ -72,42 +72,39 @@ for i = length(isi_types):-1:1
 	Maximum = nanmax(isis,[],2);
 	%M(i).Median = nanmedian(X,2);
 
-	M(i).DominantPeriod = NaN*Maximum;
 	%M(i).NormPeriodRange = NaN*Maximum;
-	M(i).DomPeriodLessThanMax = zeros(size(isis,1),1)-1;
-	%M(i).FailureMode = zeros(size(isis,1),6);
-	
+	M(i).DomPeriodLessThanMax = zeros(size(isis,1),1)+10;
+	M(i).DomPeriodMuchMoreThanMax = zeros(size(isis,1),1)+10;
 
 
 	% compute dominant period from ISIs
 	[metrics] = sourcedata.ISI2DominantPeriod(spikes, isis);
 	M(i).DominantPeriod = metrics.DominantPeriod;
 	M(i).T_mismatch = metrics.T_mismatch;
+	M(i).NormPeriodRange = metrics.NormPeriodRange;
+
 	if i < 3
 		M(i).NSpikesVar = metrics.NSpikesVar;
 		M(i).NSpikesMean = metrics.NSpikesMean;
 	end
 
 
+
+
 	
-	% convert failure mode to one-hot encoding
-	% for j= 1:length(fm)
-	% 	if fm(j) == 0
-	% 		continue
-	% 	end
-	% 	M(i).FailureMode(j,fm(j)) = 1;
-	% end
-
-
-	% M(i).NormPeriodRange = M(i).NormPeriodRange*10;
 
 
 	% capture irregularity 
 	% very negative values here indicate irregularity 
 	temp = M(i).DominantPeriod - Maximum;
-	temp(M(i).DominantPeriod<0 | isnan(Maximum)) = NaN;
+	temp(M(i).DominantPeriod == 20 | isnan(Maximum)) = NaN;
 	M(i).DomPeriodLessThanMax(temp < 0) = 10;
 	M(i).DomPeriodLessThanMax(temp > 0) = 0;
+
+	temp = M(i).DominantPeriod -  2*Maximum;
+	temp(M(i).DominantPeriod == 20 | isnan(Maximum)) = NaN;
+	M(i).DomPeriodMuchMoreThanMax(temp > 0) = 10;
+	M(i).DomPeriodMuchMoreThanMax(temp < 0) = 0;
 
 	Maximum(isnan(Maximum)) = 20;
 	M(i).Maximum = Maximum;
@@ -132,38 +129,35 @@ V(:,std(V)==0) = [];
 
 % also add something that scales with the inverse firing rate (so in units of time)
 V2 = [20./sum(~isnan(alldata.PD),2) 20./sum(~isnan(alldata.LP),2)];
-V2(isinf(V2)) = -1;
-V2(isnan(V2)) = -1;
+V2(isinf(V2)) = 20;
 
 
 % add metrics of delays
-delays1 = prctile(alldata.LP_PD',[0 25 50 75 100])';
-delays2 =  prctile(alldata.PD_LP',[0 25 50 75 100])';
-delay_var1 = (max(delays1,[],2)-min(delays1,[],2))./nanmean(delays1,2);
-delay_var2 = (max(delays2,[],2)-min(delays2,[],2))./nanmean(delays2,2);
-delay_var2(isnan(delay_var2)) = 10;
-delay_var1(isnan(delay_var1)) = 10;
-delays = [delays1 delays2 delay_var1 delay_var2];
+SyncLP = 1./nanmin(alldata.LP_PD,[],2);
+SyncPD = 1./nanmin(alldata.PD_LP,[],2);
+SyncLP(SyncLP<(1/50e-3)) = 0;
+SyncPD(SyncPD<(1/50e-3)) = 0;
+SyncLP = 10*SyncLP./nanmax(SyncLP);
+SyncPD = 10*SyncPD./nanmax(SyncPD);
+SyncLP(isnan(SyncLP)) = 10;
+SyncPD(isnan(SyncPD)) = 10;
 
-delays(isnan(delays)) = -1;
+PDphase = (nanmean(alldata.LP_PD,2)./M(1).DominantPeriod);
+LPphase = (nanmean(alldata.PD_LP,2)./M(2).DominantPeriod);
+PDphase(M(1).DominantPeriod == 20) = -1;
+LPphase(M(2).DominantPeriod == 20) = -1;
+PDphase(isnan(PDphase)) = -1;
+LPphase(isnan(LPphase)) = -1;
 
-
-% also measure the maximum time without a spike
-% PD = data.PD;
-% LP = data.LP;
-% for i = 1:size(PD,1)
-% 	PD(i,:) = PD(i,:) - min(PD(i,:));
-% 	LP(i,:) = LP(i,:) - min(LP(i,:));
-% end
-% MaxNoPD = 20 - max(PD,[],2); MaxNoPD(isnan(MaxNoPD)) = 20;
-% MaxNoLP = 20 - max(LP,[],2); MaxNoLP(isnan(MaxNoLP)) = 20;
-
+% scale
+PDphase = PDphase*10;
+LPphase = LPphase*10;
 
 % penalize neuron T mismatch
 NeuronMismatch = abs(log([M(1).DominantPeriod./M(2).DominantPeriod]));
 NeuronMismatch(NeuronMismatch>log(1.5)) = 10; 
-NeuronMismatch(M(1).DominantPeriod < 0 ) = 10;
-NeuronMismatch(M(2).DominantPeriod < 0 ) = 10;
+NeuronMismatch(M(1).DominantPeriod == 20 ) = 10;
+NeuronMismatch(M(2).DominantPeriod == 20 ) = 10;
 
 % penalize sudden increases in higher-order ISI maxima --
 % indicative of weak bursts
@@ -175,5 +169,5 @@ WeakLP = 10*erf((M(4).Maximum./M(2).Maximum)-1);
 WeakLP(M(4).Maximum == 20) = 10;
 WeakLP(M(2).Maximum == 20) = 10;
 
-V = [V V2 delays NeuronMismatch WeakPD WeakLP];
+V = [V V2 SyncLP SyncPD PDphase LPphase NeuronMismatch WeakPD WeakLP];
 
