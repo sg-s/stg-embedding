@@ -49,7 +49,13 @@ parfor i = 1:length(T)
 		this_isis = [this_isis 20-last_spike];
 	end
 
+
+	if length(unique(this_spikes) ~= length(unique(this_spikes)))
+		[this_spikes, idx]=unique(this_spikes);
+		this_isis = this_isis(idx);
+	end
 	Y = interp1(this_spikes,this_isis,time);
+	
 
 	if sum(~isnan(Y)) < 501
 		FailureMode(i) = 2;

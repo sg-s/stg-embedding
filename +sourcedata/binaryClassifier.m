@@ -147,15 +147,70 @@ M.LP_ISIsVary = temp > .2;
 
 
 
-M.SyncLP = 1./nanmin(alldata.LP_PD,[],2);
-M.SyncPD = 1./nanmin(alldata.PD_LP,[],2);
-M.SyncLP(M.SyncLP<(1/50e-3)) = 0;
-M.SyncPD(M.SyncPD<(1/50e-3)) = 0;
-M.SyncLP = 1*M.SyncLP./nanmax(M.SyncLP);
-M.SyncPD = 1*M.SyncPD./nanmax(M.SyncPD);
-M.SyncLP(isnan(M.SyncLP)) = 1;
-M.SyncPD(isnan(M.SyncPD)) = 1;
+% filter for isolated spikes outside bursts that are synchronous with 
+% the other neuron
+% PD
 
+neuron = {'PD','LP'};
+other_neuron = {'LP','PD'};
+M.ErrantPD = zeros(DataSize,1);
+M.ErrantLP = zeros(DataSize,1); 
+
+for j = 1:length(neuron)
+	for i = 1:DataSize
+
+		if M.PD_T_InRange(i) == 0 | M.LP_T_InRange(i) == 0
+			continue
+		end
+
+		if M.([neuron{j} '_SingleSpike'])(i) == 1
+			continue
+		end
+
+		if M.([neuron{j} '_ACF_OK'])(i) == 0
+			continue
+		end
+
+		spikes = alldata.(neuron{j})(i,:);
+		spikes = spikes(~isnan(spikes));
+		other_spikes = alldata.(other_neuron{j})(i,:);
+		other_spikes = other_spikes(~isnan(other_spikes));
+
+		isis = alldata.([neuron{j} '_' neuron{j}])(i,:);
+		isis = isis(~isnan(isis));
+
+		isis2 = circshift(isis,-1);
+
+		isolated_spikes = spikes(find(isis>nanmean(isis)& isis2>nanmean(isis))+1);
+
+		if isempty(isolated_spikes)
+			continue
+		end
+
+		dist_to_other_spikes = min(pdist2(other_spikes(:),isolated_spikes(:)));
+		temp = (find(isis>nanmean(isis)& isis2>nanmean(isis))+1);
+
+		temp(temp>length(isis)) = [];
+
+		if isempty(temp)
+			continue
+		end
+
+		dist_to_this_spikes = isis(temp);
+
+		if any(dist_to_other_spikes < dist_to_this_spikes)
+			M.(['Errant' neuron{j}])(i)=1;
+		end
+
+	end
+
+
+end
+
+
+
+M.SyncLP = nanmin(alldata.LP_LP,[],2) > nanmin(alldata.LP_PD,[],2);
+M.SyncPD = nanmin(alldata.PD_PD,[],2) > nanmin(alldata.PD_LP,[],2);
 
 % check if neurons are tonic
 M.LPTonic = nanmax(alldata.LP,[],2) - nanmin(alldata.LP,[],2) > 19 & nanmax(alldata.LP_LP,[],2) < .5 & nanstd(alldata.LP_LP,[],2)./nanmean(alldata.LP_LP,2) < .2;

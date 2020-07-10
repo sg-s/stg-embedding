@@ -30,12 +30,13 @@ data = sourcedata.filter(data,sourcedata.DataFilter.Baseline);
 
 
 % load saved data
-load('labels.cache','H','idx','-mat')
+load('../annotations/labels.cache','H','idx','-mat')
+
 
 clear m
 m.RawData = [alldata.LP, alldata.PD];
 m.idx = embedding.makeCategoricalArray(size(VectorisedPercentiles,1));
-
+m.idx = embedding.readAnnotations(idx,H,m.RawData,m.idx);
 
 for i = 1:length(m.idx)
     corelib.textbar(i,length(m.idx))

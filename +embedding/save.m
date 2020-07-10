@@ -5,8 +5,12 @@ else
 	error('Cannot save ... no clusterlib.manual object')
 end
 
-load('../annotations/labels.cache','H','idx','-mat')
-
+try
+	load('../annotations/labels.cache','H','idx','-mat')
+catch
+	H = {};
+	idx = categorical(NaN);
+end
 RawData = m.RawData;
 
 
