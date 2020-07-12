@@ -190,6 +190,7 @@ for j = 1:length(neuron)
 		dist_to_other_spikes = min(pdist2(other_spikes(:),isolated_spikes(:)));
 		temp = (find(isis>nanmean(isis)& isis2>nanmean(isis))+1);
 
+		dist_to_other_spikes(temp>length(isis)) = [];
 		temp(temp>length(isis)) = [];
 
 		if isempty(temp)

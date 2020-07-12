@@ -35,6 +35,7 @@ for i = 1:length(neurons)
 	for j = 1:N
 		corelib.textbar(j,N)
 		spikes = alldata.(neurons{i})(j,:);
+		spikes = spikes - nanmin(spikes);
 
 		% check if there is a large empty section
 		maxisi = max(diff(spikes));
