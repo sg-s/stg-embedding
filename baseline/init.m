@@ -52,9 +52,11 @@ clearvars H idx
 idx = m.idx;
 
 u = umap;
-u.n_neighbors = 75;
-u.min_dist = .75;
+u.n_neighbors = 150;
+u.min_dist = 1;
 u.negative_sample_rate = 25;
+u.learning_rate = 2;
+u.repulsion_strength = 2;
 u.labels = idx;
 
 R = u.fit(VectorisedPercentiles);
