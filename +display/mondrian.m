@@ -14,3 +14,6 @@ for i = 1:length(p)
     p(i).FaceColor = colors(cats{i});
     p(i).EdgeColor = [1 1 1];
 end
+
+set(gca,'XLim',[0 1],'YLim',[0 1])
+axis off

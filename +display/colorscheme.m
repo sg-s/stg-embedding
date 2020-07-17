@@ -1,6 +1,10 @@
 function colors = colorscheme(cats)
 
 
+if iscategorical(cats)
+	cats = categories(cats);
+end
+
 % make a colorscheme
 
 C = colormaps.dcol(length(cats));

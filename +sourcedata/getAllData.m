@@ -110,3 +110,11 @@ for i = 1:length(data)
         data(i).(fn{j}) = temp;
     end
 end
+
+
+% clean up the channel names a little
+for i = 1:length(data)
+    data(i).LP_channel(data(i).LP_channel == 'LP2') = 'LP';
+    data(i).PD_channel(data(i).PD_channel == 'PD2') = 'PD';
+    data(i).PD_channel(data(i).PD_channel == 'pdn2') = 'pdn';
+end

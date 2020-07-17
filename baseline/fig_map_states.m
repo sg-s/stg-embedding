@@ -22,7 +22,7 @@ for i = 1:3
     for j = 1:7
         ax.examples(pidx) = subplot(7,3,pidx); hold on
         
-        set(ax.examples(pidx),'YLim',[-.01 2.01],'XLim',[-.5 10])
+        set(ax.examples(pidx),'YLim',[-.01 10.01],'XLim',[-.5 10])
         pidx = pidx + 1;
     end
 end
@@ -39,18 +39,36 @@ for i = 1:length(cats)
 end
 
 
-show_these = [5353 1798 7880 2748 6956 6482 6899 5059 8668 5669 7671 1765 6522 4764]
+unique_states = unique(alldata.idx);
+unique_states(unique_states=='LP-tonic') = [];
+unique_states(unique_states=='silent') = [];
+unique_states(unique_states=='interrupted-bursting') = [];
 
-for i = 1:length(show_these)
+for i = 1:length(unique_states)
     axes(ax.examples(i))
-    PD = alldata.PD(show_these(i),:);
-    LP = alldata.LP(show_these(i),:);
-    offset = nanmin([LP(:); PD(:)]);
-    PD = PD - offset;
-    LP = LP - offset;
-    neurolib.raster(PD,'deltat',1,'center',false)
-    neurolib.raster(LP,'deltat',1,'center',false,'yoffset',1,'Color','r')
+
+    show_these = veclib.shuffle(find(alldata.idx==unique_states(i)));
+
+    Y = 0;
+
+    for j = 1:3
+
+        PD = alldata.PD(show_these(j),:);
+        LP = alldata.LP(show_these(j),:);
+        offset = nanmin([LP(:); PD(:)]);
+        PD = PD - offset;
+        LP = LP - offset;
+        neurolib.raster(PD,'deltat',1,'center',false,'yoffset',Y)
+        neurolib.raster(LP,'deltat',1,'center',false,'yoffset',Y+1,'Color','r')
+        
+
+        Y = Y + 4;
+
+    end
+
     title([char(idx(show_these(i))) ' (n=' mat2str(sum(idx==cats{i})) ')'],'FontWeight','normal')
+
+    
 
     ax.examples(i).YTick = [];
     ax.examples(i).XTick = [];

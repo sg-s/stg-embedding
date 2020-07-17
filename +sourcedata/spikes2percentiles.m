@@ -88,13 +88,13 @@ VectorisedPercentiles = ([p.PD_PD, p.LP_LP, Exxagerate*p.LP_PD, Exxagerate*p.PD_
 
 
 % normalise all columns
-% for i = 1:size(VectorisedPercentiles,2)
-% 	M = nanmedian(VectorisedPercentiles(:,i));
-% 	S = nanstd(VectorisedPercentiles(:,i));
-% 	VectorisedPercentiles(:,i) = VectorisedPercentiles(:,i) - M;
-% 	VectorisedPercentiles(:,i) = VectorisedPercentiles(:,i)/S;
-% end
+for i = 1:size(VectorisedPercentiles,2)
+	M = nanmedian(VectorisedPercentiles(:,i));
+	S = nanstd(VectorisedPercentiles(:,i));
+	VectorisedPercentiles(:,i) = VectorisedPercentiles(:,i) - M;
+	VectorisedPercentiles(:,i) = VectorisedPercentiles(:,i)/S;
+end
 
 
 
-VectorisedPercentiles(isnan(VectorisedPercentiles)) = -1;
+VectorisedPercentiles(isnan(VectorisedPercentiles)) = -10;
