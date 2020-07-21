@@ -33,10 +33,11 @@ ax.examples = ax.examples(isvalid(ax.examples));
 
 
 plot(ax.main,R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
-for i = 1:length(cats)
+for i = length(cats):-1:1
     plot(ax.main,R(idx==cats{i},1),R(idx==cats{i},2),'.','Color',colors(cats{i}),'MarkerSize',10)
-    axis square
+    
 end
+axis square
 
 
 unique_states = unique(alldata.idx);
@@ -58,8 +59,8 @@ for i = 1:length(unique_states)
         offset = nanmin([LP(:); PD(:)]);
         PD = PD - offset;
         LP = LP - offset;
-        neurolib.raster(PD,'deltat',1,'center',false,'yoffset',Y)
-        neurolib.raster(LP,'deltat',1,'center',false,'yoffset',Y+1,'Color','r')
+        neurolib.raster(PD,'deltat',1,'center',false,'yoffset',Y,'LineWidth',2)
+        neurolib.raster(LP,'deltat',1,'center',false,'yoffset',Y+1,'Color','r','LineWidth',2)
         
 
         Y = Y + 4;
@@ -88,10 +89,8 @@ axlib.move(ax.examples,'right',.05)
 axlib.move(ax.examples(1:2:end),'right',.05)
 
 ax.main.Position = [.06 .1 .4 .8];
-ax.examples(1).YTick = [.5 1.5];
+ax.examples(1).YTick = [.5 5.5];
 ax.examples(1).YTickLabel = {'PD','LP'};
-
-
 
 % clean up workspace
 clearvars -except alldata p data
