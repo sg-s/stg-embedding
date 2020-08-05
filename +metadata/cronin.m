@@ -1,5 +1,12 @@
 function data = cronin(data, metadata_loc)
 
+mods = {'RPCH','proctolin','CCAP'};
+p = properties(data(1));
+mods = setdiff(mods,p);
+for i = 1:length(mods)
+	addprop(data,mods{i});
+end
+
 allfiles = dir(fullfile(metadata_loc,'*.txt'));
 
 

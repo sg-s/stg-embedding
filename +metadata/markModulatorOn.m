@@ -2,9 +2,14 @@ function markModulatorOn(src, value)
 
 data_idx = src.Parent.UserData.data_idx;
 
-data = evalin('base','data');
+filename = src.Parent.UserData.filename(src.Parent.UserData.ph.YData(1));
+time = src.Parent.UserData.time(src.Parent.UserData.ph.YData(1));
+experiment_idx = src.Parent.UserData.experiment_idx;
 
-data(data_idx).modulator = ((data(data_idx).mask)*0);
-data(data_idx).modulator(src.Parent.UserData.ph.YData(1):end) = 1;
+load('../annotations/rosenbaum_modulator_on.mat','mmm')
 
-assignin('base','data',data);
+mmm = [mmm;struct('filename',filename,'time',time,'experiment_idx',experiment_idx)];
+
+save('../annotations/rosenbaum_modulator_on.mat','mmm')
+
+src.Enable = 'off';

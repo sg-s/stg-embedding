@@ -41,53 +41,6 @@ end
 
 
 
-% % manually fill in some metadata by eyeballing data
-% all_exps = unique(vertcat(data.experiment_idx));
-
-% for i = 1:length(all_exps)
-
-%     f = figure('outerposition',[300 300 1200 1000],'PaperUnits','points','PaperSize',[1200 1000]); hold on
-%     f.WindowButtonDownFcn =  @metadata.mouseCallback;
-%     c = lines;
-%     filebreaks = [];
-%     ii=1;
-%     for j = 2:size(data(i).LP,2)
-%         if data(i).filename(j) ~= data(i).filename(j-1)
-%             ii = ii +1;
-%             filebreaks = [filebreaks j];
-%         end
-
-%         neurolib.raster(data(i).LP(:,j),'split_rows',true,'yoffset',j,'Color',c(ii,:),'LineWidth',5)
-
-%     end
-
-%     time = (1:size(data(i).LP,2))*20;
-%     for j = 1:length(filebreaks)
-%         time(filebreaks(j):end) = time(filebreaks(j):end) - time(filebreaks(j));
-%     end
-
-%     f.UserData.time = time;
-%     f.UserData.filename = data(i).filename;
-
-%     f.UserData.ph = plotlib.horzline(10,'Color','k','Tag','horzline');
-
-%     f.UserData.data_idx = i;
-
-%     % add buttons for marking decentralized and modulator 
-%     uicontrol('Parent',f,'Style','pushbutton','String','Mark decentralized','Units','normalized','Position',[0.1 .01 .2 .1],'Callback',@metadata.markDecentralized);
-
-
-%     uicontrol('Parent',f,'Style','pushbutton','String','Mark modulator+','Units','normalized','Position',[0.5 .01 .2 .1],'Callback',@metadata.markModulatorOn);
-
-
-%     % open up the metadata file
-%     edit(pathlib.join(getpref('embedding','data_root'),'cronin-metadata',[char(all_exps(i)),'.txt']))
-
-%     f.Name = char(all_exps(i));
-
-%     uiwait(f)
-
-% end
 
 
 

@@ -88,6 +88,48 @@ case sourcedata.DataFilter.Baseline
 
 	outdata = data;
 
+
+case sourcedata.DataFilter.Decentralized
+
+
+	% first, remove all pieces of data that are not at 11C
+	for i = 1:length(data)
+		% except if it's Philipp's data
+		if data(i).experimenter(1) == 'rosenbaum'
+			continue
+		end
+		rm_this = data(i).temperature < 10 | data(i).temperature > 15;
+		data(i) = sourcedata.purge(data(i),rm_this);
+	end
+
+
+	% remove anything that has a non-default value
+	defaults = rmfield(metadata.defaults,'decentralized');
+	defaults = rmfield(defaults,'temperature');
+	defaults = rmfield(defaults,'baseline');
+
+	fn = fieldnames(defaults);
+
+	for i = 1:length(data)
+		rm_this = false(length(data(i).mask));
+		for j = 1:length(fn)
+			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
+		end
+		data(i) = sourcedata.purge(data(i),rm_this);
+	end
+
+
+	% remove empty datasets
+	data(cellfun(@sum,{data.mask}) == 0) = [];
+
+
+	% make sure it is decentralized at some point
+	rm_this = cellfun(@max,{data.decentralized}) == 0 | cellfun(@min,{data.decentralized}) == 1;
+	data(rm_this) = [];
+
+	outdata = data;
+
+
 otherwise
 	error('Unknown FilterSpec')
 

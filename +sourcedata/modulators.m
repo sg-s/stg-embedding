@@ -2,4 +2,4 @@
 function M = modulators()
 
 
-M = {'oxotremorine','serotonin','CCAP','CabTrp1a','serotonin','dopamine','RPCH','atropine','octopamine','pilocarpine','proctolin'};
+M = {'oxotremorine','serotonin','CCAP','CabTrp1a','serotonin','dopamine','RPCH','atropine','octopamine','pilocarpine','proctolin','FLRFamide','TNRNFLRFamide'};
