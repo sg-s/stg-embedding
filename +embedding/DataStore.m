@@ -133,61 +133,53 @@ methods
 	end
 
 
-	function out = vertcart(varargin)
+	function snakePlot(data, ax)
+
+		if nargin == 1
+			figure('outerposition',[300 300 400 700],'PaperUnits','points','PaperSize',[400 700]); hold on
+			ax = gca;
+		end
+
+		assert(length(ax)==1,'Expected axes handle to be one element long')
+		assert(isa(ax,'matlab.graphics.axis.Axes'),'Axes handle is not valid')
+		assert(length(find(data.time_offset == 0))==1,'Data has a break')
+
+
+		xbins = logspace(-2,1,101);
+		PD_PD = zeros(100,length(data.mask));
+		for i = 1:length(data.mask)
+			PD_PD(:,i) = histcounts(data.PD_PD(:,i),'BinEdges',xbins);
+		end
+
+		[~,h] = contour(PD_PD');
+		
+		PD_PD = (imgaussfilt(PD_PD',1));
+
 		keyboard
-	end
+
+		PD = sort(data.PD(:));
+		LP = sort(data.LP(:));
+
+		isiPD = [NaN; diff(PD)];
+		isiLP = [NaN; diff(LP)];
+
+		isiPD(isiPD>10) = NaN;
+		isiLP(isiLP>10) = NaN;
+
+
+		plot(ax,isiPD,PD,'k.')
+		plot(ax,isiLP*100,LP,'r.')
+
+		ax.XScale = 'log';
+		%ax(1).XLim = [1e-2 10];
+
+
+	end % snakePlot
 
 
 end % methods
 
 
-
-methods (Static)
-
-
-
-
-
-	function DSArray = cell2array(DSArray)
-
-		assert(iscell(DSArray),'Input should be a cell array containing DataStore objects')
-		for i = 1:length(DSArray)
-			assert(isa(DSArray{i},'embedding.DataStore'),'Cell array should contain DataStore objects ant nothing else')
-		end
-
-		% get all props
-		all_props = {};
-		for i = 1:length(DSArray)
-			all_props = unique([all_props; properties(DSArray{i})]);
-		end
-
-		for i = 1:length(DSArray)
-			for j = 1:length(all_props)
-				if ~isprop(DSArray{i},all_props{j})
-					DSArray{i}.addprop(all_props{j});
-				end
-			end
-		end
-
-
-		DSArray = vertcat(DSArray{:});
-
-
-
-		% now fill in the empty arrays using defaults
-		defaults = metadata.defaults;
-		for i = 1:length(DSArray)
-			N = length(DSArray(i).mask);
-			for j = 1:length(all_props)
-				if isempty(DSArray(i).(all_props{j}))
-					DSArray(i).(all_props{j}) = repmat(defaults.(all_props{j}),N,1);
-				end
-			end
-		end
-
-	end % cell2array
-
-end % static methods
 
 
 end % classdef
