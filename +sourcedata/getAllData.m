@@ -1,8 +1,7 @@
 % searches all the data and returns baseline data
-function data = getAllData()
+function alldata = getAllData()
 
 if exist('../cache/alldata.mat','file')
-
     load('../cache/alldata.mat')
     return
 end
@@ -22,7 +21,7 @@ all_exps(cellfun(@(x) strcmp(x(1),'.'),{all_exps.name})) = [];
 
 
 % first check that everything is cached nicely
-for i = length(all_exps):-1:1 %length(all_exps):-1:1
+for i = 1:length(all_exps)
 
 
 	if strcmp(all_exps(i).name(1),'.')
@@ -35,9 +34,9 @@ for i = length(all_exps):-1:1 %length(all_exps):-1:1
 
     % get the consolidated data from crabsort
     % this is internally cached
-    alldata{i} = crabsort.consolidate(this_exp,'neurons',{'PD','LP'});
+    data = crabsort.consolidate(this_exp,'neurons',{'PD','LP'});
 
-    H = structlib.md5hash(alldata{i});
+    H = structlib.md5hash(data);
 
     cache_path = fullfile(getpref('embedding','cache_loc'),[H '.mat']);
 
@@ -52,15 +51,15 @@ for i = length(all_exps):-1:1 %length(all_exps):-1:1
         options.neurons = {'PD','LP'};
 
         % make sure spikes are all sorted
-        for j = 1:length(alldata{i})
-            alldata{i}(j).LP = sort(alldata{i}(j).LP,'ascend');
-            alldata{i}(j).PD = sort(alldata{i}(j).PD,'ascend');
+        for j = 1:length(data)
+            data(j).LP = sort(data(j).LP,'ascend');
+            data(j).PD = sort(data(j).PD,'ascend');
         end
 
-        alldata{i} = crabsort.analysis.stack(alldata{i},options);
-        alldata{i} = crabsort.analysis.chunk(alldata{i},options);
+        data = crabsort.analysis.stack(data,options);
+        data = crabsort.analysis.chunk(data,options);
 
-    	data = embedding.DataStore(alldata{i});
+    	data = embedding.DataStore(data);
 
 
     	if ~any(data.mask)
@@ -93,42 +92,37 @@ for i = length(all_exps):-1:1 %length(all_exps):-1:1
 
     	save(cache_path,'data','-v7.3')
 
+        alldata(i) = data;
     else
     	% cache hit
         disp(all_exps(i).name)
     	load(cache_path,'data')
-    	alldata{i} = data;
+    	alldata(i) = data;
 	end
 
 end
 
-data = embedding.DataStore.cell2array(alldata);
+
+clearvars data
+
+alldata = alldata(:);
+
 
 
 % need to read metadata for the cronin data because fuck me 
-data = metadata.cronin(data,fullfile(getpref('embedding','cache_loc'),'cronin-metadata'));
+alldata = metadata.cronin(alldata,fullfile(getpref('embedding','cache_loc'),'cronin-metadata'));
 
 
+% need to read metadata for the rosenbaum data because fuck me
+alldata = metadata.rosenbaum(alldata);
 
-% use default values for metadata 
-defaults = metadata.defaults;
-fn = fieldnames(defaults);
-
-
-for i = 1:length(data)
-    for j = 1:length(fn)
-        temp = data(i).(fn{j});
-        temp(isnan(temp)) = defaults.(fn{j});
-        data(i).(fn{j}) = temp;
-    end
-end
 
 
 % clean up the channel names a little
-for i = 1:length(data)
-    data(i).LP_channel(data(i).LP_channel == 'LP2') = 'LP';
-    data(i).PD_channel(data(i).PD_channel == 'PD2') = 'PD';
-    data(i).PD_channel(data(i).PD_channel == 'pdn2') = 'pdn';
+for i = 1:length(alldata)
+    alldata(i).LP_channel(alldata(i).LP_channel == 'LP2') = 'LP';
+    alldata(i).PD_channel(alldata(i).PD_channel == 'PD2') = 'PD';
+    alldata(i).PD_channel(alldata(i).PD_channel == 'pdn2') = 'pdn';
 end
 
-save('../cache/alldata.mat','data')
+save('../cache/alldata.mat','alldata')

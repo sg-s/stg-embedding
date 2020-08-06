@@ -1,30 +1,60 @@
-classdef DataStore < dynamicprops
+classdef DataStore
 
 properties
 
-	mask logical 
-	LP  double
-	LP_LP double
-	LP_PD double
-	PD_LP double
-	PD_PD double
-	PD double
 
-	temperature double
+	% usability
+	mask logical = true
+	unusable double = 0
 
-	decentralized logical
+	% spikes and isis
+	LP  double = NaN(1e3,1)
+	LP_LP double = NaN(1e3,1)
+	LP_PD double = NaN(1e3,1)
+	PD_LP double = NaN(1e3,1)
+	PD_PD double = NaN(1e3,1)
+	PD double = NaN(1e3,1)
 
-	experiment_idx categorical
-	experimenter categorical
+	% experimental info
+	baseline double = 1
+	decentralized logical = false
 
+	temperature double = 11
 
-	time_offset double
-
-	LP_channel categorical
-	PD_channel  categorical
-
-	filename categorical
 	
+
+	experiment_idx categorical = categorical(NaN)
+	experimenter categorical = categorical(NaN)
+
+
+	time_offset double = 0 
+
+	LP_channel categorical  = categorical(NaN)
+	PD_channel  categorical = categorical(NaN)
+
+	filename categorical = categorical(NaN)
+
+
+	pH double = 7
+
+	% modulators, etc
+	Potassium double = 1
+	TTX double  = 0
+	PTX double = 0
+	octopamine  double = 0   
+	dopamine double = 0  
+	FLRFamide double = 0  
+	CabTrp1a double = 0  
+	TNRNFLRFamide double = 0  
+	CCAP double = 0  
+	serotonin double = 0  
+	tetraethlyammonium double = 0  
+	pilocarpine double = 0   
+	proctolin double = 0  
+	oxotremorine double = 0  
+	atropine double = 0  
+	RPCH double = 0  
+
 
 end % props
 
@@ -32,14 +62,15 @@ end % props
 methods 
 
 
+
 	function DS = DataStore(data)
 
+		if nargin == 0
+			return
+		end
+
 		fn = fieldnames(data);
-		p = properties(DS);
 		for i = 1:length(fn)
-			if ~ismember(fn{i},p)
-				DS.addprop(fn{i});
-			end
 			DS.(fn{i}) = data.(fn{i});
 		end
 
@@ -54,9 +85,17 @@ methods
 		% make sure everything has the same size
 		fn = properties(DS);
 		fn = setdiff(fn,{'PD','LP','LP_PD','LP_LP','PD_PD','PD_LP'});
+		MaskSize = size(DS.mask,1);
 		for i = 1:length(fn)
-			if ~all(size(DS.(fn{i})) == size(DS.mask))
-				disp(DS.experiment_idx(1))
+			SZ = size(DS.(fn{i}),1);
+
+			if SZ == 1
+				DS.(fn{i}) = repmat(DS.(fn{i}),MaskSize,1);
+				SZ = size(DS.(fn{i}),1);
+			end
+
+			if SZ ~= MaskSize
+				disp(DS.experiment_idx(i))
 				error('Something wrong with this data')
 			end
 		end
@@ -64,11 +103,50 @@ methods
 	end % constructor
 
 
+	function out = horzcat(varargin)
+
+		for i = 1:length(varargin)
+			assert(isa(varargin{i},'embedding.DataStore'),'Cannot concat embedding.DataStore with other data types')
+		end
+
+
+		allprops = {};
+		for i = 1:length(varargin)
+			allprops = unique([allprops; properties(varargin{i})]);
+		end
+
+		for i = 1:length(varargin)
+			for j = 1:length(allprops)
+				if isprop(varargin{i},allprops{j})
+					continue
+				end
+
+				varargin{i}.addprop(allprops{j});
+				keyboard
+
+			end
+
+		end
+
+		keyboard
+
+	end
+
+
+	function out = vertcart(varargin)
+		keyboard
+	end
+
+
 end % methods
 
 
 
 methods (Static)
+
+
+
+
 
 	function DSArray = cell2array(DSArray)
 

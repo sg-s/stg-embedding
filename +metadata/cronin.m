@@ -33,6 +33,7 @@ for i = 1:length(allfiles)
 	end
 
 	if isempty(data_idx)
+		keyboard
 		disp('Could not locate data...')
 		continue
 	end
