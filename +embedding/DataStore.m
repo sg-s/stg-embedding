@@ -133,29 +133,65 @@ methods
 	end
 
 
+	function DS = combine(data)
+
+		DS = embedding.DataStore;
+		props = properties(DS);
+		for i = 1:length(props)
+			if isscalar(DS.(props{i}))
+				DS.(props{i}) = vertcat(data.(props{i}));
+			else
+				DS.(props{i}) = horzcat(data.(props{i}));
+			end
+		end
+
+
+	end % combine
+
+
+	function data = purge(data,rm_this)
+
+		assert(isscalar(data),'Expected data to be scalar')
+		assert(isvector(rm_this),'Expected rm_this to be a vector')
+		assert(islogical(rm_this),'Expected rm_this to be logical')
+		rm_this = rm_this(:);
+		assert(length(data.mask) == length(rm_this),'Expected rm_this to be the same length as data.mask')
+
+		props = properties(data);
+		for i = 1:length(props)
+			if isvector(data.(props{i}))
+				data.(props{i})(rm_this) = [];
+			else
+				data.(props{i})(:,rm_this) = [];
+			end
+		end
+
+	end % purge
+
 	function snakePlot(data, ax)
 
 		if nargin == 1
 			figure('outerposition',[300 300 400 700],'PaperUnits','points','PaperSize',[400 700]); hold on
 			ax = gca;
+			
 		end
+
+		r = rectangle(ax,'Position',[.1 .1 1 1]);
 
 		assert(length(ax)==1,'Expected axes handle to be one element long')
 		assert(isa(ax,'matlab.graphics.axis.Axes'),'Axes handle is not valid')
-		assert(length(find(data.time_offset == 0))==1,'Data has a break')
 
+		% purge all discontinuous data
 
-		xbins = logspace(-2,1,101);
-		PD_PD = zeros(100,length(data.mask));
-		for i = 1:length(data.mask)
-			PD_PD(:,i) = histcounts(data.PD_PD(:,i),'BinEdges',xbins);
+		last_reset = find(data.time_offset == 0,1,'last');
+		if last_reset ~= 1
+			rm_this = logical(data.mask*0);
+			rm_this(1:last_reset-1) = true;
+			data = data.purge(rm_this);
 		end
 
-		[~,h] = contour(PD_PD');
-		
-		PD_PD = (imgaussfilt(PD_PD',1));
+		assert(length(find(data.time_offset == 0))==1,'Data has a break')
 
-		keyboard
 
 		PD = sort(data.PD(:));
 		LP = sort(data.LP(:));
@@ -167,11 +203,41 @@ methods
 		isiLP(isiLP>10) = NaN;
 
 
-		plot(ax,isiPD,PD,'k.')
-		plot(ax,isiLP*100,LP,'r.')
+
+		isiLP(isiLP<1e-2) = NaN;
+
+
+		% mark when it is decentralized
+		temp = [data.PD(:,find(data.decentralized,1,'first'):end); data.LP(:,find(data.decentralized,1,'first'):end)];
+		
+
+		PD(PD>nanmin(temp(:))+1000) = NaN;
+		LP(LP>nanmin(temp(:))+1000) = NaN;
+
+		plot(ax,isiPD,PD,'.','Color',color.onehalf('blue'),'MarkerSize',1)
+		plot(ax,isiLP*100,LP,'.','Color',color.onehalf('orange'),'MarkerSize',1)
+
+
 
 		ax.XScale = 'log';
-		%ax(1).XLim = [1e-2 10];
+		
+
+		try
+			r.Position = [.01 nanmin(temp(:)) 300 1000];
+			ax.YLim = [nanmin(data.PD(:)) nanmax(data.PD(:))];
+		catch
+		end
+		r.FaceColor = [.95 .95 .95];
+		r.LineStyle = 'none';
+
+		
+		ax.YDir = 'reverse';
+		ax.YColor = 'w';
+		ax.YTick = [];
+
+		ax.YLim = [nanmin(temp(:)) - 300 nanmin(temp(:)) + 1050];
+		ax.XLim = [.01 200];
+
 
 
 	end % snakePlot
