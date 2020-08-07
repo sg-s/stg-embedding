@@ -3,9 +3,5 @@ function DS = combine(data)
 DS = embedding.DataStore;
 props = properties(DS);
 for i = 1:length(props)
-	if isscalar(DS.(props{i}))
-		DS.(props{i}) = vertcat(data.(props{i}));
-	else
-		DS.(props{i}) = horzcat(data.(props{i}));
-	end
+	DS.(props{i}) = vertcat(data.(props{i}));
 end

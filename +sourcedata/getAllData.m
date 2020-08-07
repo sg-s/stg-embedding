@@ -59,8 +59,10 @@ for i = 1:length(all_exps)
         data = crabsort.analysis.stack(data,options);
         data = crabsort.analysis.chunk(data,options);
 
-    	data = embedding.DataStore(data);
+        data.PD = transpose(data.PD);
+        data.LP = transpose(data.LP);
 
+    	data = embedding.DataStore(data);
 
     	if ~any(data.mask)
             save(cache_path,'data','-v7.3')
@@ -71,24 +73,24 @@ for i = 1:length(all_exps)
         % delete spikes that are closer than 3ms to other spikes
         min_isi = .003;
         for j = 1:length(data.mask)
-            spikes = data.LP(:,j);
+            spikes = data.LP(j,:);
             delete_these = find(diff(spikes)<min_isi);
             if ~isempty(delete_these)
-                data.LP(delete_these,j) = NaN;
-                data.LP(:,j) = sort(data.LP(:,j));
+                data.LP(j,delete_these) = NaN;
+                data.LP(j,:) = sort(data.LP(j,:));
             end
 
-            spikes = data.PD(:,j);
+            spikes = data.PD(j,:);
             delete_these = find(diff(spikes)<min_isi);
             if ~isempty(delete_these)
-                data.PD(delete_these,j) = NaN;
-                data.PD(:,j) = sort(data.PD(:,j));
+                data.PD(j,delete_these) = NaN;
+                data.PD(j,:) = sort(data.PD(j,:));
             end
         end
 
 
     	% measure ISIs
-		data = thoth.computeISIs(data, {'LP','PD'});
+		data = computeISIs(data);
 
     	save(cache_path,'data','-v7.3')
 
@@ -97,6 +99,7 @@ for i = 1:length(all_exps)
     	% cache hit
         disp(all_exps(i).name)
     	load(cache_path,'data')
+
     	alldata(i) = data;
 	end
 

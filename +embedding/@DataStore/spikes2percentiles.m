@@ -21,9 +21,10 @@ structlib.packUnpack(options);
 
 DataFrameSize = length(ISIorders)*length(PercentileVec);
 
+N = length(alldata.mask);
+
 % make placeholders 
 for i = 1:length(neurons)
-	N = size(alldata.(neurons{i}),1);
 	p.([neurons{i} '_' neurons{i}]) = NaN(N,DataFrameSize);
 	p.([neurons{i} '_meanISI']) = NaN(N,length(ISIorders));
 	p.([neurons{i} '_stdISI']) = NaN(N,length(ISIorders));

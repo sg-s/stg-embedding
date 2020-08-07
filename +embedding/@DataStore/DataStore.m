@@ -9,12 +9,12 @@ properties
 
 	% spikes and isis
 
-	LP  double = NaN(1e3,1)
-	LP_LP double = NaN(1e3,1)
-	LP_PD double = NaN(1e3,1)
-	PD_LP double = NaN(1e3,1)
-	PD_PD double = NaN(1e3,1)
-	PD double = NaN(1e3,1)
+	LP  double = NaN(1,1e3)
+	LP_LP double = NaN(1,1e3)
+	LP_PD double = NaN(1,1e3)
+	PD_LP double = NaN(1,1e3)
+	PD_PD double = NaN(1,1e3)
+	PD double = NaN(1,1e3)
 
 	% experimental info
 	baseline double = 1
@@ -86,12 +86,12 @@ methods
 
 		% make sure everything has the same size
 		fn = properties(DS);
-		fn = setdiff(fn,{'PD','LP','LP_PD','LP_LP','PD_PD','PD_LP'});
 		MaskSize = size(DS.mask,1);
 		for i = 1:length(fn)
 			SZ = size(DS.(fn{i}),1);
 
 			if SZ == 1
+
 				DS.(fn{i}) = repmat(DS.(fn{i}),MaskSize,1);
 				SZ = size(DS.(fn{i}),1);
 			end
@@ -146,12 +146,10 @@ methods
 		assert(length(data.mask) == length(rm_this),'Expected rm_this to be the same length as data.mask')
 
 		props = properties(data);
+
+
 		for i = 1:length(props)
-			if isvector(data.(props{i}))
-				data.(props{i})(rm_this) = [];
-			else
-				data.(props{i})(:,rm_this) = [];
-			end
+			data.(props{i})(rm_this,:) = [];
 		end
 
 	end % purge
