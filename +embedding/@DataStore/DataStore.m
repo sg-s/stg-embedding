@@ -3,11 +3,12 @@ classdef DataStore
 properties
 
 
-	% usability
-	mask logical = true
-	unusable double = 0
+
+	mask logical = true % should we ignore these sections?
+	unusable double = 0 % is this unusable?
 
 	% spikes and isis
+
 	LP  double = NaN(1e3,1)
 	LP_LP double = NaN(1e3,1)
 	LP_PD double = NaN(1e3,1)
@@ -38,6 +39,7 @@ properties
 	pH double = 7
 
 	% modulators, etc
+
 	Potassium double = 1
 	TTX double  = 0
 	PTX double = 0
@@ -103,6 +105,7 @@ methods
 	end % constructor
 
 
+
 	function out = horzcat(varargin)
 
 		for i = 1:length(varargin)
@@ -134,7 +137,7 @@ methods
 
 
 	function DS = combine(data)
-
+		% combines a vector of DataStore objects into a single scalar object by concatenating all properties 
 		DS = embedding.DataStore;
 		props = properties(DS);
 		for i = 1:length(props)
@@ -144,8 +147,6 @@ methods
 				DS.(props{i}) = horzcat(data.(props{i}));
 			end
 		end
-
-
 	end % combine
 
 
@@ -246,6 +247,31 @@ methods
 end % methods
 
 
+
+methods (Static)
+
+	function D = defaults()
+
+		DS = embedding.DataStore;
+		props = properties(DS);
+		props = setdiff(props,'time_offset');
+		props = setdiff(props,'mask');
+
+		D = struct;
+		for i = 1:length(props)
+			if size(DS.(props{i}),1)>1
+				continue
+			end
+			if iscategorical(DS.(props{i}))
+				continue
+			end
+			D.(props{i}) = DS.(props{i});
+		end
+
+	end % defaults
+
+
+end % static methods
 
 
 end % classdef

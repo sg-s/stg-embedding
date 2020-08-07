@@ -1,6 +1,9 @@
 % filters data according to some criteria
 
-function outdata = filter(data, FilterSpec)
+function data = filter(data, FilterSpec)
+
+assert(isa(FilterSpec,'sourcedata.DataFilter'),'Filter needs to be of type sourcedata.DataFilter')
+
 
 switch FilterSpec
 
@@ -51,17 +54,15 @@ case sourcedata.DataFilter.Neuromodulator
 		if rm_this(i)
 			disp(data(i).experiment_idx(1))
 		end
-
-
-
 	end
 
-	outdata = data;
+
+
+
+
 
 case sourcedata.DataFilter.Baseline
 
-
-	modulator = sourcedata.modulatorUsed(data);
 
 	% first, remove all pieces of data that are not at 11C
 	for i = 1:length(data)
@@ -69,9 +70,8 @@ case sourcedata.DataFilter.Baseline
 		data(i) = sourcedata.purge(data(i),rm_this);
 	end
 
-
-	% remove anything that has a non-default value
-	defaults = rmfield(metadata.defaults,'temperature');
+	% remove anything that has a non-default value	
+	defaults = rmfield(embedding.DataStore.defaults,'temperature');
 	fn = fieldnames(defaults);
 
 	for i = 1:length(data)
@@ -86,7 +86,12 @@ case sourcedata.DataFilter.Baseline
 	% remove empty datasets
 	data(cellfun(@sum,{data.mask}) == 0) = [];
 
-	outdata = data;
+
+
+
+
+
+
 
 
 case sourcedata.DataFilter.Decentralized
@@ -126,8 +131,6 @@ case sourcedata.DataFilter.Decentralized
 	% make sure it is decentralized at some point
 	rm_this = cellfun(@max,{data.decentralized}) == 0 | cellfun(@min,{data.decentralized}) == 1;
 	data(rm_this) = [];
-
-	outdata = data;
 
 
 otherwise
