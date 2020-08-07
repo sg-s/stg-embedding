@@ -76,10 +76,11 @@ case sourcedata.DataFilter.Baseline
 	fn = fieldnames(defaults);
 
 	for i = 1:length(data)
-		rm_this = false(length(data(i).mask));
+		rm_this = false(length(data(i).mask),1);
 		for j = 1:length(fn)
 			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
 		end
+
 		data(i) = purge(data(i),rm_this);
 	end
 

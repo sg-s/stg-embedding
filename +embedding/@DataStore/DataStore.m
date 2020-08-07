@@ -168,6 +168,7 @@ methods (Static)
 		props = properties(DS);
 		props = setdiff(props,'time_offset');
 		props = setdiff(props,'mask');
+		props = setdiff(props,{'LP','PD','PD_PD','LP_LP','LP_PD','PD_LP'});
 
 		D = struct;
 		for i = 1:length(props)
@@ -177,6 +178,7 @@ methods (Static)
 			if iscategorical(DS.(props{i}))
 				continue
 			end
+
 			D.(props{i}) = DS.(props{i});
 		end
 
