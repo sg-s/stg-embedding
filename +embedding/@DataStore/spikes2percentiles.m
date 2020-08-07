@@ -7,6 +7,9 @@
 
 function [p, VectorisedPercentiles] = spikes2percentiles(alldata, varargin)
 
+
+assert(isscalar(alldata),'Expected a scalar argument')
+
 options.ISIorders = 1:10;
 options.PercentileVec = linspace(0,100,11);
 options.DelayPercentileVec = linspace(0,100,11);

@@ -2,6 +2,7 @@
 
 function data = filter(data, FilterSpec)
 
+
 assert(isa(FilterSpec,'sourcedata.DataFilter'),'Filter needs to be of type sourcedata.DataFilter')
 
 

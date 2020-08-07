@@ -18,15 +18,14 @@ end
 data = sourcedata.getAllData();
 
 
-data = sourcedata.filter(data,sourcedata.DataFilter.Baseline);
+data = filter(data,sourcedata.DataFilter.Baseline);
 
 
 
+% combine into a single structure
+alldata = combine(data);
 
-% we're going to convert back into a structure array
-[alldata, data] = sourcedata.combine(data);
-
-[p, VectorisedPercentiles] = sourcedata.spikes2percentiles(alldata,'ISIorders',[1 2]);
+[p, VectorisedPercentiles] = spikes2percentiles(alldata,'ISIorders',[1 2]);
 
 
 % load saved data
