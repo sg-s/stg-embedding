@@ -40,9 +40,10 @@ isiLP(isiLP<1e-2) = NaN;
 % mark when it is decentralized
 temp = [data.PD(:,find(data.decentralized,1,'first'):end); data.LP(:,find(data.decentralized,1,'first'):end)];
 
-
-PD(PD>nanmin(temp(:))+1000) = NaN;
-LP(LP>nanmin(temp(:))+1000) = NaN;
+if ~isempty(temp)
+	PD(PD>nanmin(temp(:))+1000) = NaN;
+	LP(LP>nanmin(temp(:))+1000) = NaN;
+end
 
 plot(ax,isiPD,PD,'.','Color',color.onehalf('blue'),'MarkerSize',1)
 plot(ax,isiLP*100,LP,'.','Color',color.onehalf('orange'),'MarkerSize',1)
@@ -65,7 +66,9 @@ ax.YDir = 'reverse';
 ax.YColor = 'w';
 ax.YTick = [];
 
-ax.YLim = [nanmin(temp(:)) - 300 nanmin(temp(:)) + 1050];
+if ~isempty(temp)
+	ax.YLim = [nanmin(temp(:)) - 300 nanmin(temp(:)) + 1050];
+end
 ax.XLim = [.01 200];
 
 end

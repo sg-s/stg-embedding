@@ -10,7 +10,7 @@ raw_spike_data = [alldata.LP, alldata.PD];
 
 
 m = clusterlib.manual;
-m.idx = embedding.makeCategoricalArray(size(VectorisedPercentiles,1));
+m.idx = embedding.makeCategoricalArray(size(VectorizedData,1));
 m.RawData = raw_spike_data;
 m.DisplayFcn = @embedding.plotSpikes;
 m.labels = categories(m.idx);
@@ -26,11 +26,11 @@ m.idx = embedding.readAnnotations(idx,H,m.RawData,m.idx);
 clearvars H idx midx
 
 
-fitData = VectorisedPercentiles;
+fitData = VectorizedData;
 
-
-
+% original
 u = umap('min_dist',0, 'metric','euclidean','n_neighbors',50,'negative_sample_rate',15);
+u = umap('min_dist',0, 'metric','euclidean','n_neighbors',20,'negative_sample_rate',20);
 R = u.fit(fitData);
 m.ReducedData = R;
 m.RawData = raw_spike_data;

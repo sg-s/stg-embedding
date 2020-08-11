@@ -29,7 +29,7 @@ alldata = combine(data);
 
 
 % load saved data
-load('../annotations/labels.cache','H','idx','-mat')
+load('../annotations/labels.c8ache','H','idx','-mat')
 
 
 clear m

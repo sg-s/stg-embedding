@@ -85,6 +85,12 @@ case sourcedata.DataFilter.Baseline
 	end
 
 
+	% purge masked data
+	for i = 1:length(data)
+		data(i) = data(i).purge(~data(i).mask);
+	end
+
+
 	% remove empty datasets
 	data(cellfun(@sum,{data.mask}) == 0) = [];
 
