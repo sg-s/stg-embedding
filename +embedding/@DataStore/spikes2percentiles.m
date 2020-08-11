@@ -133,7 +133,69 @@ end
 
 
 
+% measure a "phase" for every spike defined by timing of the other neuron
+p.PDphases = NaN(N,length(PercentileVec));
+p.LPphases = NaN(N,length(PercentileVec));
 
+disp('Computing pseudo phases...')
+
+for i = 1:N
+
+	corelib.textbar(i,N)
+
+	spikes = alldata.PD(i,:);
+	otherspikes = alldata.LP(i,:);
+	phases = NaN*spikes;
+
+	for j = 1:length(spikes)
+
+		if isnan(spikes(j))
+			break
+		end
+		prev_other_spike = otherspikes(find(otherspikes<spikes(j),1,'last'));
+		
+		if isempty(prev_other_spike)
+			continue
+		end
+		next_other_spike = otherspikes(find(otherspikes>spikes(j),1,'first'));
+		if isempty(next_other_spike)
+			continue
+		end
+
+		phases(j) = (spikes(j)-prev_other_spike)/(next_other_spike-prev_other_spike);
+	end
+
+	p.PDphases(i,:) = prctile(phases,PercentileVec);
+
+
+
+
+	spikes = alldata.LP(i,:);
+	otherspikes = alldata.PD(i,:);
+	phases = NaN*spikes;
+
+	for j = 1:length(spikes)
+
+		if isnan(spikes(j))
+			break
+		end
+		prev_other_spike = otherspikes(find(otherspikes<spikes(j),1,'last'));
+		
+		if isempty(prev_other_spike)
+			continue
+		end
+		next_other_spike = otherspikes(find(otherspikes>spikes(j),1,'first'));
+		if isempty(next_other_spike)
+			continue
+		end
+
+		phases(j) = (spikes(j)-prev_other_spike)/(next_other_spike-prev_other_spike);
+	end
+
+	p.LPphases(i,:) = prctile(phases,PercentileVec);
+
+
+end
 
 
 
@@ -180,7 +242,7 @@ end
 % p.PD_LP2 = 1./p.PD_LP;
 
 Exxagerate = 2;
-VectorizedData = ([p.PD_PD, p.LP_LP, p.ClosestLP, p.ClosestPD]);
+VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases]);
 
 VectorizedData(isinf(VectorizedData)) = NaN;
 
