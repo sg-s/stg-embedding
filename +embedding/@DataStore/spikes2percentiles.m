@@ -19,23 +19,61 @@ options = corelib.parseNameValueArguments(options,varargin{:});
 structlib.packUnpack(options);
 
 
-DataFrameSize = length(ISIorders)*length(PercentileVec);
+DataFrameSize = length(PercentileVec);
 
 N = length(alldata.mask);
 
 % make placeholders 
 for i = 1:length(neurons)
 	p.([neurons{i} '_' neurons{i}]) = NaN(N,DataFrameSize);
-	p.([neurons{i} '_meanISI']) = NaN(N,length(ISIorders));
-	p.([neurons{i} '_stdISI']) = NaN(N,length(ISIorders));
-	p.([neurons{i} '_rangeISI']) = NaN(N,length(ISIorders));
+	p.([neurons{i} '_' neurons{i} '_2']) = NaN(N,1);
+	p.([neurons{i} '_' neurons{i} '_ratio']) = NaN(N,2);
 end
 
 
 
-% compute percentiles for nth order isis
+% % compute percentiles for nth order isis
+% for i = 1:length(neurons)
+% 	N = size(alldata.(neurons{i}),1);
+% 	for j = 1:N
+% 		corelib.textbar(j,N)
+% 		spikes = alldata.(neurons{i})(j,:);
+% 		spikes = spikes - nanmin(spikes);
+
+% 		% check if there is a large empty section
+% 		maxisi = max(diff(spikes));
+% 		if (20-max(spikes(~isnan(spikes)))-min(spikes(~isnan(spikes)))) > maxisi
+% 			spikes(find(isnan(spikes),1,'first')) = max(spikes)+(20-max(spikes(~isnan(spikes)))-min(spikes(~isnan(spikes))));
+% 		end
+
+% 		a = 1;
+% 		z = a + length(PercentileVec) - 1;
+% 		for k = 1:length(ISIorders)
+% 			spikes2 = circshift(spikes,ISIorders(k));
+
+% 			isis = spikes-spikes2;
+% 			isis(isis<0.001) = NaN;
+
+% 			p.([neurons{i} '_' neurons{i}])(j,a:z) = prctile(isis,PercentileVec);;
+
+% 			% if a > 1
+% 			% 	% scale by 1st order ISIs
+% 			% 	p.([neurons{i} '_' neurons{i}])(j,a:z) = p.([neurons{i} '_' neurons{i}])(j,a:z)./(p.([neurons{i} '_' neurons{i}])(j,1:length(PercentileVec)));
+% 			% end
+
+
+% 			a = z + 1;
+% 			z = a + length(PercentileVec) - 1;
+
+% 		end
+% 	end
+% end
+
+
+
+% compute 2nd order ISIs
 for i = 1:length(neurons)
-	N = size(alldata.(neurons{i}),1);
+
 	for j = 1:N
 		corelib.textbar(j,N)
 		spikes = alldata.(neurons{i})(j,:);
@@ -47,95 +85,94 @@ for i = 1:length(neurons)
 			spikes(find(isnan(spikes),1,'first')) = max(spikes)+(20-max(spikes(~isnan(spikes)))-min(spikes(~isnan(spikes))));
 		end
 
-		a = 1;
-		z = a + length(PercentileVec) - 1;
-		for k = 1:length(ISIorders)
-			spikes2 = circshift(spikes,ISIorders(k));
 
-			isis = spikes-spikes2;
-			isis(isis<0.001) = NaN;
-
-			p.([neurons{i} '_' neurons{i}])(j,a:z) = prctile(isis,PercentileVec);;
-
-			% if a > 1
-			% 	% scale by 1st order ISIs
-			% 	p.([neurons{i} '_' neurons{i}])(j,a:z) = p.([neurons{i} '_' neurons{i}])(j,a:z)./(p.([neurons{i} '_' neurons{i}])(j,1:length(PercentileVec)));
-			% end
-
-			% also return some summary statistics
-			p.([neurons{i} '_meanISI'])(j,k) = nanmean(isis);
-			p.([neurons{i} '_stdISI'])(j,k) = nanstd(isis);
-			p.([neurons{i} '_rangeISI'])(j,k) = nanmax(isis) - nanmin(isis);
-
-			a = z + 1;
-			z = a + length(PercentileVec) - 1;
-
-		end
-	end
-end
+		% compute 1st order ISIs
+		spikes2 = circshift(spikes,1);
+		isis = spikes-spikes2;
+		isis(isis<0.003) = NaN;
+		p.([neurons{i} '_' neurons{i}])(j,:) = prctile(isis,PercentileVec);
 
 
 
+		% compute 2nd order ISIs
+		spikes2 = circshift(spikes,2);
+		isis2 = spikes-spikes2;
+		isis2(isis2<0.003) = NaN;
 
-% compute cross ISI percentiles
-for i = 1:length(neurons)
-	for j = 1:length(neurons)
-		if i == j
-			continue
-		end
+		p.([neurons{i} '_' neurons{i} '_2'])(j) = nanmax(isis2)/nanmax(isis);
 
-		for k = N:-1:1
-			p.([neurons{i} '_' neurons{j}])(k,:) = prctile(alldata.([neurons{i} '_' neurons{j}])(k,:),DelayPercentileVec);
-		end
+	
+		isis = sort(isis,'descend','MissingPlacement','last');
+		p.([neurons{i} '_' neurons{i} '_ratio'])(j,:) = isis(1)./isis(2:3); 
 
 	end
 
+
 end
+
+% truncate ratios
+p.PD_PD_ratio(p.PD_PD_ratio>3) = 3;
+p.LP_LP_ratio(p.LP_LP_ratio>3) = 3;
+
+% % compute cross ISI percentiles
+% for i = 1:length(neurons)
+% 	for j = 1:length(neurons)
+% 		if i == j
+% 			continue
+% 		end
+
+% 		for k = N:-1:1
+% 			p.([neurons{i} '_' neurons{j}])(k,:) = prctile(alldata.([neurons{i} '_' neurons{j}])(k,:),DelayPercentileVec);
+% 		end
+
+% 	end
+
+% end
 
 
 
 % measure distance to closest spike on same neuron vs. to other neuron
 
-p.ClosestPD = NaN(N,length(PercentileVec));
-p.ClosestLP = NaN(N,length(PercentileVec));
+% p.ClosestPD = NaN(N,length(PercentileVec));
+% p.ClosestLP = NaN(N,length(PercentileVec));
 
-for i = N:-1:1
+% for i = N:-1:1
 
-	spikes = alldata.PD(i,:);
-	otherspikes = alldata.LP(i,:);
-	isis = diff(spikes);
-	isis2 = circshift(isis,1);
+% 	spikes = alldata.PD(i,:);
+% 	otherspikes = alldata.LP(i,:);
+% 	isis = diff(spikes);
+% 	isis2 = circshift(isis,1);
 
-	closest_dist = nanmin([isis;isis2]);
-	closest_dist_to_other_spike = pdist2(otherspikes(:),spikes(:),'Euclidean','Smallest',1);
+% 	closest_dist = nanmin([isis;isis2]);
+% 	closest_dist_to_other_spike = pdist2(otherspikes(:),spikes(:),'Euclidean','Smallest',1);
 
-	norm_closest = (closest_dist./closest_dist_to_other_spike(1:end-1));
-	norm_closest(norm_closest>1) = 1;
+% 	norm_closest = (closest_dist./closest_dist_to_other_spike(1:end-1));
+% 	norm_closest(norm_closest>1) = 1;
 
-	p.ClosestPD(i,:) = prctile(norm_closest,PercentileVec);
+% 	p.ClosestPD(i,:) = prctile(norm_closest,PercentileVec);
 
 
 
-	spikes = alldata.LP(i,:);
-	otherspikes = alldata.PD(i,:);
-	isis = diff(spikes);
-	isis2 = circshift(isis,1);
+% 	spikes = alldata.LP(i,:);
+% 	otherspikes = alldata.PD(i,:);
+% 	isis = diff(spikes);
+% 	isis2 = circshift(isis,1);
 
-	closest_dist = nanmin([isis;isis2]);
-	closest_dist_to_other_spike = pdist2(otherspikes(:),spikes(:),'Euclidean','Smallest',1);
+% 	closest_dist = nanmin([isis;isis2]);
+% 	closest_dist_to_other_spike = pdist2(otherspikes(:),spikes(:),'Euclidean','Smallest',1);
 
-	norm_closest = (closest_dist./closest_dist_to_other_spike(1:end-1));
-	norm_closest(norm_closest>1) = 1;
+% 	norm_closest = (closest_dist./closest_dist_to_other_spike(1:end-1));
+% 	norm_closest(norm_closest>1) = 1;
 
-	p.ClosestLP(i,:) = prctile(norm_closest,PercentileVec);
+% 	p.ClosestLP(i,:) = prctile(norm_closest,PercentileVec);
 
-end
+% end
 
 
 
 % measure a "phase" for every spike defined by timing of the other neuron
-p.PDphases = NaN(N,length(PercentileVec));
-p.LPphases = NaN(N,length(PercentileVec));
+p.PDphases = NaN(N,length(DelayPercentileVec));
+p.LPphases = NaN(N,length(DelayPercentileVec));
 
 disp('Computing pseudo phases...')
 
@@ -165,7 +202,7 @@ for i = 1:N
 		phases(j) = (spikes(j)-prev_other_spike)/(next_other_spike-prev_other_spike);
 	end
 
-	p.PDphases(i,:) = prctile(phases,PercentileVec);
+	p.PDphases(i,:) = prctile(phases,DelayPercentileVec);
 
 
 
@@ -192,7 +229,7 @@ for i = 1:N
 		phases(j) = (spikes(j)-prev_other_spike)/(next_other_spike-prev_other_spike);
 	end
 
-	p.LPphases(i,:) = prctile(phases,PercentileVec);
+	p.LPphases(i,:) = prctile(phases,DelayPercentileVec);
 
 
 end
@@ -242,7 +279,7 @@ end
 % p.PD_LP2 = 1./p.PD_LP;
 
 Exxagerate = 2;
-VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases]);
+VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases, p.PD_PD_ratio, p.LP_LP_ratio, p.PD_PD_2, p.LP_LP_2]);
 
 VectorizedData(isinf(VectorizedData)) = NaN;
 
