@@ -27,7 +27,7 @@ N = length(alldata.mask);
 for i = 1:length(neurons)
 	p.([neurons{i} '_' neurons{i}]) = NaN(N,DataFrameSize);
 	p.([neurons{i} '_' neurons{i} '_2']) = NaN(N,1);
-	p.([neurons{i} '_' neurons{i} '_ratio']) = NaN(N,2);
+	p.([neurons{i} '_' neurons{i} '_ratio']) = NaN(N,4);
 end
 
 
@@ -81,7 +81,7 @@ for i = 1:length(neurons)
 
 		% check if there is a large empty section
 		maxisi = max(diff(spikes));
-		if (20-max(spikes(~isnan(spikes)))-min(spikes(~isnan(spikes)))) > maxisi
+		if (20-max(spikes(~isnan(spikes)))-min(spikes(~isnan(spikes)))) > 2*maxisi
 			spikes(find(isnan(spikes),1,'first')) = max(spikes)+(20-max(spikes(~isnan(spikes)))-min(spikes(~isnan(spikes))));
 		end
 
@@ -103,12 +103,14 @@ for i = 1:length(neurons)
 
 	
 		isis = sort(isis,'descend','MissingPlacement','last');
-		p.([neurons{i} '_' neurons{i} '_ratio'])(j,:) = isis(1)./isis(2:3); 
+		p.([neurons{i} '_' neurons{i} '_ratio'])(j,:) = isis(1)./isis(2:5); 
 
 	end
 
 
 end
+
+
 
 % truncate ratios
 p.PD_PD_ratio(p.PD_PD_ratio>3) = 3;
@@ -278,8 +280,7 @@ end
 % p.LP_PD2 = 1./p.LP_PD;
 % p.PD_LP2 = 1./p.PD_LP;
 
-Exxagerate = 2;
-VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases, p.PD_PD_ratio, p.LP_LP_ratio, p.PD_PD_2, p.LP_LP_2]);
+VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases, p.PD_PD_ratio, p.LP_LP_ratio, exp(p.PD_PD_2), exp(p.LP_LP_2)]);
 
 VectorizedData(isinf(VectorizedData)) = NaN;
 
