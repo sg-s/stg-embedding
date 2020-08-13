@@ -3,13 +3,14 @@
 % This works when both neurons are bursting anti-phase,
 % and degrades gracefully if this assumption isn't met
 
-function [A_burst_starts, A_burst_stops] = findNominalBurstStartsStops(A,B)
+function [A_starts, A_stops, A_starts_strict, A_stops_strict] = findNominalBurstStartsStops(A,B)
 
 
 % compute A burst starts
-A_burst_starts = false(length(A),1);
-A_burst_stops = false(length(A),1);
-
+A_starts = false(length(A),1);
+A_stops = false(length(A),1);
+A_starts_strict = false(length(A),1);
+A_stops_strict = false(length(A),1);
 
 for j = 1:999  % we know each data frame has only a 1000 spikes at max
 	if isnan(A(j))
@@ -52,32 +53,57 @@ for j = 1:999  % we know each data frame has only a 1000 spikes at max
 	end
 
 	if last_B_spike > last_A_spike
-		A_burst_starts(j) = true;
+		A_starts(j) = true;
+
+
+		if next_A_spike < next_B_spike
+			A_starts_strict(j) = true;
+		end
+
 	end
 
 	if next_A_spike > next_B_spike
-		A_burst_stops(j) = true;
+		A_stops(j) = true;
+
+		if last_A_spike > last_B_spike
+			A_stops_strict(j) = true;
+		end
+
 	end
+
+
+
 	
 end
 
 % the NaN padding is to ensure that these arrays are never empty
-A_burst_starts = [A(A_burst_starts) NaN NaN];
-A_burst_stops = [A(A_burst_stops) NaN NaN];
+A_starts = [A(A_starts) NaN NaN NaN];
+A_stops = [A(A_stops) NaN NaN NaN];
+A_starts_strict = [A(A_starts_strict) NaN NaN NaN];
+A_stops_strict = [A(A_stops_strict) NaN NaN NaN];
+
+A_burst_period = nanmax(diff(A_starts));
+A_burst_period_strict = nanmax(diff(A_starts_strict));
 
 
-A_burst_period = nanmean(diff(A_burst_starts));
+% make sure bursting doesn't start too late or stop too early
+if A_starts(1) > A_burst_period
+	A_starts = [0 A_starts];
+end
 
-if isnan(A_burst_period)
-	return
+
+if 20-nanmax(A_starts) > A_burst_period
+	A_starts(end) = 20;
+	A_starts = sort(A_starts);
 end
 
 % make sure bursting doesn't start too late or stop too early
-if A_burst_starts(1) > A_burst_period*2
-	A_burst_starts = [0 A_burst_starts];
+if A_starts_strict(1) > A_burst_period_strict
+	A_starts_strict = [0 A_starts_strict];
 end
 
 
-if 20-A_burst_starts(end-2) > 2*A_burst_period
-	A_burst_starts(end-1) = 20;
+if 20-nanmax(A_starts_strict) > A_burst_period_strict
+	A_starts_strict(end) = 20;
+	A_starts_strict = sort(A_starts_strict);
 end

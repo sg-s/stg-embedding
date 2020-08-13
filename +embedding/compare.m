@@ -20,3 +20,8 @@ B = B(idx);
 
 T = table(A,B,D,'RowNames',fn(idx));
 disp(T)
+
+
+m = evalin('base','m');
+m.handles.CurrentPointReduced.XData = m.ReducedData([a b],1);
+m.handles.CurrentPointReduced.YData = m.ReducedData([a b],2);

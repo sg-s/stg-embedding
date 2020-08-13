@@ -23,11 +23,11 @@ idx(1) = 'PD-irregular-bursting';
 
 % one neuron weak bursting
 idx(1) = 'LP-01';
-idx(1) = 'LP-single-spike';
+idx(1) = 'LP-skipped-bursts';
 idx(1) = 'LP-1-plus';
 
 idx(1) = 'PD-01';
-idx(1) = 'PD-single-spike';
+idx(1) = 'PD-skipped-bursts';
 idx(1) = 'PD-1-plus';
 
 

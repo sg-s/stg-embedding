@@ -50,7 +50,7 @@ title(m.handles.ax(1),'')
 
 m.handles.ax(1).XColor = 'w';
 m.handles.ax(1).YColor = 'w';
-
+m.handles.ax(2).Box = 'on'
 
 embed_button = uicontrol(m.handles.main_fig,'Units','normalized','Style','pushbutton','String','Embed using uMAP','FontSize',24,'Position',[.75 .4 .2 .1]);
 
