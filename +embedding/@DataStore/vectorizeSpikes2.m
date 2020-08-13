@@ -3,7 +3,7 @@
 % which are in turn estimated by their position
 % relative to the other neuron
 
-function [Metrics, NMetrics, VectorizedData] = vectorizeSpikes(alldata)
+function [Metrics, NMetrics, VectorizedData] = vectorizeSpikes2(alldata)
 
 
 assert(length(alldata)==1,'Expected DataStore to be scalar')
@@ -85,8 +85,8 @@ p.LPf = sum(~isnan(alldata.LP),2);
 
 
 % flag for wheter we pick strict or non-strict burst metrics
-% p.PD_strict = zeros(N,1);
-% p.LP_strict = zeros(N,1);
+p.PD_strict = zeros(N,1);
+p.LP_strict = zeros(N,1);
 
 
 % compute spike phases, which are always defined (except when neurons are silent)
@@ -143,26 +143,22 @@ for i = 1:N
 	PD = PD - offset;
 	LP = LP - offset;
 
+	[PD_burst_starts, PD_burst_stops,PD_burst_starts_strict, PD_burst_stops_strict] = embedding.findNominalBurstStartsStops(PD,LP);
+	[LP_burst_starts, LP_burst_stops,LP_burst_starts_strict, LP_burst_stops_strict] = embedding.findNominalBurstStartsStops(LP,PD);
 
-	% [PD_burst_starts, PD_burst_stops,PD_burst_starts_strict, PD_burst_stops_strict] = embedding.findNominalBurstStartsStops(PD,LP);
-	% [LP_burst_starts, LP_burst_stops,LP_burst_starts_strict, LP_burst_stops_strict] = embedding.findNominalBurstStartsStops(LP,PD);
 
+	% figure out if we want to use strict or non-strict metrics
+	if nanstd(diff(PD_burst_starts)) > nanstd(diff(PD_burst_starts_strict))
+		p.PD_strict(i) = 1;
+		PD_burst_starts = PD_burst_starts_strict;
+		PD_burst_stops = PD_burst_stops_strict;
+	end
 
-	% % figure out if we want to use strict or non-strict metrics
-	% if nanstd(diff(PD_burst_starts)) > nanstd(diff(PD_burst_starts_strict))
-	% 	p.PD_strict(i) = 1;
-	% 	PD_burst_starts = PD_burst_starts_strict;
-	% 	PD_burst_stops = PD_burst_stops_strict;
-	% end
-
-	% if nanstd(diff(LP_burst_starts)) > nanstd(diff(LP_burst_starts_strict))
-	% 	p.LP_strict(i) = 1;
-	% 	LP_burst_starts = LP_burst_starts_strict;
-	% 	LP_burst_stops = LP_burst_stops_strict;
-	% end
-
-	[PD_burst_starts, PD_burst_stops] = embedding.findBurstStartsStopsUsingISIs(PD);
-	[LP_burst_starts, LP_burst_stops] = embedding.findBurstStartsStopsUsingISIs(LP);
+	if nanstd(diff(LP_burst_starts)) > nanstd(diff(LP_burst_starts_strict))
+		p.LP_strict(i) = 1;
+		LP_burst_starts = LP_burst_starts_strict;
+		LP_burst_stops = LP_burst_stops_strict;
+	end
 
 	PD_burst_periods = diff(PD_burst_starts);
 	LP_burst_periods = diff(LP_burst_starts);
@@ -404,10 +400,8 @@ NMetrics.PD_dc_max(isnan(NMetrics.PD_dc_max)) = -1;
 NMetrics.LP_dc_max(isnan(NMetrics.LP_dc_max)) = -1;
 NMetrics.PD_dc_min(isnan(NMetrics.PD_dc_min)) = 2;
 NMetrics.LP_dc_min(isnan(NMetrics.LP_dc_min)) = 2;
-
-% exxagerate 0 duty cycle because it's qualitatively different from .01
-NMetrics.PD_dc_min(NMetrics.PD_dc_min==0) = -1;
-NMetrics.LP_dc_min(NMetrics.LP_dc_min==0) = -1;
+% NMetrics.PD_dc_mean(isnan(NMetrics.PD_dc_mean)) = -1;
+% NMetrics.LP_dc_mean(isnan(NMetrics.LP_dc_mean)) = -1;
 
 
 
