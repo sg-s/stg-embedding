@@ -50,15 +50,9 @@ p.PD_dc_min = NaN(N,1);
 p.PeriodError = NaN(N,1);
 
 
-% ratio of periods from burst ends and burst starts
-p.LP_period_error = NaN(N,1);
-p.PD_period_error = NaN(N,1);
-
 
 p.PD_isi_max = NaN(N,1);
 p.LP_isi_max = NaN(N,1);
-% p.PD_isi_min = nanmin(alldata.PD_PD,[],2);
-% p.LP_isi_min = nanmin(alldata.LP_LP,[],2);
 
 
 % ratio of max of 2nd to max of 1st order ISI
@@ -78,8 +72,29 @@ p.LPf = sum(~isnan(alldata.LP),2);
 
 
 
+
 PD_burst_periods2 = NaN(N,1);
 LP_burst_periods2 = NaN(N,1);
+
+
+
+
+disp('Computing skipped burst statistic...')
+for i = 1:N
+	PD = alldata.PD(i,:);
+	LP = alldata.LP(i,:);
+
+
+	p.skipped_burst_PD(i) = embedding.findMaxISIInOtherNeuron(PD,LP);
+	p.skipped_burst_LP(i) = embedding.findMaxISIInOtherNeuron(LP,PD);
+end
+
+p.skipped_burst_LP(isnan(p.skipped_burst_LP)) = 0;
+p.skipped_burst_PD(isnan(p.skipped_burst_PD)) = 0;
+
+
+
+
 
 disp('Computing burst starts and stops...')
 
@@ -90,21 +105,39 @@ for i = 1:N
 	PD = alldata.PD(i,:);
 	LP = alldata.LP(i,:);
 
+	offset = nanmin([PD(:); LP(:)]);
+
+	PD = PD - offset;
+	LP = LP - offset;
+
 	[PD_burst_starts, PD_burst_stops] = embedding.findNominalBurstStartsStops(PD,LP);
 	[LP_burst_starts, LP_burst_stops] = embedding.findNominalBurstStartsStops(LP,PD);
 
 
+	PD_burst_periods = diff(PD_burst_starts);
+	LP_burst_periods = diff(LP_burst_starts);
+
+	PD_burst_periods2(i) = nanmean(diff(PD_burst_stops));
+	LP_burst_periods2(i) = nanmean(diff(LP_burst_stops));
 
 
 
+	% if i == 15904
+	% 	keyboard
+	% end
+
+	% error('NO')
 	% figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
-	% neurolib.raster(alldata.PD(i,:),'deltat',1,'center',false,'yoffset',0)
-	% neurolib.raster(alldata.LP(i,:),'deltat',1,'center',false,'yoffset',1)
-	% plot(LP_burst_starts,LP_burst_starts*0+1.95,'gd')
+
+	% neurolib.raster(PD,'deltat',1,'center',false,'yoffset',0)
+	% neurolib.raster(LP,'deltat',1,'center',false,'yoffset',1)
+	% plot(LP_burst_starts,LP_burst_starts*0+1.96,'go')
 	% plot(LP_burst_stops,LP_burst_stops*0+1.95,'rd')
 
-	% plot(PD_burst_starts,PD_burst_starts*0+.95,'gd')
+	% plot(PD_burst_starts,PD_burst_starts*0+.96,'go')
 	% plot(PD_burst_stops,PD_burst_stops*0+.95,'rd')
+
+
 
 	LP_phases = PD_burst_starts*NaN;
 	PD_phases = LP_burst_starts*NaN;
@@ -151,23 +184,12 @@ for i = 1:N
 	end
 
 
-	PD_burst_periods = diff(PD_burst_starts);
-	LP_burst_periods = diff(LP_burst_starts);
-
-	PD_burst_periods2(i) = nanmean(diff(PD_burst_stops));
-	LP_burst_periods2(i) = nanmean(diff(LP_burst_stops));
-
 
 	LP_phases(1:end-1) = LP_phases(1:end-1)./PD_burst_periods;
 	PD_phases(1:end-1) = PD_phases(1:end-1)./LP_burst_periods;
 
 	LP_dc(1:end-1) = LP_dc(1:end-1)./LP_burst_periods;
 	PD_dc(1:end-1) = PD_dc(1:end-1)./PD_burst_periods;
-	
-
-	if i == 4976
-		keyboard
-	end
 
 
 
@@ -207,9 +229,6 @@ for i = 1:N
 	p.LP_dc_min(i) = nanmin(LP_dc);
 end
 
-% compare burst periods from burst starts and burst ends
-p.PD_period_error = 2*abs(PD_burst_periods2 - p.PD_burst_period_mean)./(PD_burst_periods2 + p.PD_burst_period_mean);
-p.LP_period_error = 2*abs(LP_burst_periods2 - p.LP_burst_period_mean)./(LP_burst_periods2 + p.LP_burst_period_mean);
 
 
 
@@ -251,10 +270,13 @@ for i = 1:length(neurons)
 	end
 end
 
-% cap the ratios
+% cap the ratios and exaggerate them
 p.PD_isi_ratios(p.PD_isi_ratios>3)=  3;
 p.LP_isi_ratios(p.LP_isi_ratios>3)=  3;
 
+% exxagerate isi ratios
+p.PD_isi_ratios = exp(p.PD_isi_ratios-1);
+p.LP_isi_ratios = exp(p.LP_isi_ratios-1);
 
 % phases beyond [0 1] are meaningless
 p.PD_phase_mean(p.PD_phase_mean>1) = NaN;
@@ -281,10 +303,29 @@ p.LP_phase_cv = p.LP_phase_cv./p.LP_phase_mean;
 p.PD_phase_cv = p.PD_phase_cv./p.PD_phase_mean;
 
 
-p.PeriodError = 2+abs(p.PD_burst_period_mean - p.LP_burst_period_mean)./(p.PD_burst_period_mean + p.LP_burst_period_mean);
+p.PeriodError = abs(p.PD_burst_period_mean - p.LP_burst_period_mean)./(p.PD_burst_period_mean + p.LP_burst_period_mean);
+
+
+% scale skipped bursts by burst period
+p.skipped_burst_LP = p.skipped_burst_LP./p.LP_burst_period_mean;
+p.skipped_burst_PD = p.skipped_burst_PD./p.PD_burst_period_mean;
+
+% eliminate skipped burst metrics for when burst metrics aren't defined
+p.skipped_burst_PD(isnan(p.PD_burst_period_mean)) = NaN;
+p.skipped_burst_PD(isnan(p.LP_burst_period_mean)) = NaN;
+p.skipped_burst_LP(isnan(p.PD_burst_period_mean)) = NaN;
+p.skipped_burst_LP(isnan(p.LP_burst_period_mean)) = NaN;
+
+
+p.skipped_burst_PD(isnan(p.skipped_burst_PD)) = 0;
+p.skipped_burst_LP(isnan(p.skipped_burst_LP)) = 0;
 
 Metrics = p;
 NMetrics = Metrics;
+
+
+
+
 
 % normalize 
 fn = fieldnames(NMetrics);
@@ -328,9 +369,10 @@ NMetrics.LP_dc_mean(isnan(NMetrics.LP_dc_mean)) = -1;
 
 
 
+
 % fill in NaNs in some fields with the maximum value,
 % because higher values = "bad" in these fields
-fields = {'PeriodError','PD_isi_max','LP_isi_max','PD_isi_ratios','LP_isi_ratios','PD_second_order','LP_second_order','PD_period_error','LP_period_error','PD_dc_cv','LP_dc_cv','PD_phase_cv','LP_phase_cv','PD_burst_period_cv','LP_burst_period_cv'};
+fields = {'PeriodError','PD_isi_max','LP_isi_max','PD_isi_ratios','LP_isi_ratios','PD_second_order','LP_second_order','PD_dc_cv','LP_dc_cv','PD_phase_cv','LP_phase_cv','PD_burst_period_cv','LP_burst_period_cv'};
 for i = 1:length(fields)
 	NMetrics.(fields{i}) = embedding.nan2max(NMetrics.(fields{i}));
 end

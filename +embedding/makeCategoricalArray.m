@@ -15,11 +15,21 @@ idx(1) = 'LP-silent';
 idx(1) = 'LP-silent-PD-bursting';
 idx(1) = 'PD-silent';
 idx(1) = 'PD-silent-LP-bursting';
-idx(1) = 'LP-01';
-idx(1) = 'PD-01';
+
 idx(1) = 'synchronous-spike'; % at least one PD,LP spike pair co-occur
 idx(1) = 'LP-irregular-bursting'; % sometimes bursting,sometimes not. PD ok
 idx(1) = 'PD-irregular-bursting';
+
+
+% one neuron weak bursting
+idx(1) = 'LP-01';
+idx(1) = 'LP-single-spike';
+idx(1) = 'LP-1-plus';
+
+idx(1) = 'PD-01';
+idx(1) = 'PD-single-spike';
+idx(1) = 'PD-1-plus';
+
 
 % both neurons weird
 idx(1) = 'slow-bursting';
