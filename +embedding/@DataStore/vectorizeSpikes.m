@@ -61,6 +61,7 @@ p.PD_isi_min = nanmin(alldata.PD_PD,[],2);
 p.LP_isi_min = nanmin(alldata.LP_LP,[],2);
 
 % 1/delays, capped
+% this is needed to detect synchronous aberrant spikes
 p.LP_PD = 1./nanmin(alldata.LP_PD,[],2);
 p.PD_LP = 1./nanmin(alldata.LP_PD,[],2);
 p.LP_PD(p.LP_PD>20) = 20;
@@ -119,8 +120,12 @@ for i = 1:N
 	p.LP_burstiness(i) = isi_gap/LP(pos);
 end
 % cap
-p.LP_burstiness(p.LP_burstiness>10) = 10;
-p.PD_burstiness(p.PD_burstiness>10) = 10;
+p.LP_burstiness(p.LP_burstiness>5) = 5;
+p.PD_burstiness(p.PD_burstiness>5) = 5;
+
+p.LP_burstiness(p.LP_burstiness<1) = -1;
+p.PD_burstiness(p.PD_burstiness<1) = -1;
+
 p.PD_burstiness(isnan(p.PD_burstiness)) = -1;
 p.LP_burstiness(isnan(p.LP_burstiness)) = -1;
 
@@ -182,8 +187,8 @@ for i = 1:N
 
 
 
-	LP_phases = PD_burst_starts*NaN;
-	PD_phases = LP_burst_starts*NaN;
+	% LP_phases = PD_burst_starts*NaN;
+	% PD_phases = LP_burst_starts*NaN;
 
 	LP_dc = LP_burst_starts*NaN;
 	PD_dc = PD_burst_starts*NaN;
@@ -191,7 +196,7 @@ for i = 1:N
 
 	% measure duty cycles
 	for j = 1:length(PD_dc)-1
-		next_PD_stop = PD_burst_stops(find(PD_burst_stops>=PD_burst_starts(j),1,'first'));
+		next_PD_stop = PD_burst_stops(find(PD_burst_stops>=PD_burst_starts(j) & PD_burst_stops<PD_burst_starts(j+1),1,'first'));
 		if isempty(next_PD_stop)
 			continue
 		end
@@ -199,7 +204,7 @@ for i = 1:N
 	end
 
 	for j = 1:length(LP_dc)-1
-		next_LP_stop = LP_burst_stops(find(LP_burst_stops>=LP_burst_starts(j),1,'first'));
+		next_LP_stop = LP_burst_stops(find(LP_burst_stops>=LP_burst_starts(j) & LP_burst_stops<LP_burst_starts(j+1),1,'first'));
 		if isempty(next_LP_stop)
 			continue
 		end
@@ -208,28 +213,28 @@ for i = 1:N
 
 
 
-	% measure LP delay in PD time
-	for j = 1:length(LP_phases)-1
-		next_LP_start = LP_burst_starts(find(LP_burst_starts>PD_burst_starts(j),1,'first'));
-		if isempty(next_LP_start)
-			continue
-		end
-		LP_phases(j) = next_LP_start - PD_burst_starts(j);
-	end
+	% % measure LP delay in PD time
+	% for j = 1:length(LP_phases)-1
+	% 	next_LP_start = LP_burst_starts(find(LP_burst_starts>PD_burst_starts(j),1,'first'));
+	% 	if isempty(next_LP_start)
+	% 		continue
+	% 	end
+	% 	LP_phases(j) = next_LP_start - PD_burst_starts(j);
+	% end
 
-	% measure PD delay in LP time
-	for j = 1:length(PD_phases)-1
-		next_PD_start = PD_burst_starts(find(PD_burst_starts>LP_burst_starts(j),1,'first'));
-		if isempty(next_PD_start)
-			continue
-		end
-		PD_phases(j) = next_PD_start - LP_burst_starts(j);
-	end
+	% % measure PD delay in LP time
+	% for j = 1:length(PD_phases)-1
+	% 	next_PD_start = PD_burst_starts(find(PD_burst_starts>LP_burst_starts(j),1,'first'));
+	% 	if isempty(next_PD_start)
+	% 		continue
+	% 	end
+	% 	PD_phases(j) = next_PD_start - LP_burst_starts(j);
+	% end
 
 
 
-	LP_phases(1:end-1) = LP_phases(1:end-1)./PD_burst_periods;
-	PD_phases(1:end-1) = PD_phases(1:end-1)./LP_burst_periods;
+	% LP_phases(1:end-1) = LP_phases(1:end-1)./PD_burst_periods;
+	% PD_phases(1:end-1) = PD_phases(1:end-1)./LP_burst_periods;
 
 	LP_dc(1:end-1) = LP_dc(1:end-1)./LP_burst_periods;
 	PD_dc(1:end-1) = PD_dc(1:end-1)./PD_burst_periods;
@@ -303,8 +308,8 @@ p.PD_dc_cv2(p.PD_dc_cv2>10) = 10;
 
 
 % either can be higher, so we can't do simple division as before
-p.PeriodError = abs(p.PD_burst_period_max - p.LP_burst_period_max)./(p.PD_burst_period_max + p.LP_burst_period_max);
-p.PeriodError = exp(p.PeriodError);
+% p.PeriodError = abs(p.PD_burst_period_max - p.LP_burst_period_max)./(p.PD_burst_period_max + p.LP_burst_period_max);
+% p.PeriodError = exp(p.PeriodError);
 
 
 
@@ -360,6 +365,7 @@ p.LP_isi_ratios(p.LP_isi_ratios>3)=  3;
 % exxagerate isi ratios
 p.PD_isi_ratios = exp(p.PD_isi_ratios-1);
 p.LP_isi_ratios = exp(p.LP_isi_ratios-1);
+
 
 
 

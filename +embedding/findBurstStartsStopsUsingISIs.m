@@ -23,19 +23,28 @@ A_stops = [A_stops NaN NaN NaN];
 
 
 
-A_burst_period = nanmax(diff(A_starts));
+% A_burst_period = nanmax(diff(A_starts));
 
 
-% make sure bursting doesn't start too late or stop too early
-if A_starts(1) > A_burst_period
-	A_starts = [A(1) A_starts];
-end
+% % make sure bursting doesn't start too late or stop too early
+% if A_starts(1) > A_burst_period
+
+% 	if A(1) > A_burst_period
+% 		% add first spike
+% 		A_starts = [A(1) A_starts];
+% 	end
+
+% 	if A_starts(1) > A_burst_period
+% 		A_starts = [0 A_starts];
+% 	end
+
+% end
 
 
-if 20-nanmax(A_starts) > A_burst_period
-	A_starts(end) = 20;
-	A_starts = sort(A_starts);
-end
+% if 20-nanmax(A_starts) > A_burst_period
+% 	A_starts(end) = 20;
+% 	A_starts = sort(A_starts);
+% end
 
 
 % figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on

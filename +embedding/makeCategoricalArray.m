@@ -44,4 +44,6 @@ idx(1) = 'LP-01-PD-var-burst';
 idx(1) = 'irregular-bursting'; % always bursting, but irregularly (both neurons)
 
 
+idx(1) = 'phase-disturbed';
+
 idx(:) = categorical(NaN);

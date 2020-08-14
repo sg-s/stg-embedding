@@ -1,6 +1,6 @@
 function compare(a,b)
 
-p = evalin('base','p');
+p = evalin('base','NormalizedMetrics');
 
 fn = fieldnames(p);
 
@@ -12,7 +12,7 @@ for i = 1:length(A)
 	B(i) = p.(fn{i})(b);
 end
 
-D = round(100*abs(A-B)./(A+B));
+D = round(100*abs(A-B));
 
 [D,idx] = sort(D);
 A = A(idx);
