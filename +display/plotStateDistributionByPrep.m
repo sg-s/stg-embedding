@@ -1,14 +1,18 @@
-function [h, P] = plotStateDistributionByPrep(alldata,OnlyWhen)
+function [h, P] = plotStateDistributionByPrep(allidx, experiment_idx, OnlyWhen)
 
-unique_exps = unique(alldata.experiment_idx);
+assert(length(allidx) == length(experiment_idx),'idx and preps not the same length')
+assert(iscategorical(allidx),'Expected idx to be categorical')
+
+unique_exps = unique(experiment_idx);
 N = length(unique_exps);
-P = zeros(N,length(unique(alldata.idx)));
+P = zeros(N,length(unique(allidx)));
 for i = 1:N
-	idx = alldata.idx(alldata.experiment_idx == unique_exps(i) & OnlyWhen);
+	idx = allidx(experiment_idx == unique_exps(i) & OnlyWhen);
 	if isempty(idx)
 		continue
 	end
 
+	keyboard
 	P(i,:) = histcounts(idx);
 	P(i,:) = P(i,:)/sum(P(i,:));
 end
@@ -19,7 +23,7 @@ h = barh(P,'stacked','LineStyle','none','BarWidth',1);
 
 
 % get the colors sright
-cats = categories(alldata.idx);
+cats = categories(allidx);
 colors = display.colorscheme(cats);
 
 for i = 1:length(h)

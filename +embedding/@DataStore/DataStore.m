@@ -57,6 +57,8 @@ properties
 	atropine double = 0  
 	RPCH double = 0  
 
+	% stores the manually assigned labels
+	idx categorical = categorical(NaN)
 
 end % props
 
@@ -167,6 +169,7 @@ methods (Static)
 		DS = embedding.DataStore;
 		props = properties(DS);
 		props = setdiff(props,'time_offset');
+		props = setdiff(props,'idx');
 		props = setdiff(props,'mask');
 		props = setdiff(props,{'LP','PD','PD_PD','LP_LP','LP_PD','PD_LP'});
 

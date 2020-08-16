@@ -1,7 +1,20 @@
 % converts isis to dominant period
 % in a parameter-free manner
+% using autocorrelation function of ISIs
 
-function [metrics] = ISI2DominantPeriod(spikes,isis)
+function metrics = ISIAutocorrelationPeriod(alldata, neuron)
+
+assert(length(alldata)==1,'Expected a scalar DataStore object')
+
+
+spikes = alldata.(neuron);
+isis = alldata.([neuron '_' neuron]);
+
+DataSize = length(alldata.mask);
+for i = 1:DataSize
+	spikes(i,:) = spikes(i,:) - nanmin(spikes(i,:));
+end
+
 
 T = NaN(size(isis,1),1);
 ACF_values = T;
@@ -15,7 +28,9 @@ time = linspace(0,20,2e3);
 NSpikesMean = T;
 NSpikesVar = T;
 
-parfor i = 1:length(T)
+
+
+parfor i = 1:DataSize
 %for i = 1030
 
 
@@ -93,12 +108,6 @@ parfor i = 1:length(T)
 
 	% find all peaks
 	[~,peak_locs] = findpeaks(Y,'MinPeakHeight',T(i)/300,'MinPeakDistance',T(i)/2);
-
-
-	% if max(peak_locs) < (2000-T(i)*2)
-	% 	% some peaks are missing...something happens in the later part 
-	% 	peak_locs = [peak_locs 2000];
-	% end
 
 
 	all_T = diff(peak_locs);

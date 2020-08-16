@@ -2,7 +2,8 @@
 
 function [means, group_idx] = probStateGroupedBy(alldata, state, GroupBy)
 
-
+assert(length(alldata)==1,'Expected a scalar DataStore')
+assert(~any(isundefined(alldata.idx)),'States are undefiend')
 
 groupNames = unique(vertcat(alldata.(GroupBy)));
 
@@ -27,7 +28,6 @@ for i = 1:length(groupNames)
 
 	group_idx = [repmat(groupNames(i),length(probability),1); group_idx];
 	means = [probability; means];
-
 
 
 end

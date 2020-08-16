@@ -7,21 +7,15 @@ clearvars ax
 % get data
 if ~exist('data','var')
 	data = sourcedata.getAllData();
-	data = sourcedata.filter(data,sourcedata.DataFilter.Baseline);
+	data = filter(data,sourcedata.DataFilter.Baseline);
 
-	% we're going to convert back into a structure array
-	[alldata, data] = sourcedata.combine(data);
+	% convert into a scalar 
+	alldata = data.combine;
 
 	% compute sub-dominant period
-	DataSize = length(alldata.mask);
-	for i = 1:DataSize
-		offset = nanmin([nanmin(alldata.PD(i,:)) nanmin(alldata.LP(i,:))]);
-		alldata.PD(i,:) = alldata.PD(i,:) - offset;
-		alldata.LP(i,:) = alldata.LP(i,:) - offset;
-	end
 
-	metricsPD = sourcedata.ISI2DominantPeriod(alldata.PD,alldata.PD_PD);
-	metricsLP = sourcedata.ISI2DominantPeriod(alldata.LP,alldata.LP_LP);
+	metricsLP = alldata.ISIAutocorrelationPeriod('LP');
+	metricsPD = alldata.ISIAutocorrelationPeriod('PD');
 
 end
 

@@ -2,34 +2,33 @@
 close all
 clearvars -except data alldata metricsPD metricsLP
 
-% constants
+% drawing constants
 extra_color = [.1 .1 .1];
 intra_color = [.9 0 0];
+
+DataSize = length(alldata.mask);
 
 % get data
 if ~exist('metricsPD','var')
 
 
-	% compute sub-dominant period
-	DataSize = length(alldata.mask);
-	for i = 1:DataSize
-		offset = nanmin([nanmin(alldata.PD(i,:)) nanmin(alldata.LP(i,:))]);
-		alldata.PD(i,:) = alldata.PD(i,:) - offset;
-		alldata.LP(i,:) = alldata.LP(i,:) - offset;
-	end
-
-	metricsPD = sourcedata.ISI2DominantPeriod(alldata.PD,alldata.PD_PD);
-	metricsLP = sourcedata.ISI2DominantPeriod(alldata.LP,alldata.LP_LP);
+	metricsLP = alldata.ISIAutocorrelationPeriod('LP');
+	metricsPD = alldata.ISIAutocorrelationPeriod('PD');
 
 	metricsPD.DominantPeriod(metricsPD.DominantPeriod==20) = NaN;
 	metricsLP.DominantPeriod(metricsLP.DominantPeriod==20) = NaN;
 
+
 end
 
 
+if any(isundefined(alldata.idx))
+	% get the states
+	alldata.idx = alldata.getLabelsFromCache();
+end
+
 
 colors = display.colorscheme(alldata.idx);
-
 
 
 
@@ -38,12 +37,12 @@ figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[120
 
 
 ax.experimenter = subplot(3,3,1); hold on
-[means, group_idx] = analysis.probStateGroupedBy(alldata, 'normal', 'experimenter');
+[means, group_idx] = probStateGroupedBy(alldata, 'normal', 'experimenter');
 C = lines;
 group_idx = removecats(group_idx);
 experimenters = unique(group_idx);
 for i = 1:length(experimenters)
-	[S,P]=plotlib.raincloud(means(group_idx == experimenters(i)),'YOffset',i*2,'Color',C(i,:));
+	[S,P] = plotlib.raincloud(means(group_idx == experimenters(i)),'YOffset',i*2,'Color',C(i,:));
 	P.MarkerSize = 10;
 end
 group_idx = removecats(group_idx);
@@ -55,17 +54,20 @@ xlabel('p(normal)')
 
 
 
+
 % does recording type correlate with normal behavior? 
 
 ax.LP_extra = subplot(3,3,4); hold on
-temp = structlib.purge(alldata,alldata.LP_channel == 'gpn');
-[means, group_idx] = analysis.probStateGroupedBy(temp, 'normal', 'LP_channel');
+temp = alldata.purge(alldata.LP_channel == 'gpn');
+temp.LP_channel(temp.LP_channel ~= 'LP') = 'LP-extra';
+temp.LP_channel(temp.LP_channel == 'LP') = 'LP-intra';
 
-C = [intra_color; .3 .4 .7; ; extra_color];
+
+[means, group_idx] = temp.probStateGroupedBy('normal', 'LP_channel');
+
+C = [extra_color; intra_color];
 
 groups = unique(group_idx);
-% reorder groups for asethetics
-groups = [groups(2); groups(1); groups(3)];
 
 for i = 1:length(groups)
 	[~, shade(i)] = display.plotCDFWithError(means(group_idx==groups(i)),C(i,:));
@@ -78,20 +80,19 @@ end
 set(gca,'XTickLabel',{},'XLim',[0 1],'YLim',[0 1])
 legend(lines,cellfun(@char,{groups},'UniformOutput',false),'Location','northwest')
 
-[~,p]=kstest2(means(group_idx=='LP'),means(group_idx~='LP'));
+[~,p]=kstest2(means(group_idx=='LP-intra'),means(group_idx~='LP-intra'));
 th = text(.35,.85,['\itp = ' mat2str(p,2)]);
 
-% add some lines to indicate data grouping
-ph = plot(ax.LP_extra,[.27 .33],[.75 .75],'k','HandleVisibility','off');
-ph = plot(ax.LP_extra,[.27 .33],[.92 .92],'k','HandleVisibility','off');
-ph = plot(ax.LP_extra,[.33 .33],[.75 .92],'k','HandleVisibility','off');
-ph = plot(ax.LP_extra,[.27 .27],[.67 .83],'k','HandleVisibility','off');
 
 
 
-C = [ extra_color; intra_color];
+
 subplot(3,3,7); hold on
-[means, group_idx] = analysis.probStateGroupedBy(alldata, 'normal', 'PD_channel');
+temp = alldata;
+temp.PD_channel(temp.PD_channel ~= 'PD') = 'PD-extra';
+temp.PD_channel(temp.PD_channel == 'PD') = 'PD-intra';
+
+[means, group_idx] = temp.probStateGroupedBy('normal', 'PD_channel');
 groups = unique(group_idx);
 clear lines shade
 for i = 1:length(groups)
@@ -106,12 +107,12 @@ legend(lines,cellfun(@char,{groups},'UniformOutput',false),'Location','northwest
 xlabel('p(normal)')
 set(gca,'XLim',[0 1],'YLim',[0 1])
 
-[~,p]=kstest2(means(group_idx=='PD'),means(group_idx~='PD'));
+[~,p]=kstest2(means(group_idx=='PD-extra'),means(group_idx~='PD-extra'));
 th = text(.1,.8,['\itp = ' mat2str(p,2)]);
 
 
 
-
+return
 
 
 
@@ -124,7 +125,7 @@ th = text(.1,.8,['\itp = ' mat2str(p,2)]);
 labels = {'LP/PD','LP/pdn','PD/lpn/lvn','pdn/lpn','pdn/lvn'};
 
 
-ShowThese = zeros(length(alldata.idx),5);
+ShowThese = zeros(length(idx),5);
 ShowThese(:,1) = alldata.LP_channel == 'LP' & alldata.PD_channel == 'PD';
 ShowThese(:,2) = alldata.LP_channel == 'LP' & alldata.PD_channel == 'pdn';
 ShowThese(:,3) = (alldata.LP_channel == 'lvn' | alldata.LP_channel == 'lpn') & alldata.PD_channel == 'PD';
@@ -132,10 +133,10 @@ ShowThese(:,4) = alldata.LP_channel == 'lpn' & alldata.PD_channel == 'pdn';
 ShowThese(:,5) = alldata.LP_channel == 'lvn' & alldata.PD_channel == 'pdn';
 
 
-cats = categories(alldata.idx);
+cats = categories(idx);
 for i = 1:5
 	subplot(5,3,3*(i)-1); hold on
-	[h,P] = display.plotStateDistributionByPrep(alldata,ShowThese(:,i));
+	[h,P] = display.plotStateDistributionByPrep(idx, alldata.experiment_idx,ShowThese(:,i));
 	delete(h)
 
 	if i == 1
@@ -177,11 +178,11 @@ end
 
 ax.PD01 = subplot(4,3,3); hold on
 
-temp = structlib.purge(alldata,alldata.LP_channel == 'LP' );
+temp = alldata.purge(alldata.LP_channel == 'LP' );
 temp.PD_channel(temp.PD_channel == 'PD') = 'PD-intra';
 temp.PD_channel(temp.PD_channel ~= 'PD-intra') = 'PD-extra';
 
-[means, group_idx] = analysis.probStateGroupedBy(temp, 'PD-01', 'PD_channel');
+[means, group_idx] = analysis.probStateGroupedBy(temp, idx, 'PD-01', 'PD_channel');
 
 C = [intra_color; extra_color];
 groups = categories(removecats(group_idx));
@@ -203,13 +204,13 @@ ax.PD01.XLim = [0 1];
 
 
 ax.LP01 = subplot(4,3,6); hold on
-temp = structlib.purge(alldata,alldata.PD_channel == 'PD' );
+temp = alldata.purge(alldata.PD_channel == 'PD' );
 temp.LP_channel(temp.LP_channel == 'LP') = 'LP-intra';
 temp.LP_channel(temp.LP_channel == 'lpn') = 'LP-extra';
 temp.LP_channel(temp.LP_channel == 'lvn') = 'LP-extra';
-temp = structlib.purge(temp,temp.LP_channel == 'gpn' );
+temp = temp.purge(temp.LP_channel == 'gpn' );
 
-[means, group_idx] = analysis.probStateGroupedBy(temp, 'LP-01', 'LP_channel');
+[means, group_idx] = analysis.probStateGroupedBy(temp,  idx, 'LP-01', 'LP_channel');
 
 C = [intra_color; extra_color];
 groups = categories(removecats(group_idx));
@@ -351,8 +352,8 @@ for i = 1:length(unique_exps)
 	T_PD_mean(i) = nanmean(this_T);
 	T_PD_std(i) = nanstd(this_T);
 
-	p_normal_mean(i) = mean(alldata.idx(alldata.experiment_idx == unique_exps(i)) == 'normal');
-	p_normal_std(i) = std(alldata.idx(alldata.experiment_idx == unique_exps(i)) == 'normal')/sqrt(length(alldata.idx(alldata.experiment_idx == unique_exps(i)) == 'normal'));
+	p_normal_mean(i) = mean(idx(alldata.experiment_idx == unique_exps(i)) == 'normal');
+	p_normal_std(i) = std(idx(alldata.experiment_idx == unique_exps(i)) == 'normal')/sqrt(length(idx(alldata.experiment_idx == unique_exps(i)) == 'normal'));
 end
 
 
