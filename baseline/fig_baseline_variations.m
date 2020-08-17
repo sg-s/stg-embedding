@@ -81,7 +81,7 @@ set(gca,'XTickLabel',{},'XLim',[0 1],'YLim',[0 1])
 legend(lines,cellfun(@char,{groups},'UniformOutput',false),'Location','northwest')
 
 [~,p]=kstest2(means(group_idx=='LP-intra'),means(group_idx~='LP-intra'));
-th = text(.35,.85,['\itp = ' mat2str(p,2)]);
+th = text(.45,.85,['\itp = ' mat2str(p,2)]);
 
 
 
@@ -108,7 +108,7 @@ xlabel('p(normal)')
 set(gca,'XLim',[0 1],'YLim',[0 1])
 
 [~,p]=kstest2(means(group_idx=='PD-extra'),means(group_idx~='PD-extra'));
-th = text(.1,.8,['\itp = ' mat2str(p,2)]);
+th = text(.45,.8,['\itp = ' mat2str(p,2)]);
 
 
 
@@ -305,8 +305,6 @@ ax.T_LP.Position(4) =  ax.T_LP.Position(4)*.9;
 
 
 
-
-th.Position = [.35 .85];
 
 
 
