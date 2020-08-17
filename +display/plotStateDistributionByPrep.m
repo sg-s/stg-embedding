@@ -12,7 +12,6 @@ for i = 1:N
 		continue
 	end
 
-	keyboard
 	P(i,:) = histcounts(idx);
 	P(i,:) = P(i,:)/sum(P(i,:));
 end

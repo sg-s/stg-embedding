@@ -10,3 +10,4 @@ raw_spike_data = [alldata.LP, alldata.PD];
 midx = embedding.makeCategoricalArray(DataSize);
 load('../annotations/labels.cache','H','idx','-mat')
 idx = embedding.readAnnotations(idx,H,raw_spike_data,midx);
+idx = removecats(idx);

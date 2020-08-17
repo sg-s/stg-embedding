@@ -1,29 +1,30 @@
 % colors map by different metrics
 
 close all
-clearvars -except data alldata metricsPD metricsLP
 
 
-% get data
+% get the embedding
+if ~exist('R','var')
+    [p,NormalizedMetrics, VectorizedData] = alldata.vectorizeSpikes2;
+
+    fitData = VectorizedData;
+
+    % original
+    u = umap('min_dist',1, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
+    u.labels = alldata.idx;
+    R = u.fit(fitData);
+end
+
 if ~exist('metricsPD','var')
 
-
-	% compute sub-dominant period
-	DataSize = length(alldata.mask);
-	for i = 1:DataSize
-		offset = nanmin([nanmin(alldata.PD(i,:)) nanmin(alldata.LP(i,:))]);
-		alldata.PD(i,:) = alldata.PD(i,:) - offset;
-		alldata.LP(i,:) = alldata.LP(i,:) - offset;
-	end
-
-	metricsPD = sourcedata.ISI2DominantPeriod(alldata.PD,alldata.PD_PD);
-	metricsLP = sourcedata.ISI2DominantPeriod(alldata.LP,alldata.LP_LP);
+	metricsLP = alldata.ISIAutocorrelationPeriod('LP');
+	metricsPD = alldata.ISIAutocorrelationPeriod('PD');
 
 	metricsPD.DominantPeriod(metricsPD.DominantPeriod==20) = NaN;
 	metricsLP.DominantPeriod(metricsLP.DominantPeriod==20) = NaN;
 
-end
 
+end
 
 
 C = [metricsLP.DominantPeriod metricsLP.ACF_values abs(metricsPD.DominantPeriod - metricsLP.DominantPeriod) sum(~isnan(alldata.LP),2)/20];
@@ -35,8 +36,8 @@ figure('outerposition',[300 300 1302 1201],'PaperUnits','points','PaperSize',[13
 clear ax
 for i = 1:4
 	ax(i) = subplot(2,2,i); hold on
-	plot(alldata.R(:,1),alldata.R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',24)
-	scatter(alldata.R(:,1),alldata.R(:,2),6,C(:,i),'filled')
+	plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',24)
+	scatter(R(:,1),R(:,2),6,C(:,i),'filled')
 	axis square
 	caxis(Limits(i,:))
 	axis off
@@ -67,5 +68,8 @@ end
 
 for i = 1:length(ax)
     ax(i).Position(3:4) = .37;
+    ax(i).XLim = [-30 40];
+    ax(i).YLim = [-30 40];
 end
 
+clearvars -except data alldata metricsPD metricsLP R

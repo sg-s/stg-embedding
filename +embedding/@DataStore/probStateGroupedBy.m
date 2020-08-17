@@ -3,7 +3,7 @@
 function [means, group_idx] = probStateGroupedBy(alldata, state, GroupBy)
 
 assert(length(alldata)==1,'Expected a scalar DataStore')
-assert(~any(isundefined(alldata.idx)),'States are undefiend')
+assert(~any(isundefined(alldata.idx)),'States are undefined')
 
 groupNames = unique(vertcat(alldata.(GroupBy)));
 
