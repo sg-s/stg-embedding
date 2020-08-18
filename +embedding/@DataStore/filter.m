@@ -13,6 +13,16 @@ switch FilterSpec
 case sourcedata.DataFilter.AllUsable
 
 
+	% purge masked data
+	for i = 1:length(data)
+		data(i) = data(i).purge(~data(i).mask);
+	end
+
+
+	% remove empty datasets
+	data(cellfun(@sum,{data.mask}) == 0) = [];
+
+
 	% first, remove all pieces of data that are not at 11C
 	for i = 1:length(data)
 		% except if it's Philipp's data
@@ -22,6 +32,8 @@ case sourcedata.DataFilter.AllUsable
 		rm_this = data(i).temperature < 10 | data(i).temperature > 15;
 		data(i) = purge(data(i),rm_this);
 	end
+
+
 
 	% remove empty datasets
 	data(cellfun(@sum,{data.mask}) == 0) = [];

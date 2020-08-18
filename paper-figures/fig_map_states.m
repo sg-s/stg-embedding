@@ -41,21 +41,22 @@ end
 axis square
 
 
-show_these_states.normal = [5415 6001 5844];
-show_these_states.LP_silent_PD_bursting = [28657 38485 31173];
-show_these_states.PD_silent_LP_bursting = [41821 44480 44310];
-show_these_states.aberrant_spikes = [40980 40954 28458];
-show_these_states.interrupted_bursting = [35962 15600 18931];
-show_these_states.irregular = [28509 28490 28504];
-show_these_states.irregular_bursting = [55034 30588 30544];
-show_these_states.LP_skipped_bursts = [2638 26121 11753];
-show_these_states.LP_weak_skipped = [9225 52372 48357];
-show_these_states.PD_weak_skipped = [43170 30693 31515];
+show_these_states = dictionary;
+show_these_states.normal = [1888 41282];
+show_these_states.('LP-silent-PD-bursting') = [31773 25244];
+show_these_states.('PD-silent-LP-bursting') = [36034 32041];
+show_these_states.('aberrant-spikes') = [25346 33573];
+show_these_states.('interrupted-bursting') = [29486 13255];
+show_these_states.irregular = [47580 30426];
+show_these_states.('LP-skipped-bursts') = [42062 5547];
+show_these_states.('LP-weak-skipped') = [43599 18080];
+show_these_states.('PD-weak-skipped') = [27110 34743];
+show_these_states.('LP-PD-01') = [26569 37344];
 
 
 
 
-fn = fieldnames(show_these_states);
+fn = show_these_states.keys;
 
 for i = 1:length(ax.examples)
     axes(ax.examples(i))
@@ -79,7 +80,7 @@ for i = 1:length(ax.examples)
 
     end
 
-    title([char(idx(show_these(1))) ' (n=' mat2str(sum(idx==cats{i})) ')'],'FontWeight','normal')
+    title([char(idx(show_these(1))) ' (n=' mat2str(sum(idx==fn{i})) ')'],'FontWeight','normal')
 
     
 

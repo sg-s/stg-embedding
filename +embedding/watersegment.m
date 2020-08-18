@@ -1,7 +1,11 @@
+% given a Nx2 array containing coordinates,
+% applies a watershed segmentation to find "sub-clusters"
+% so that we can show sub-occupancy nicely
 
-function idx = watersegment(alldata)
 
-R = double(alldata.R);
+function idx = watersegment(R)
+
+assert(isnumeric(R),'Expected a double argument')
 
 nbins = 130; % increasing this will result in more clusters
 blur_radius = 1;

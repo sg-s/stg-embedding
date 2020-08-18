@@ -1,4 +1,4 @@
-function idx =  readAnnotations(MasterIdx, Hashes, RawData, idx)
+function [idx, raw_data_hashes] =  readAnnotations(MasterIdx, Hashes, RawData, idx)
 
 
 % hash the data

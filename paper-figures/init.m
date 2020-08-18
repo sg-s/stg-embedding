@@ -1,12 +1,12 @@
 % init script
 
 data = sourcedata.getAllData();
-data = filter(data,sourcedata.DataFilter.AllUsable);
-alldata = data.combine();
+alldata = filter(data,sourcedata.DataFilter.AllUsable);
+alldata = alldata.combine();
 
-alldata.idx = alldata.getLabelsFromCache;
+[alldata.idx, alldata_hashes] = alldata.getLabelsFromCache;
 
-assert(~any(isundefined(alldata.idx)),'Some data is unlabelled')
+assert(~any(isundefined(alldata.idx)),'Some data is unlabeled')
 
 % get the embedding
 [p,NormalizedMetrics, VectorizedData] = alldata.vectorizeSpikes2;
@@ -27,4 +27,4 @@ end
 
 
 
-clearvars -except alldata data R burst_metrics
+clearvars -except alldata data R burst_metrics basedata alldata_hashes
