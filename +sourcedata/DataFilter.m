@@ -1,6 +1,6 @@
 
 classdef DataFilter
    enumeration
-      Baseline, Decentralized, Neuromodulator
+      Baseline, Decentralized, Neuromodulator, AllUsable
    end
 end

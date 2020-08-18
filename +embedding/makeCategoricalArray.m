@@ -37,6 +37,8 @@ idx(1) = 'interrupted-bursting';
 idx(1) = 'irregular-bursting'; % always bursting, but irregularly (both neurons)
 
 
+idx(1) = 'slow-weak-bursting';
+
 idx(1) = 'phase-disturbed';
 
 idx(:) = categorical(NaN);

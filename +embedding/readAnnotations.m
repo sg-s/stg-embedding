@@ -1,10 +1,12 @@
 function idx =  readAnnotations(MasterIdx, Hashes, RawData, idx)
 
+
+% hash the data
+raw_data_hashes = cell(length(idx),1);
 parfor i = 1:length(idx)
-	this_hash = hashlib.md5hash(RawData(i,:));
-	loc = find(strcmp(this_hash,Hashes));
-	if ~isempty(loc)
-		loc = loc(1);
-		idx(i) = MasterIdx(loc);
-	end
+	raw_data_hashes{i} = hashlib.md5hash(RawData(i,:));
 end
+
+[hash_exists,loc] = ismember(raw_data_hashes,Hashes);
+
+idx(hash_exists) = MasterIdx(nonzeros(loc));
