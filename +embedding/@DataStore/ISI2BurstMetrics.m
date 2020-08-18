@@ -51,6 +51,9 @@ for i = 1:N
 	PD_burst_periods = diff(PD_burst_starts);
 	LP_burst_periods = diff(LP_burst_starts);
 
+	PD_n_spikes = NaN;
+	LP_n_spikes = NaN;
+
 
 
 	LP_delays = PD_burst_starts*NaN;
@@ -138,9 +141,12 @@ for i = 1:N
 
 	if length(PD_burst_starts)>1
 		PD_n_spikes = histcounts(PD,PD_burst_starts);
+
 	end
+	
 	if length(LP_burst_starts)>1
 		LP_n_spikes = histcounts(LP,LP_burst_starts);
+
 	end
 
 	p(i).LP_nspikes = nanmean(LP_n_spikes);

@@ -30,6 +30,8 @@ fitData = VectorizedData;
 
 % original
 u = umap('min_dist',0, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
+
+
 R = u.fit(fitData);
 
 % R = [metricsLP.Maximum, metricsLP.DominantPeriod];
