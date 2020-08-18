@@ -9,19 +9,6 @@ end
 % unpack
 idx = alldata.idx;
 
-% get the embedding
-if ~exist('R','var')
-    [p,NormalizedMetrics, VectorizedData] = alldata.vectorizeSpikes2;
-
-    fitData = VectorizedData;
-
-    % original
-    u = umap('min_dist',1, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
-    u.labels = alldata.idx;
-    R = u.fit(fitData);
-end
-
-
 
 
 cats = categories(idx);
@@ -33,10 +20,10 @@ figure('outerposition',[300 300 2000 999],'PaperUnits','points','PaperSize',[200
 
 pidx = 1;
 for i = 1:3
-    for j = 1:6
-        ax.examples(pidx) = subplot(6,3,pidx); hold on
+    for j = 1:5
+        ax.examples(pidx) = subplot(5,3,pidx); hold on
         
-        set(ax.examples(pidx),'YLim',[-.01 10.01],'XLim',[-.5 10])
+        set(ax.examples(pidx),'YLim',[-.01 6.01],'XLim',[-.5 10])
         pidx = pidx + 1;
     end
 end
@@ -54,19 +41,20 @@ end
 axis square
 
 
+show_these_states.normal = [5415 6001 5844];
+show_these_states.LP_silent_PD_bursting = [28657 38485 31173];
+show_these_states.PD_silent_LP_bursting = [41821 44480 44310];
+show_these_states.aberrant_spikes = [40980 40954 28458];
+show_these_states.interrupted_bursting = [35962 15600 18931];
+show_these_states.irregular = [28509 28490 28504];
+show_these_states.irregular_bursting = [55034 30588 30544];
+show_these_states.LP_skipped_bursts = [2638 26121 11753];
+show_these_states.LP_weak_skipped = [9225 52372 48357];
+show_these_states.PD_weak_skipped = [43170 30693 31515];
 
-show_these_states.aberrant_spikes = [19150 5455 2354];
-show_these_states.interrupted_bursting = [10483 7132 17823];
-show_these_states.irregular = [18505 19535 18577];
-show_these_states.irregular_bursting = [4964 608 2331];
-show_these_states.LP_irregular_bursting = [2745 5473 20556];
-show_these_states.LP_skipped_bursts = [2691 1908 9619];
-show_these_states.LP_weak_skipped = [3944 20555 19851];
-show_these_states.normal = [8711 1230 15671];
-show_these_states.PD_skipped_bursts = [10662 17167 2011];
-show_these_states.PD_weak_skipped = [14080 15347 13999];
-show_these_states.phase_distrubed = [2229 3662 18412];
-show_these_states.LP_silent_PD_bursting = [11200 2730 20932];
+
+
+
 fn = fieldnames(show_these_states);
 
 for i = 1:length(ax.examples)
@@ -76,7 +64,7 @@ for i = 1:length(ax.examples)
 
     Y = 0;
 
-    for j = 1:3
+    for j = 1:2
 
         PD = alldata.PD(show_these(j),:);
         LP = alldata.LP(show_these(j),:);
@@ -87,7 +75,7 @@ for i = 1:length(ax.examples)
         neurolib.raster(LP,'deltat',1,'center',false,'yoffset',Y+1,'Color','r','LineWidth',1)
         
 
-        Y = Y + 4;
+        Y = Y + 3;
 
     end
 
@@ -117,4 +105,4 @@ ax.examples(1).YTick = [.5 5.5];
 ax.examples(1).YTickLabel = {'PD','LP'};
 
 % clean up workspace
-clearvars -except alldata data VectorizedData R metricsPD metricsLP
+clearvars -except alldata data R burst_metrics

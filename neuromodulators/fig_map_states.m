@@ -8,7 +8,7 @@ end
 
 % unpack
 idx = alldata.idx;
-R = alldata.R;
+
 
 cats = categories(idx);
 

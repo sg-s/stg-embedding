@@ -12,7 +12,7 @@ assert(~any(isundefined(alldata.idx)),'Some data is unlabelled')
 [p,NormalizedMetrics, VectorizedData] = alldata.vectorizeSpikes2;
 
 % original
-u = umap('min_dist',1, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
+u = umap('min_dist',.75, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
 u.labels = alldata.idx;
 R = u.fit(VectorizedData);
 

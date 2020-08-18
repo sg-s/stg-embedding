@@ -44,3 +44,5 @@ for i = 1:length(ax)
 	xlabel(insets(i),Labels{i})
 end
 
+
+axlib.move(ax,'left',.03)
