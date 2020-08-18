@@ -112,23 +112,23 @@ case sourcedata.DataFilter.Decentralized
 			continue
 		end
 		rm_this = data(i).temperature < 10 | data(i).temperature > 15;
-		data(i) = sourcedata.purge(data(i),rm_this);
+		data(i) = purge(data(i),rm_this);
 	end
 
 
 	% remove anything that has a non-default value
-	defaults = rmfield(metadata.defaults,'decentralized');
+	defaults = rmfield(embedding.DataStore.defaults,'decentralized');
 	defaults = rmfield(defaults,'temperature');
 	defaults = rmfield(defaults,'baseline');
 
 	fn = fieldnames(defaults);
 
 	for i = 1:length(data)
-		rm_this = false(length(data(i).mask));
+		rm_this = false(length(data(i).mask),1);
 		for j = 1:length(fn)
 			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
 		end
-		data(i) = sourcedata.purge(data(i),rm_this);
+		data(i) = purge(data(i),rm_this);
 	end
 
 

@@ -12,6 +12,7 @@ idx(1) = 'normal';
 idx(1) = 'LP-silent';
 idx(1) = 'LP-silent-PD-bursting';
 idx(1) = 'PD-silent';
+idx(1) = 'PD-silent-LP-bursting';
 
 idx(1) = 'LP-irregular-bursting'; % sometimes bursting,sometimes not. PD ok
 idx(1) = 'aberrant-spikes';

@@ -11,5 +11,6 @@ end
 data = sourcedata.getAllData();
 
 
-data = sourcedata.filter(data,sourcedata.DataFilter.Decentralized);
+data = filter(data,sourcedata.DataFilter.Decentralized);
 
+alldata = data.combine;
