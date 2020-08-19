@@ -2,7 +2,7 @@
 
 
 % get the data and filter
-if ~exist('data','var')
+if ~exist('alldata','var')
 	disp('Reading in all data...')
 	data = sourcedata.getAllData();
 	alldata = filter(data,sourcedata.DataFilter.AllUsable);

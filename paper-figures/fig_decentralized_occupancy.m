@@ -67,4 +67,5 @@ ax(2).Position = [.6 .62 .33 .35];
 
 
 
-clearvars -except alldata basedata R decdata alldata_hashes
+
+clearvars -except alldata data R metrics basedata decdata hashes

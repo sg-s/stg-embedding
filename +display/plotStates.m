@@ -1,26 +1,31 @@
-function plotStates(ax, cats, states, time, y)
+% plots states in a line, useful for making neural ethogram
+% plots
 
+function plotStates(ax, states, time, YOffset)
+
+cats = categories(states);
 colors = display.colorscheme(cats);
 
 for j = 1:length(cats)
 
-    yy = y;
-    yy(states ~= cats{j}) = NaN;
+    y = time*0 + YOffset;
+    y(states ~= cats{j}) = NaN;
 
-    if all(isnan(yy))
+    if all(isnan(y))
         continue
     end
 
     % this effectively plots lines of continuous blocks
-    plot(ax,time,yy,'Color',colors(cats{j}),'LineWidth',2.5)
+    
+    plot(ax,time(:),y(:),'Color',colors(cats{j}),'LineWidth',2.5)
 
     % now what about single pts? 
-    yy1 = circshift(yy,1);
-    yy2 = circshift(yy,-1);
+    y1 = circshift(y,1);
+    y2 = circshift(y,-1);
 
-    isolated_pts = ~isnan(yy) & isnan(yy1) & isnan(yy2);
+    isolated_pts = ~isnan(y) & isnan(y1) & isnan(y2);
 
-    plot(ax,time(isolated_pts),yy(isolated_pts),'.','MarkerSize',10,'Color',colors(cats{j}),'LineStyle','none')
+    plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',10,'Color',colors(cats{j}),'LineStyle','none')
 
 
 end
