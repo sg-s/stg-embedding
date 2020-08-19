@@ -2,9 +2,7 @@
 % assuming it exists, and shows illustrative examples from
 % each class 
 
-if ~exist('alldata','var')
-    init()
-end
+init
 
 % unpack
 idx = alldata.idx;
