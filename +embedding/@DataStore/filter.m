@@ -63,6 +63,9 @@ case sourcedata.DataFilter.AllUsable
 
 case sourcedata.DataFilter.Neuromodulator
 
+
+	error('Not coded')
+
 	% first, remove all pieces of data that are not at 11C
 	for i = 1:length(data)
 		% except if it's Philipp's data
@@ -117,36 +120,26 @@ case sourcedata.DataFilter.Neuromodulator
 case sourcedata.DataFilter.Baseline
 
 
-	% first, remove all pieces of data that are not at 11C
-	for i = 1:length(data)
-		rm_this = data(i).temperature < 10 | data(i).temperature > 12;
-		data(i) = purge(data(i),rm_this);
-	end
+	assert(isscalar(data),'expected data to be scalar')
+	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
+
+
 
 	% remove anything that has a non-default value	
 	defaults = rmfield(embedding.DataStore.defaults,'temperature');
 	fn = fieldnames(defaults);
 
-	for i = 1:length(data)
-		rm_this = false(length(data(i).mask),1);
-		for j = 1:length(fn)
-			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
-		end
 
-		data(i) = purge(data(i),rm_this);
+	rm_this = false(length(data.mask),1);
+	for j = 1:length(fn)
+		rm_this(data.(fn{j}) ~= defaults.(fn{j})) = true;
 	end
 
-
-	% purge masked data
-	for i = 1:length(data)
-		data(i) = data(i).purge(~data(i).mask);
-	end
+	data = purge(data,rm_this);
 
 
-	% remove empty datasets
-	data(cellfun(@sum,{data.mask}) == 0) = [];
-
-
+	% purge data with undefined experiment IDs. WTF??
+	data = purge(data,isundefined(data.experiment_idx));
 
 
 

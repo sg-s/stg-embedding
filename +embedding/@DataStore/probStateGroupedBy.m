@@ -1,14 +1,28 @@
-% computes the probability of state in groups grouped by something
+% computes the probability of one state in groups grouped by something
+% computed on a prep-by-prep basis
+% you cannot use 'experiment_idx' as the grouping variable
+
 
 function [means, group_idx] = probStateGroupedBy(alldata, state, GroupBy)
+
+
 
 assert(length(alldata)==1,'Expected a scalar DataStore')
 assert(~any(isundefined(alldata.idx)),'States are undefined')
 
+assert(~strcmp(GroupBy,'experiment_idx'),'You cannot use experiment_idx to group by')
+assert(isprop(alldata,GroupBy),'GroupBy should be a DataStore property')
+
+
 groupNames = unique(vertcat(alldata.(GroupBy)));
+
+if iscategorical(groupNames)
+	groupNames(isundefined(groupNames)) = [];
+end
 
 group_idx = [];
 means = [];
+
 
 for i = 1:length(groupNames)
 
