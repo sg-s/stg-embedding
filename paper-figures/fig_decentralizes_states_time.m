@@ -3,29 +3,12 @@
 init
 close all
 
+
+
 % compute the time of decentralization and make a vector
 % for this
-time_since_decentralization = NaN(length(decdata.mask),1);
+time_since_decentralization = analysis.timeSinceDecentralization(decdata);
 all_preps = unique(decdata.experiment_idx);
-for i = 1:length(all_preps)
-	use_this = decdata.experiment_idx == all_preps(i);
-	idx = decdata.idx(use_this);
-	time = decdata.time_offset(use_this);
-	decentralized = decdata.decentralized(use_this);
-	
-
-	breaks = (find(diff(time)<0));
-	d = find(decentralized,1,'first');
-
-	first_usable = max(breaks(breaks<d));
-	last_usable = min(breaks(breaks>d));
-
-	time(1:first_usable) = NaN;
-	time(last_usable+1:end) = NaN;
-
-	time_since_decentralization(use_this) = time - time(find(decentralized,1,'first'));
-
-end
 
 % first make line plots for baseline and decentralized
 
@@ -159,8 +142,10 @@ r1.Position = [0 84 2000 2];
 ax(1).YLim = [0 88];
 
 
+
+
 figlib.pretty()
 
 
 
-% clearvars -except alldata data R metrics basedata decdata hashes
+clearvars -except alldata data R metrics basedata decdata hashes

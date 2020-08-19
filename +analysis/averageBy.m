@@ -1,3 +1,5 @@
+% average a vector by some group information
+
 function [M, S] = averageBy(X,Group)
 
 unique_groups = unique(Group);

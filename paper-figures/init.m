@@ -34,12 +34,7 @@ if ~exist('R','var')
 	R = u.fit(VectorizedData);
 end
 
-% compute metrics
-
-if ~exist('metrics','var')
-	metrics = alldata.ISI2BurstMetrics;
-	metrics = structlib.scalarify(metrics);
-end
 
 
-clearvars -except alldata data R metrics basedata decdata hashes
+
+clearvars -except alldata data R metrics basedata decdata hashes decmetrics
