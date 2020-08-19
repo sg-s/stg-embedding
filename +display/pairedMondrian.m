@@ -1,4 +1,19 @@
-function pairedMondrian(ax,alldata, modulator)
+% makes three plots:
+% 1. mondrian plot in case A
+% 2. mondrian plot in case B
+% 3. bar graph comparing fold change from A to B
+% 
+% provide a single axes handle to it, and it will delete it
+% and make its own axes within the space of that axes
+
+
+function ax = pairedMondrian(ax,alldata, A, B, A_label, B_label)
+
+
+assert(isa(alldata,'embedding.DataStore'),'Expected alldata to be of type embedding.DataStore')
+assert(length(A)==length(B),'Expected A and B to be of the same length')
+assert(length(A)==length(alldata.mask),'DataStore length does not match A and B')
+
 
 % delete the ax handle provided, and create 3 new axes in that physical location
 
@@ -21,103 +36,14 @@ hold on
 
 
 idx = alldata.idx;
-
 cats = categories(idx);
 colors = display.colorscheme(cats);
 
-preps = unique(alldata.experiment_idx);
-Nexp = length(preps);
-
-all_cats = {};
-
-time = -600:20:600;
-state_matrix = categorical(NaN(length(time),Nexp));
-
-tick = 0;
-
-for i = 1:Nexp
-
-	% skip this prep if it doesn't have the mod we are intereste din
-
-	if all(isnan(alldata.(modulator)(alldata.experiment_idx == preps(i))))
-		continue
-	end
-
-	if max(alldata.(modulator)(alldata.experiment_idx == preps(i))) == 0 
-		continue
-	end
-
-	tick = tick +1;
 
 
-	this_time = alldata.time_since_mod_on(alldata.experiment_idx == preps(i));
-	these_states = idx(alldata.experiment_idx == preps(i));
-
-
-	for j = 1:length(time)
-		if time(j) > 0
-			continue
-		end
-		insert_this = find(this_time == time(j));
-		if isempty(insert_this)
-			continue
-		end
-
-		state_matrix(j,i) = these_states(insert_this);
-
-	end
-
-
-	% now insert the states corresponding to the highest mod
-	max_mod = max(alldata.(modulator)(alldata.experiment_idx == preps(i)));
-	max_mod_start = find(alldata.(modulator)(alldata.experiment_idx == preps(i)) == max_mod,1,'first');
-	if this_time(max_mod_start) > 0
-		this_time = this_time - this_time(max_mod_start);
-	end
-
-	% now we have time starting at 0 when the max mod is there, so continue inserting
-	for j = 1:length(time)
-		if time(j) <= 0
-			continue
-		end
-		insert_this = find(this_time == time(j));
-		if isempty(insert_this)
-			continue
-		end
-
-		state_matrix(j,i) = these_states(insert_this);
-
-	end
-
-
-end
-
-
-% computer a per-prep state histogram
-decentralized_counts = zeros(Nexp,length(cats)); 
-modulator_counts = zeros(Nexp,length(cats)); 
-
-for i = 1:Nexp
-
-	decentralized_counts(i,:) = histcounts(state_matrix(1:30,i),categories(idx));
-	modulator_counts(i,:) = histcounts(state_matrix(31:end,i),categories(idx));
-end
-
-rm_this = sum(modulator_counts' + decentralized_counts') == 0;
-state_matrix(:,rm_this) = [];
-modulator_counts(rm_this,:) = [];
-decentralized_counts(rm_this,:) = [];
-
-
-
-% convert into probabilities
-
-decentralized_p = decentralized_counts;
-modulator_p = modulator_counts;
-for i = 1:size(decentralized_counts,1)
-	decentralized_p(i,:) = decentralized_counts(i,:)./sum(decentralized_counts(i,:));
-	modulator_p(i,:) = modulator_counts(i,:)./sum(modulator_counts(i,:));
-end
+% compute probabilities of states in both conditions
+P.A = alldata.probState(A);
+P.B = alldata.probState(B);
 
 
 
@@ -127,20 +53,19 @@ view([90 -90])
 ax(1).XLim = [0 1];
 ax(1).YLim = [0 1];
 axis(ax(1),'off')
-decentralized_p(isnan(decentralized_p)) = 0;
-p = display.mondrian(mean(decentralized_p),colors,cats);
+p = display.mondrian(mean(P.A),colors,cats);
 
 axes(ax(2))
 axis(ax(2),'off')
 ax(2).XLim = [0 1];
 ax(2).YLim = [0 1];
 view([90 -90])
-p2 = display.mondrian(mean(modulator_p),colors,cats);
+p2 = display.mondrian(mean(P.B),colors,cats);
 
 
 p_values = NaN(length(cats),1);
 for i = 1:length(p_values)
-	p_values(i) = ranksum(decentralized_p(:,i),modulator_p(:,i));
+	p_values(i) = ranksum(P.A(:,i),P.B(:,i));
 end
 
 
@@ -157,14 +82,14 @@ end
 
 
 % alternative -- plot fold change 
-fold_change = (mean(modulator_p) - mean(decentralized_p))./(mean(modulator_p) + mean(decentralized_p));
+fold_change = (mean(P.B) - mean(P.A))./(mean(P.B) + mean(P.A));
 [~,sidx] = sort(fold_change);
 
 
 
 % to compute errors, we need to propagate them correctly
-E = sqrt((std(modulator_p)./mean(modulator_p)).^2 + (std(decentralized_p)./mean(decentralized_p)).^2).*fold_change;
-E  = E./sqrt(Nexp);
+E = sqrt((std(P.B)./mean(P.B)).^2 + (std(P.A)./mean(P.A)).^2).*fold_change;
+E  = E./sqrt(length(unique(alldata.experiment_idx)));
 
 axes(ax(3))
 for i = 1:length(cats)
@@ -179,7 +104,7 @@ end
 ax(3).YScale = 'linear';
 ax(3).YLim = [-1.5 1.5];
 ax(3).XLim = [0 sum(~isnan(fold_change))+1];
-ylabel(ax(3),'Change from decentralized (norm)')
+ylabel(ax(3),['Fold change(norm)'])
 ax(3).XTick = [];
 ax(3).XColor = 'w';
 ax(3).YTick = [-1:.5:1];
@@ -188,6 +113,6 @@ ax(3).YGrid = 'on';
 axlib.move(ax(1:2),'left',.02)
 
 
-title(ax(2),{['+' modulator],['(' mat2str((sum(sum(modulator_counts))*20)/3600,2) ' hours)' ]},'FontWeight','normal')
+title(ax(2),{B_label,['(' num2str(sum(B)*20/3600,3) ' hours)' ]},'FontWeight','normal')
 
-title(ax(1),{'decentralized',['(' mat2str(size(decentralized_p,1)) ' crabs, ' mat2str((sum(sum(decentralized_counts))*20)/3600,2) ' hours) ' ]},'FontWeight','normal')
+title(ax(1),{A_label,['(' mat2str(size(P.B,1)) ' crabs, ' mat2str(sum(A)*20/3600,2) ' hours) ' ]},'FontWeight','normal')

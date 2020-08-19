@@ -1,3 +1,6 @@
+% plots stacked bar graph of state distribution 
+% by prep 
+
 function [h, P] = plotStateDistributionByPrep(allidx, experiment_idx, OnlyWhen)
 
 assert(length(allidx) == length(experiment_idx),'idx and preps not the same length')

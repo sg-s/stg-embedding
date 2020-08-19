@@ -24,7 +24,7 @@ cats = categories(data.idx);
 P = zeros(length(all_preps),length(cats));
 
 for i = 1:length(all_preps)
-	idx = data.idx(data.experiment_idx == all_preps(i));
+	idx = data.idx(data.experiment_idx == all_preps(i) & OnlyWhen);
 	P(i,:) = histcounts(idx,'Normalization','probability');
 
 end
