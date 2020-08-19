@@ -157,15 +157,16 @@ case sourcedata.DataFilter.Baseline
 case sourcedata.DataFilter.Decentralized
 
 
-	% first, remove all pieces of data that are not at 11C
-	for i = 1:length(data)
-		% except if it's Philipp's data
-		if data(i).experimenter(1) == 'rosenbaum'
-			continue
-		end
-		rm_this = data(i).temperature < 10 | data(i).temperature > 15;
-		data(i) = purge(data(i),rm_this);
-	end
+	% assume we are working with scalar data, because
+	% filtering is expected to happen after we combine all the data
+	% and embed it
+	% so we also assume that it has already gone through the 
+	% AllUsable filter
+	assert(isscalar(data),'expecteded data to be scalar')
+	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
+
+
+
 
 
 	% remove anything that has a non-default value
@@ -175,22 +176,39 @@ case sourcedata.DataFilter.Decentralized
 
 	fn = fieldnames(defaults);
 
-	for i = 1:length(data)
-		rm_this = false(length(data(i).mask),1);
-		for j = 1:length(fn)
-			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
+	rm_this = false(length(data.mask),1);
+	for j = 1:length(fn)
+		rm_this(data.(fn{j}) ~= defaults.(fn{j})) = true;
+	end
+	data = purge(data,rm_this);
+
+
+	% purge data with undefined experiment IDs. WTF??
+	data = purge(data,isundefined(data.experiment_idx));
+
+
+	% make sure every prep is decentralized at some point, and is 
+	% intact at some point
+	all_exps = unique(data.experiment_idx);
+	rm_these_exps = false(length(all_exps),1);
+	for i = 1:length(all_exps)
+		this_dec = data.decentralized(data.experiment_idx == all_exps(i));
+		if max(this_dec) == 1 & min(this_dec) == 0
+			continue
 		end
-		data(i) = purge(data(i),rm_this);
+		rm_these_exps(i) = true;
 	end
 
 
-	% remove empty datasets
-	data(cellfun(@sum,{data.mask}) == 0) = [];
+	rm_this = false(length(data.mask),1);
+	for i = 1:length(all_exps)
+		if rm_these_exps(i)
+			rm_this(data.experiment_idx == all_exps(i)) = true;
 
+		end
+	end
 
-	% make sure it is decentralized at some point
-	rm_this = cellfun(@max,{data.decentralized}) == 0 | cellfun(@min,{data.decentralized}) == 1;
-	data(rm_this) = [];
+	data = purge(data,rm_this);
 
 
 otherwise
