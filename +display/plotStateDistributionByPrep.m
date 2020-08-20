@@ -24,7 +24,7 @@ P(sum(P,2) ==0,:) = [];
 h = barh(P,'stacked','LineStyle','none','BarWidth',1);
 
 
-% get the colors sright
+% get the colors right
 cats = categories(allidx);
 colors = display.colorscheme(cats);
 

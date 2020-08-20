@@ -120,6 +120,12 @@ case sourcedata.DataFilter.Neuromodulator
 case sourcedata.DataFilter.Baseline
 
 
+
+	rm_this = data.temperature < 10 | data.temperature > 12;
+	data = purge(data,rm_this);
+	
+
+
 	assert(isscalar(data),'expected data to be scalar')
 	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
 
@@ -128,8 +134,6 @@ case sourcedata.DataFilter.Baseline
 	% remove anything that has a non-default value	
 	defaults = rmfield(embedding.DataStore.defaults,'temperature');
 	fn = fieldnames(defaults);
-
-
 	rm_this = false(length(data.mask),1);
 	for j = 1:length(fn)
 		rm_this(data.(fn{j}) ~= defaults.(fn{j})) = true;
@@ -155,7 +159,7 @@ case sourcedata.DataFilter.Decentralized
 	% and embed it
 	% so we also assume that it has already gone through the 
 	% AllUsable filter
-	assert(isscalar(data),'expecteded data to be scalar')
+	assert(isscalar(data),'expected data to be scalar')
 	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
 
 

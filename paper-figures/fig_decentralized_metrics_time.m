@@ -17,18 +17,6 @@ time = -600:20:1800;
 figure('outerposition',[300 300 1401 999],'PaperUnits','points','PaperSize',[1401 999]); hold on
 
 
-if ~exist('decmetrics','var')
-	decmetrics = decdata.ISI2BurstMetrics;
-	decmetrics = structlib.scalarify(decmetrics);
-
-
-	% censor metrics in non-normal states
-	fn = fieldnames(decmetrics);
-	for i = 1:length(fn)
-		decmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
-	end
-
-end
 
 % average metrics by prep
 baseline_averaged_metrics = struct;
@@ -79,7 +67,7 @@ LPf = analysis.normalizeMatrix(LPf,time<0);
 % raincloud of all normalized metrics
 ax(1) = subplot(2,3,1); hold on
 fn = fieldnames(decmetrics);
-fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','LP_burst_period','LP_durations','PD_durations'});
+fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','LP_burst_period','LP_durations','PD_durations','PD_phase_on'});
 L = {};
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
@@ -95,10 +83,15 @@ for i = 1:length(fn)
 	else
 		L{i} = [L{i} ' (s)'];
 	end
+
+	[h,p]=ttest(X);
+	if p*length(fn) < .05
+		plot(max(X) + .2,2*i,'k*','MarkerSize',12);
+	end
 end
 set(ax(1),'YTick',[2:2:2*length(fn)],'YTickLabel',L)
 ax(1).YLim = [0 2*i+2];
-ax(1).XLim = [-.5 1];
+ax(1).XLim = [-.5 1.2];
 
 
 

@@ -36,5 +36,36 @@ end
 
 
 
+if ~exist('decmetrics','var')
+	disp('Computing metrics for decentralized data...')
+	decmetrics = decdata.ISI2BurstMetrics;
+	decmetrics = structlib.scalarify(decmetrics);
 
-clearvars -except alldata data R metrics basedata decdata hashes decmetrics
+
+	% censor metrics in non-normal states
+	fn = fieldnames(decmetrics);
+	for i = 1:length(fn)
+		decmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
+	end
+
+end
+
+
+
+if ~exist('basemetrics','var')
+	disp('Computing metrics for baseline data...')
+	basemetrics = basedata.ISI2BurstMetrics;
+	basemetrics = structlib.scalarify(basemetrics);
+
+
+	% censor metrics in non-normal states
+	fn = fieldnames(basemetrics);
+	for i = 1:length(fn)
+		basemetrics.(fn{i})(basedata.idx ~= 'normal') = NaN;
+	end
+
+end
+
+
+
+clearvars -except alldata data R metrics basedata decdata hashes decmetrics basemetrics

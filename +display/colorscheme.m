@@ -1,3 +1,7 @@
+% defines a universal colorscheme
+% for the categories
+% the returned object is a dictionary object
+
 function colors = colorscheme(cats)
 
 

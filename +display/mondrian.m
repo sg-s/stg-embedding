@@ -1,4 +1,7 @@
-function p = mondrian(states, colors, cats);
+% makes a mondrian plot (a treemap)
+% from a list of states 
+
+function p = mondrian(states, cats);
 
 if iscategorical(states)
 	h = histcounts(states);
@@ -7,6 +10,8 @@ else
 	% assume the probabilities have been calculated already
 	h = states;
 end
+
+colors = display.colorscheme(cats);
 
 h = treemap.treemap(h);
 p = treemap.plotRectangles(h);
