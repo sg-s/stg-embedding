@@ -6,14 +6,14 @@ init
 
 % unpack
 idx = alldata.idx;
-
-
-
 cats = categories(idx);
-
 colors = display.colorscheme(cats);
 
-clear ax
+
+LP_color = color.aqua('red');
+PD_color = color.aqua('indigo');
+
+
 figure('outerposition',[300 300 2000 999],'PaperUnits','points','PaperSize',[2000 999]); hold on
 
 pidx = 1;
@@ -43,8 +43,8 @@ show_these_states = dictionary;
 show_these_states.normal = [1888 41282];
 show_these_states.('LP-silent-PD-bursting') = [31773 25244];
 show_these_states.('PD-silent-LP-bursting') = [36034 32041];
-show_these_states.('aberrant-spikes') = [25346 33573];
-show_these_states.('interrupted-bursting') = [29486 13255];
+show_these_states.('aberrant-spikes') = [7836 33573];
+show_these_states.('interrupted-bursting') = [8744 13255];
 show_these_states.irregular = [47580 30426];
 show_these_states.('LP-skipped-bursts') = [42062 5547];
 show_these_states.('LP-weak-skipped') = [43599 18080];
@@ -70,8 +70,8 @@ for i = 1:length(ax.examples)
         offset = nanmin([LP(:); PD(:)]);
         PD = PD - offset;
         LP = LP - offset;
-        neurolib.raster(PD,'deltat',1,'center',false,'yoffset',Y,'LineWidth',1)
-        neurolib.raster(LP,'deltat',1,'center',false,'yoffset',Y+1,'Color','r','LineWidth',1)
+        neurolib.raster(PD,'deltat',1,'center',false,'yoffset',Y,'LineWidth',1,'Color',PD_color)
+        neurolib.raster(LP,'deltat',1,'center',false,'yoffset',Y+1,'Color',LP_color,'LineWidth',1)
         
 
         Y = Y + 3;
@@ -100,8 +100,18 @@ axlib.move(ax.examples,'right',.05)
 axlib.move(ax.examples(1:2:end),'right',.05)
 
 ax.main.Position = [.06 .1 .4 .8];
-ax.examples(1).YTick = [.5 5.5];
-ax.examples(1).YTickLabel = {'PD','LP'};
+ax.examples(1).YTick = [.5 1.5 3.5 4.5];
+ax.examples(1).YTickLabel = '';
+
+th = text(ax.examples(1),-1.5, .5, 'PD');
+th.FontSize = 16;
+th.Color = PD_color;
+
+th = text(ax.examples(1),-1.5, 1.5, 'LP');
+th.FontSize = 16;
+th.Color = LP_color;
+
+
 
 % clean up workspace
-clearvars -except alldata data R burst_metrics
+init()

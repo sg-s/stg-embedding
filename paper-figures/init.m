@@ -29,11 +29,23 @@ assert(~any(isundefined(alldata.idx)),'Some data is unlabeled')
 % get the embedding
 if ~exist('R','var')
 	[p,NormalizedMetrics, VectorizedData] = alldata.vectorizeSpikes2;
-	u = umap('min_dist',.75, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
+	u = umap('min_dist',.75, 'metric','euclidean','n_neighbors',100,'negative_sample_rate',75, 'repulsion_strength',2);
 	u.labels = alldata.idx;
 	R = u.fit(VectorizedData);
 end
 
+
+if ~exist('allmetrics','var')
+	disp('Computing metrics for all data...')
+	allmetrics = alldata.ISI2BurstMetrics;
+	allmetrics = structlib.scalarify(allmetrics);
+
+
+	% we are not cenosoring the metrics in the non-normal states
+	% because we want to show these metrics in the embedding
+
+
+end
 
 
 if ~exist('decmetrics','var')
@@ -68,4 +80,4 @@ end
 
 
 
-clearvars -except alldata data R metrics basedata decdata hashes decmetrics basemetrics
+clearvars -except alldata data R metrics basedata decdata hashes decmetrics basemetrics allmetrics

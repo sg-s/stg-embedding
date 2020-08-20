@@ -6,6 +6,10 @@ close all
 init()
 
 
+LP_color = color.aqua('red');
+PD_color = color.aqua('indigo');
+
+
 subidx = embedding.watersegment(R);
 is_baseline = ismember(hashes.alldata,hashes.basedata);
 

@@ -67,5 +67,5 @@ ax(2).Position = [.6 .62 .33 .35];
 
 
 
-
-clearvars -except alldata data R metrics basedata decdata hashes
+figlib.saveall
+init()

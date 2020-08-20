@@ -148,4 +148,5 @@ figlib.pretty()
 
 
 
-clearvars -except alldata data R metrics basedata decdata hashes
+figlib.saveall
+init()

@@ -49,6 +49,9 @@ LP_dc = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralizat
 LP_on = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, decmetrics.LP_phase_on, time);
 LP_off = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, decmetrics.LP_phase_off, time);
 
+% there's a weird outlier, let's nuke it
+LP_on(LP_on>1) = NaN;
+LP_off(LP_off>1) = NaN;
 
 PD_T = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, decmetrics.PD_burst_period, time);
 LP_T = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, decmetrics.LP_burst_period, time);
@@ -56,10 +59,6 @@ LP_T = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralizati
 % normalize
 PD_T_norm = analysis.normalizeMatrix(PD_T,time<0);
 LP_T_norm = analysis.normalizeMatrix(LP_T,time<0);
-
-PDf = analysis.normalizeMatrix(PDf,time<0);
-LPf = analysis.normalizeMatrix(LPf,time<0);
-
 
 
 
@@ -100,10 +99,10 @@ ax(1).XLim = [-.5 1.2];
 
 
 ax(2) = subplot(2,3,2); hold on
-display.plotMetricsVsTime(time,nanmean(PDf),PD_color)
-display.plotMetricsVsTime(time,nanmean(LPf),LP_color)
-set(gca,'YLim',[0 5])
-plot([min(time) max(time)],[1 1],':','Color',[.5 .5 .5])
+display.plotMetricsVsTime(time,(PDf),PD_color)
+display.plotMetricsVsTime(time,(LPf),LP_color)
+set(gca,'YLim',[0 10])
+
 
 
 
@@ -183,7 +182,7 @@ h = xlabel(ax(5),'Time since decentralized (s)');
 h.Position = [2500 -.15];
 
 h = xlabel(ax(2),'Time since decentralized (s)');
-h.Position = [2500 5.7];
+h.Position = [2500 11.1];
 
 xlabel(ax(4),'Burst period (s)');
 ylabel(ax(4),'Phase')
@@ -195,6 +194,9 @@ ylabel(ax(2),'Firing rate (fold change)')
 
 figlib.pretty()
 
+
+
+figlib.saveall
 
 % this init clears all the junk this script
 init()

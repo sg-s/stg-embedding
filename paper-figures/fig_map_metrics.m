@@ -1,13 +1,13 @@
 % colors map by different metrics
 
 close all
-
+init()
 
 
 
 PDf = sum(~isnan(alldata.PD),2)/20;
 
-C = [burst_metrics.PD_burst_period burst_metrics.LP_burst_period  burst_metrics.PD_duty_cycle burst_metrics.LP_duty_cycle burst_metrics.LP_phase_on PDf];
+C = [allmetrics.PD_burst_period allmetrics.LP_burst_period  allmetrics.PD_duty_cycle allmetrics.LP_duty_cycle allmetrics.LP_phase_on PDf];
 Limits = [0 2; 0 2; 0 1; 0 1; 0 1; 0 20];
 Labels = {'T_{PD} (s)','T_{LP} (s)','Duty cycle_{PD}','Duty cycle_{LP}','LP phase','<f_{PD}> (Hz)'};
 
@@ -46,3 +46,6 @@ end
 
 
 axlib.move(ax,'left',.03)
+
+
+init()

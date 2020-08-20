@@ -1,6 +1,8 @@
 % makes a figure showing ISIs of different preps as they are decentralized
 % to visualize what happens when preps are decentralized 
 
+
+init()
 close all
 
 figure('outerposition',[300 300 1200 999],'PaperUnits','points','PaperSize',[1200 999]); hold on
@@ -15,78 +17,77 @@ idx = 1;
 % unchanged
 show_this = {'876_047'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 
 
 % slows down, keeps bursting
 show_this = {'862_133','862_104','862_114'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
 
 % slows, then stops
 show_this = {'876_062','862_152'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 
 % LP craps out
 show_this = {'862_101','862_075','862_145'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 
 
 % irregular, interrupted bursting
 show_this = {'862_149','879_046'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 
 % bouting/oscillations
 show_this = {'862_128'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 % tonic
 show_this = {'876_027','876_021'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 
 
@@ -94,32 +95,32 @@ end
 % both stop
 show_this = {'140_087'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 % stop, then restart
 show_this = {'140_086'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 % fluctuates, keeps bursting
 show_this = {'876_016','862_129'};
 
-for i = 1:length(data)
-	if any(strcmp(show_this,char(data(i).experiment_idx(1))))
-		data(i).snakePlot(ax(idx));
-		idx = idx+1;
-	end
+for i = 1:length(show_this)
+	showdata = alldata.purge(alldata.experiment_idx ~= show_this{i});
+	showdata.snakePlot(ax(idx));
+	idx = idx+1;
 end
+
 
 
 figlib.pretty('LineWidth',1.5,'AxesColor','w')
@@ -144,3 +145,8 @@ t = text(ax(1),.01,ax(1).YLim(2)-900,'200s ','HorizontalAlignment','right','Font
 
 
 ax(1).XLim(1) = .00901;
+
+
+
+figlib.saveall
+init()

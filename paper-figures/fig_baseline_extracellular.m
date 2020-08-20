@@ -1,7 +1,7 @@
 % the point of this figure is to show that intracellular 
 % recording can cause non-normal behavior in baseline
 
-
+close all
 init()
 
 % drawing constants
@@ -286,7 +286,7 @@ ax.T_PD.Position(4) =  ax.T_PD.Position(4)*.9;
 ax.T_LP.Position(4) =  ax.T_LP.Position(4)*.9;
 
 
-
+figlib.saveall
 
 
 % this init clears all the junnk this script creates
