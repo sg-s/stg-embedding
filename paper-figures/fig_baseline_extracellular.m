@@ -1,34 +1,17 @@
+% the point of this figure is to show that intracellular 
+% recording can cause non-normal behavior in baseline
 
-close all
-clearvars -except data alldata metricsPD metricsLP R
+
+init()
 
 % drawing constants
 extra_color = [.1 .1 .1];
 intra_color = [.9 0 0];
 
-DataSize = length(alldata.mask);
-
-% get data
-if ~exist('metricsPD','var')
+DataSize = length(basedata.mask);
 
 
-	metricsLP = alldata.ISIAutocorrelationPeriod('LP');
-	metricsPD = alldata.ISIAutocorrelationPeriod('PD');
-
-	metricsPD.DominantPeriod(metricsPD.DominantPeriod==20) = NaN;
-	metricsLP.DominantPeriod(metricsLP.DominantPeriod==20) = NaN;
-
-
-end
-
-
-if any(isundefined(alldata.idx))
-	% get the states
-	alldata.idx = alldata.getLabelsFromCache();
-end
-
-
-colors = display.colorscheme(alldata.idx);
+colors = display.colorscheme(basedata.idx);
 
 
 
@@ -37,7 +20,7 @@ figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[120
 
 
 ax.experimenter = subplot(3,3,1); hold on
-[means, group_idx] = probStateGroupedBy(alldata, 'normal', 'experimenter');
+[means, group_idx] = probStateGroupedBy(basedata, 'normal', 'experimenter');
 C = lines;
 group_idx = removecats(group_idx);
 experimenters = unique(group_idx);
@@ -58,7 +41,7 @@ xlabel('p(normal)')
 % does recording type correlate with normal behavior? 
 
 ax.LP_extra = subplot(3,3,4); hold on
-temp = alldata.purge(alldata.LP_channel == 'gpn');
+temp = basedata.purge(basedata.LP_channel == 'gpn');
 temp.LP_channel(temp.LP_channel ~= 'LP') = 'LP-extra';
 temp.LP_channel(temp.LP_channel == 'LP') = 'LP-intra';
 
@@ -81,14 +64,14 @@ set(gca,'XTickLabel',{},'XLim',[0 1],'YLim',[0 1])
 legend(lines,cellfun(@char,{groups},'UniformOutput',false),'Location','northwest')
 
 [~,p]=kstest2(means(group_idx=='LP-intra'),means(group_idx~='LP-intra'));
-th = text(.45,.85,['\itp = ' mat2str(p,2)]);
+th = text(.45,.85,['\itp = ' corelib.num2tex(p)]);
 
 
 
 
 
 subplot(3,3,7); hold on
-temp = alldata;
+temp = basedata;
 temp.PD_channel(temp.PD_channel ~= 'PD') = 'PD-extra';
 temp.PD_channel(temp.PD_channel == 'PD') = 'PD-intra';
 
@@ -108,7 +91,7 @@ xlabel('p(normal)')
 set(gca,'XLim',[0 1],'YLim',[0 1])
 
 [~,p]=kstest2(means(group_idx=='PD-extra'),means(group_idx~='PD-extra'));
-th = text(.45,.8,['\itp = ' mat2str(p,2)]);
+th = text(.45,.8,['\itp = ' corelib.num2tex(p)]);
 
 
 
@@ -122,18 +105,18 @@ th = text(.45,.8,['\itp = ' mat2str(p,2)]);
 labels = {'both intra','LP intra','PD intra','both extra'};
 
 
-ShowThese = zeros(length(alldata.idx),4);
-ShowThese(:,1) = alldata.LP_channel == 'LP' & alldata.PD_channel == 'PD';
-ShowThese(:,2) = alldata.LP_channel == 'LP' & alldata.PD_channel ~= 'PD';
-ShowThese(:,3) = alldata.LP_channel ~= 'LP' & alldata.PD_channel == 'PD';
-ShowThese(:,4) = alldata.LP_channel ~= 'LP' & alldata.PD_channel ~= 'PD';
+ShowThese = zeros(length(basedata.idx),4);
+ShowThese(:,1) = basedata.LP_channel == 'LP' & basedata.PD_channel == 'PD';
+ShowThese(:,2) = basedata.LP_channel == 'LP' & basedata.PD_channel ~= 'PD';
+ShowThese(:,3) = basedata.LP_channel ~= 'LP' & basedata.PD_channel == 'PD';
+ShowThese(:,4) = basedata.LP_channel ~= 'LP' & basedata.PD_channel ~= 'PD';
 
 
 
-cats = categories(alldata.idx);
+cats = categories(basedata.idx);
 for i = 1:size(ShowThese,2)
 	subplot(4,3,3*(i)-1); hold on
-	[h,P] = display.plotStateDistributionByPrep(alldata.idx, alldata.experiment_idx,ShowThese(:,i));
+	[h,P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx,ShowThese(:,i));
 	delete(h)
 
 	if i == 1
@@ -144,7 +127,7 @@ for i = 1:size(ShowThese,2)
 
 	P = mean(P);
 
-	display.mondrian(P,display.colorscheme(cats),cats);
+	display.mondrian(P,cats);
 	text(.2,.5,[mat2str(P(1)*100,2) '%'],'Color','w','FontSize',24)
 	title(labels{i},'FontWeight','normal')
 end
@@ -173,7 +156,7 @@ end
 
 ax.PD01 = subplot(4,3,3); hold on
 
-temp = alldata.purge(alldata.LP_channel == 'gpn' );
+temp = basedata.purge(basedata.LP_channel == 'gpn' );
 temp.PD_channel(temp.PD_channel == 'PD') = 'PD-intra';
 temp.PD_channel(temp.PD_channel ~= 'PD-intra') = 'PD-extra';
 
@@ -196,7 +179,7 @@ lines(1) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',
 lines(2) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',extra_color,'MarkerFaceColor',extra_color);
 legend(lines,{'PD-intra','PD-extra'},'Location','southeast')
 [~,p]=kstest2(means(group_idx=='PD-intra'),means(group_idx=='PD-extra'));
-text(.7,.6,['\itp = ' mat2str(p,2)]);
+text(.7,.6,['\itp = ' corelib.num2tex(p)]);
 ax.PD01.XLim = [0 1];
 
 
@@ -204,7 +187,7 @@ ax.PD01.XLim = [0 1];
 
 
 ax.LP01 = subplot(4,3,6); hold on
-temp = alldata.purge(alldata.PD_channel == 'PD' );
+temp = basedata.purge(basedata.PD_channel == 'PD' );
 temp = temp.purge(temp.LP_channel == 'gpn' );
 temp.LP_channel(temp.LP_channel == 'LP') = 'LP-intra';
 temp.LP_channel(temp.LP_channel ~= 'LP-intra') = 'LP-extra';
@@ -227,7 +210,7 @@ lines(2) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',
 legend(lines,{'LP-intra','LP-extra'},'Location','southeast')
 xlabel('p(LP-reduced)')
 [~,p]=kstest2(means(group_idx=='LP-intra'),means(group_idx=='LP-extra'));
-text(.7,.6,['\itp = ' mat2str(p,2)]);
+text(.7,.6,['\itp = ' corelib.num2tex(p)]);
 ax.LP01.XLim = [0 1];
 
 
@@ -243,14 +226,14 @@ ax.LP01.XLim = [0 1];
 % show how the burst periods change if we switch from intra to extra
 clear L lh
 ax.T_PD = subplot(4,3,9); hold on
-X = metricsPD.DominantPeriod(alldata.PD_channel == 'PD');
-X = analysis.averageBy(X,alldata.experiment_idx(alldata.PD_channel == 'PD'));
+X = basemetrics.PD_burst_period(basedata.PD_channel == 'PD');
+X = analysis.averageBy(X,basedata.experiment_idx(basedata.PD_channel == 'PD'));
 display.plotCDFWithError(X, intra_color);
 
 
 
-Y = metricsPD.DominantPeriod(alldata.PD_channel ~= 'PD');
-Y = analysis.averageBy(Y,alldata.experiment_idx(alldata.PD_channel ~= 'PD'));
+Y = basemetrics.PD_burst_period(basedata.PD_channel ~= 'PD');
+Y = analysis.averageBy(Y,basedata.experiment_idx(basedata.PD_channel ~= 'PD'));
 display.plotCDFWithError(Y, extra_color);
 xlabel('T_{PD} (s)')
 
@@ -259,7 +242,7 @@ lines(1) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',
 lines(2) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',extra_color,'MarkerFaceColor',extra_color);
 legend(lines,{'PD-intra','PD-extra'},'Location','southeast')
 [~,p]=kstest2(X,Y);
-text(2,.6,['\itp = ' mat2str(p,2)]);
+text(2,.6,['\itp = ' corelib.num2tex(p)]);
 ax.T_PD.XLim = [0 3];
 
 
@@ -267,12 +250,12 @@ ax.T_PD.XLim = [0 3];
 
 clear lines
 ax.T_LP =subplot(4,3,12); hold on
-X = metricsLP.DominantPeriod(alldata.LP_channel == 'LP');
-X = analysis.averageBy(X,alldata.experiment_idx(alldata.LP_channel == 'LP'));
+X = basemetrics.LP_burst_period(basedata.LP_channel == 'LP');
+X = analysis.averageBy(X,basedata.experiment_idx(basedata.LP_channel == 'LP'));
 display.plotCDFWithError(X, intra_color);
 
-Y = metricsLP.DominantPeriod(alldata.LP_channel ~= 'LP');
-Y = analysis.averageBy(Y,alldata.experiment_idx(alldata.LP_channel ~= 'LP'));
+Y = basemetrics.LP_burst_period(basedata.LP_channel ~= 'LP');
+Y = analysis.averageBy(Y,basedata.experiment_idx(basedata.LP_channel ~= 'LP'));
 display.plotCDFWithError(Y, extra_color);
 xlabel('T_{LP} (s)')
 
@@ -282,15 +265,15 @@ lines(2) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',
 legend(lines,{'LP-intra','LP-extra'},'Location','southeast')
 
 [~,p]=kstest2(X,Y);
-text(2,.6,['\itp = ' mat2str(p,2)]);
+text(2,.6,['\itp = ' corelib.num2tex(p)]);
 
 
 
 
 figlib.pretty('FontSize',16)
 ax.experimenter.YLim = [0 14];
-ax.PD01.XColor = colors('PD-01');
-ax.LP01.XColor = colors('LP-01');
+ax.PD01.XColor = colors('PD-weak-skipped');
+ax.LP01.XColor = colors('LP-weak-skipped');
 
 
 
@@ -306,6 +289,8 @@ ax.T_LP.Position(4) =  ax.T_LP.Position(4)*.9;
 
 
 
+% this init clears all the junnk this script creates
+init()
 
 
 

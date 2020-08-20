@@ -84,6 +84,8 @@ for i = 1:length(fn)
 		L{i} = [L{i} ' (s)'];
 	end
 
+	L{i} = ['\Delta' L{i}];
+
 	[h,p]=ttest(X);
 	if p*length(fn) < .05
 		plot(max(X) + .2,2*i,'k*','MarkerSize',12);
@@ -103,20 +105,59 @@ display.plotMetricsVsTime(time,nanmean(LPf),LP_color)
 set(gca,'YLim',[0 5])
 plot([min(time) max(time)],[1 1],':','Color',[.5 .5 .5])
 
+
+
+
+
 ax(3) = subplot(2,3,3); hold on
 display.plotMetricsVsTime(time,PD_T_norm,PD_color)
 set(gca,'YLim',[0.9 2])
 plot([min(time) max(time)],[1 1],':','Color',[.5 .5 .5])
 
+
+
+
+
 % plot phases of things vs. periods
 ax(4) = subplot(2,3,4); hold on
-plot(nanmean(PD_T(:,time>0)),nanmean(LP_off(:,time>0)),'.','Color',[.8 .8 .8],'MarkerSize',20)
-plot(nanmean(PD_T),nanmean(LP_off),'.','Color',LP_color)
+C = lines;
+plot(nanmean(PD_T(:,time>0)),nanmean(LP_off(:,time>0)),'k.','MarkerSize',10)
+plot(nanmean(PD_T(:,time<0)),nanmean(LP_off(:,time<0)),'.','Color',C(3,:),'MarkerSize',10)
 
-plot(nanmean(PD_T(:,time>0)),nanmean(LP_on(:,time>0)),'.','Color',[.8 .8 .8],'MarkerSize',30)
-plot(nanmean(PD_T),nanmean(LP_on),'+','Color',LP_color)
+
+
+plot(nanmean(PD_T(:,time>0)),nanmean(LP_on(:,time>0)),'k.','MarkerSize',10)
+plot(nanmean(PD_T(:,time<0)),nanmean(LP_on(:,time<0)),'.','Color',C(2,:),'MarkerSize',10)
+
+
+% fit lines
+XX = linspace(0.1,2,1e3);
+X = nanmean(PD_T(:,time<0)); X = X(:);
+Y = nanmean(LP_off(:,time<0)); Y = Y(:);
+ff = fit(X,Y,'poly1');
+
+temp = (predint(ff,XX));
+ph = plot(polyshape([XX fliplr(XX)]', [temp(:,1); flipud(temp(:,2))]));
+ph.FaceColor = C(3,:);
+uistack(ph,'bottom')
+ph.LineStyle = 'none';
+
+
+XX = linspace(0.1,2,1e3);
+X = nanmean(PD_T(:,time<0)); X = X(:);
+Y = nanmean(LP_on(:,time<0)); Y = Y(:);
+ff = fit(X,Y,'poly1');
+
+temp = (predint(ff,XX));
+ph = plot(polyshape([XX fliplr(XX)]', [temp(:,1); flipud(temp(:,2))]));
+ph.FaceColor = C(2,:);
+uistack(ph,'bottom')
+ph.LineStyle = 'none';
+
+
+
 ax(4).YLim = [0 1];
-
+ax(4).XLim = [.5 1.5];
 
 
 
@@ -153,3 +194,7 @@ ylabel(ax(3),'Burst period (fold change)')
 ylabel(ax(2),'Firing rate (fold change)')
 
 figlib.pretty()
+
+
+% this init clears all the junk this script
+init()
