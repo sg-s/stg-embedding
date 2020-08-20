@@ -1,10 +1,13 @@
 % makes a figure showing where the baseline data is.
 % the point is to show that baseline data is surprisingly variable
 
+
+close all
+init()
+
+
 subidx = embedding.watersegment(R);
-basedata = filter(alldata,sourcedata.DataFilter.Baseline);
-[basedata.idx, base_hashes] = basedata.getLabelsFromCache;
-is_baseline = ismember(alldata_hashes,base_hashes);
+is_baseline = ismember(hashes.alldata,hashes.basedata);
 
 
 figure('outerposition',[300 300 1800 901],'PaperUnits','points','PaperSize',[1800 901]); hold on
@@ -31,8 +34,9 @@ X = X/sum(X);
 for i = 1:length(X)
 	bh(i) = barh(i,X(i));
 end
-set(gca,'XScale','log','YTick',[1:length(X)],'YTickLabel',sorted_cats)
 sorted_cats = cats(sort_order);
+set(gca,'XScale','log','YTick',[1:length(X)],'YTickLabel',sorted_cats)
+
 for i = 1:length(sorted_cats)
 	bh(i).FaceColor = colors.(sorted_cats{i});
 	bh(i).EdgeAlpha = 0;
@@ -72,3 +76,8 @@ figlib.pretty('FontSize',15)
 
 ax(2).Position = [.6 .62 .33 .35];
 ax(4).Position = [.6 .1 .33 .35];
+
+
+
+% % this init clears polluting variables
+init()

@@ -6,6 +6,10 @@ function [h, P] = plotStateDistributionByPrep(allidx, experiment_idx, OnlyWhen)
 assert(length(allidx) == length(experiment_idx),'idx and preps not the same length')
 assert(iscategorical(allidx),'Expected idx to be categorical')
 
+if nargin == 2
+	OnlyWhen = true(length(allidx),1);
+end
+
 unique_exps = unique(experiment_idx);
 N = length(unique_exps);
 P = zeros(N,length(unique(allidx)));
