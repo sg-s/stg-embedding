@@ -9,8 +9,12 @@
 
 function ax = pairedMondrian(ax,alldata, A, B, A_label, B_label)
 
+arguments
+	ax (1,1) matlab.graphics.axis.Axes
+	alldata (1,1) embedding.DataStore
+end
 
-assert(isa(alldata,'embedding.DataStore'),'Expected alldata to be of type embedding.DataStore')
+
 assert(length(A)==length(B),'Expected A and B to be of the same length')
 assert(length(A)==length(alldata.mask),'DataStore length does not match A and B')
 

@@ -4,8 +4,10 @@
 
 function time_since_decentralization = timeSinceDecentralization(decdata)
 
-assert(isa(decdata,'embedding.DataStore'),'Expected a embedding.DataStore')
-assert(length(decdata)==1,'Expected a scalar DataStore')
+arguments
+	decdata (1,1) embedding.DataStore
+end
+
 
 time_since_decentralization = NaN(length(decdata.mask),1);
 all_preps = unique(decdata.experiment_idx);

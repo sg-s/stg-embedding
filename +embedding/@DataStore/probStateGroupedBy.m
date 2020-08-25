@@ -5,7 +5,12 @@
 
 function [means, group_idx] = probStateGroupedBy(alldata, state, GroupBy)
 
+arguments
+	alldata (1,1) embedding.DataStore
+	state char
+	GroupBy char 
 
+end
 
 assert(length(alldata)==1,'Expected a scalar DataStore')
 assert(~any(isundefined(alldata.idx)),'States are undefined')

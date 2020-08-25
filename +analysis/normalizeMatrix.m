@@ -3,12 +3,14 @@
 
 function X = normalizeMatrix(X, NormWindow)
 
-assert(isa(X,'double'),'Expected X to be a double matrix')
+arguments
+	X double 
+	NormWindow logical 
+end
+
+
 assert(ismatrix(X),'Expected X to be a matrix')
-
 assert(isvector(NormWindow),'Expected NormWindow to be a vector')
-assert(islogical(NormWindow),'Expected NormWindow to be a logical vector')
-
 assert(size(X,2)==length(NormWindow),'Size of NormWindow should be the same as the 2nd dimension of X')
 
 

@@ -1,8 +1,15 @@
+% plots a CDF of some vector and boostraps to get a 
+% error estimate 
+
 function [lines, shade] = plotCDFWithError(X, Color)
 
 
-assert(isvector(X),'Expected X to be a vector')
-assert(isnumeric(X),'Expected X to be numeric')
+arguments
+	X (:,1) {mustBeNumeric}
+	Color (3,1) double
+end
+
+
 X = X(:);
 X(isnan(X)) = [];
 [hy,hx] = histcounts(X,'Normalization','cdf','NumBins',100);

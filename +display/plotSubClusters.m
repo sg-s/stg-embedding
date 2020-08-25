@@ -1,5 +1,14 @@
 function fh = plotSubClusters(ax,idx,R,b_noise,sub_idx)
 
+arguments
+
+	ax (1,1) matlab.graphics.axis.Axes
+	idx (:,1) categorical
+	R (:,2) {mustBeNumeric}
+
+end
+
+
 R = double(R);
 
 b_noise = .2;

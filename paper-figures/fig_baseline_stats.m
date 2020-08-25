@@ -13,7 +13,7 @@ figure('outerposition',[300 300 1500 901],'PaperUnits','points','PaperSize',[150
 
 clear ax
 ax.states = subplot(3,1,1); hold on
-[h,P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx,true(length(basedata.mask),1));
+[h,P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx);
 
 [~,sort_order]= sort(P(:,1),'descend');
 delete(h)

@@ -3,6 +3,14 @@
 
 function plotStates(ax, states, time, YOffset)
 
+arguments
+    ax (1,1) matlab.graphics.axis.Axes
+    states (:,1) categorical
+    time (:,1) double
+    YOffset(1,1) double 
+end
+
+
 cats = categories(states);
 colors = display.colorscheme(cats);
 

@@ -5,8 +5,16 @@
 %
 function X = prepTimeMatrix(preps, time, Thing, time_vec)
 
-assert(iscategorical(preps),'Expected preps to be a categorical array')
-assert(isvector(preps),'Expected preps to be a vector')
+arguments
+
+	preps (:,1) categorical
+	time (:,1) double 
+
+	Thing (:,1)
+	time_vec (:,1) double
+
+end
+
 assert(length(time)==length(preps),'Expected preps and time to be of the same size')
 assert(length(Thing)==length(time),'Expected preps and Thing to be of the same size')
 
