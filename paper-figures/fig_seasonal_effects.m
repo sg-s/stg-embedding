@@ -3,128 +3,133 @@
 close all
 init()
 
-% get sea surface temperatures
+% get all experimental dates
+load('../cache/recording_dates.mat','ExpDates')
+
+
 S = SeaSurfaceTemperature;
-S.after = '01-Jan-2013';
-S.before = '01-Dec-2019';
 
-surface_temps = S.fetch;
-
-% load dates of experiments
-load date.mat
-
-% convert dates into day of year
-ndays = [31 28 31 30 31 30 31 31 30 31 30 31];
-ndays = [0 cumsum(ndays)];
+for i = 1:length(ExpDates)
+	S.Date = ExpDates(i).date;
+	data = S.fetch;
+	ExpDates(i).Temperature = data.Temperature;
+end
 
 
-T_PD_mean = NaN(length(unique_exps),1);
-T_PD_std = NaN(length(unique_exps),1);
-Date = repmat(datetime(),length(unique_exps),1);
+time_since_decentralization = analysis.timeSinceDecentralization(decdata);
 
-PD_dc = NaN(length(unique_exps),1);
 
-p_normal_mean = NaN*T_PD_mean;
-temperature = NaN*T_PD_mean;
+% measure the metrics for these experiments
+for i = 1:length(ExpDates)
 
-for i = 1:length(unique_exps)
+	ExpDates(i).p_normal = NaN;
+	ExpDates(i).p_normal_dec = NaN;
+	ExpDates(i).PD_dc = NaN;
+	ExpDates(i).PD_mean = NaN;
+	ExpDates(i).PD_std = NaN;
+	ExpDates(i).T_change = NaN;
+	ExpDates(i).PD_f_change = NaN;
+	ExpDates(i).LP_f_change = NaN;
 
-	if any(basedata.LP_channel(basedata.experiment_idx == unique_exps(i)) == 'LP')
+	if any(basedata.LP_channel(basedata.experiment_idx == ExpDates(i).exp) == 'LP')
 		continue
 	end
 
-	if any(basedata.PD_channel(basedata.experiment_idx == unique_exps(i)) == 'PD')
+	if any(basedata.PD_channel(basedata.experiment_idx == ExpDates(i).exp) == 'PD')
 		continue
 	end
 
-	if isnan(dates(i))
-		continue
-	end
 
-	this_date = mat2str(dates(i));
-	
-
-	
-
-	[~,use_this]=min(abs(datetime(this_date,'Format','yyyyMMdd') - surface_temps.Date));
-
-	temperature(i) = surface_temps.Temperature(use_this);
-
-	Date(i) = datetime(this_date,'Format','yyyyMMdd');
+	this_T = basemetrics.PD_burst_period(basedata.experiment_idx == ExpDates(i).exp & basedata.idx == 'normal');
+	ExpDates(i).PD_mean = nanmean(this_T);
+	ExpDates(i).PD_std = nanstd(this_T);
 
 
-	% remove the year
-	temp = datevec(Date(i));
-	Date(i) = Date(i) - calyears(temp(1));
+	this_PD_dc = basemetrics.PD_duty_cycle(basedata.experiment_idx == ExpDates(i).exp & basedata.idx == 'normal');
+	ExpDates(i).PD_dc = nanmean(this_PD_dc);
+
+	ExpDates(i).p_normal = mean(basedata.idx(basedata.experiment_idx == ExpDates(i).exp) == 'normal');
 
 
-	this_T = basemetrics.PD_burst_period(basedata.experiment_idx == unique_exps(i) & basedata.idx == 'normal');
-	T_PD_mean(i) = nanmean(this_T);
-	T_PD_std(i) = nanstd(this_T);
+	% compute decentralized metrics
 
 
-	this_PD_dc = basemetrics.PD_duty_cycle(basedata.experiment_idx == unique_exps(i) & basedata.idx == 'normal');
-	PD_dc(i) = nanmean(this_PD_dc);
+	this_exp = decdata.experiment_idx == ExpDates(i).exp;
+	dec =  time_since_decentralization > 0 & time_since_decentralization < 20*30 & this_exp;
+	not_dec = time_since_decentralization < 0 & this_exp;
 
-	p_normal_mean(i) = mean(basedata.idx(basedata.experiment_idx == unique_exps(i)) == 'normal');
 
+
+
+	ExpDates(i).p_normal_dec = mean(decdata.idx(dec) == 'normal'); 
+
+	T_before = nanmean(decmetrics.PD_burst_period(not_dec));
+	T_after = nanmean(decmetrics.PD_burst_period(dec));
+	ExpDates(i).T_change = T_after - T_before;
+
+	PD_f_before = nanmean(sum(~isnan(decdata.PD(not_dec,:)),2))/20;
+	PD_f_after = nanmean(sum(~isnan(decdata.PD(dec,:)),2))/20;
+	ExpDates(i).PD_f_change = PD_f_after - PD_f_before;
+
+	LP_f_before = nanmean(sum(~isnan(decdata.LP(not_dec,:)),2))/20;
+	LP_f_after = nanmean(sum(~isnan(decdata.LP(dec,:)),2))/20;
+	ExpDates(i).LP_f_change = LP_f_after - LP_f_before;
 end
 
 
 
-rm_this = isnan(T_PD_mean) | isnan(PD_dc);
-Date(rm_this) = [];
-PD_dc(rm_this) = [];
-T_PD_mean(rm_this) = [];
-p_normal_mean(rm_this) = [];
-temperature(rm_this) = [];
 
 figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 
-subplot(3,3,1:2); hold on
-plot(Date,T_PD_mean,'.','MarkerSize',10)
-set(gca,'YLim',[ 0 2])
-ylabel('T_{PD} (s)')
+ax = subplot(3,3,1:3); hold on
+plot([ExpDates.date],[ExpDates.Temperature],'k.','MarkerSize',10)
+ax.XLim(1) = datetime('2013','InputFormat','yyyy');
+ylabel('Sea Surface Temp (C)')
+xlabel('Experiment date')
+
+xx = [ExpDates.date];
+yy = [ExpDates.Temperature];
+xx = datenum(xx);
+ff = fit(xx(:),yy(:),'smoothingspline','SmoothingParam',0.0001);
+xs = linspace(min(xx),max(xx),1e3);
+plot(datetime(datestr(xs)),ff(xs),'r')
 
 
-subplot(3,3,3); hold on
-plot(temperature,T_PD_mean,'k.','MarkerSize',10)
-set(gca,'YLim',[0 2],'XLim',[0 23])
-[~,p]=corr(temperature,T_PD_mean,'Type','Spearman');
-text(10,.3,['\itp=' mat2str(p,2)])
+subplot(3,3,4); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_mean]);
+ylabel('<T_{PD}> (s)')
+set(gca,'XAxisLocation','top')
 
-
-% duty cycles of PD
-subplot(3,3,4:5); hold on
-plot(Date,PD_dc,'.','MarkerSize',10)
-ylabel('PD duty cycle')
-set(gca,'YLim',[ 0 .5])
-
-
+subplot(3,3,5); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_dc]);
+ylabel('<DC_{PD}>')
+set(gca,'XAxisLocation','top')
 
 subplot(3,3,6); hold on
-plot(temperature,PD_dc,'k.','MarkerSize',10)
-set(gca,'YLim',[0 .5],'XLim',[0 23])
-[~,p]=corr(temperature,PD_dc,'Type','Spearman');
-text(10,.3,['\itp=' mat2str(p,2)])
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal]);
+ylabel('<p(normal)>')
+set(gca,'XAxisLocation','top')
+
+subplot(3,3,7); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal_dec]);
+
+ylabel('<p(normal)> (decentralized)')
 
 
-
-subplot(3,3,7:8); hold on
-plot(Date,p_normal_mean,'.','MarkerSize',10)
-xlabel('Day of year')
-ylabel('p(normal)')
-
+subplot(3,3,8); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.T_change]);
+ylabel('\DeltaT_{PD} (s)')
+xlabel('Sea Surface Temperature (C)')
 
 subplot(3,3,9); hold on
-plot(temperature,p_normal_mean,'k.','MarkerSize',10)
-xlabel('Sea temperature (C)')
-[~,p]=corr(temperature,p_normal_mean,'Type','Spearman');
-set(gca,'YLim',[0 1],'XLim',[0 23])
-text(20,.5,['\itp=' mat2str(p,2)])
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_f_change]);
 
-figlib.pretty()
+ylabel('\Deltaf_{PD} (Hz)')
 
+
+figlib.pretty('LineWidth',1)
+
+ax.Position = [.13 .75 .77 .2];
 
 
 % cleanup
