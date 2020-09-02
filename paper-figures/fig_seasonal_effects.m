@@ -132,6 +132,9 @@ figlib.pretty('LineWidth',1)
 ax.Position = [.13 .75 .77 .2];
 
 
+figlib.label('XOffset',-.001,'FontSize',28,'YOffset',.01)
+
 % cleanup
-figlib.saveall
+figlib.saveall('Location',display.saveHere)
+
 init()

@@ -48,4 +48,6 @@ end
 axlib.move(ax,'left',.03)
 
 
+figlib.saveall('Location',display.saveHere)
+
 init()

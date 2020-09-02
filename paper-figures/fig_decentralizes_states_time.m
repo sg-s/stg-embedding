@@ -12,11 +12,11 @@ all_preps = unique(decdata.experiment_idx);
 
 % first make line plots for baseline and decentralized
 
-figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 
 
 % show activity before decentralization
-ax(1) = subplot(1,5,1); hold on
+ax(1) = subplot(4,1,1:3); hold on
 
 set(ax(1),'XLim',[-600 1800])
 
@@ -42,6 +42,8 @@ for i = 1:length(all_preps)
 	YOffset = YOffset + 1;
 
 end
+
+disp(YOffset)
 
 
 r1 = rectangle(ax(1),'Position',[.205 .04 .47 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
@@ -104,7 +106,7 @@ end
 
 
 
-ax(2) = subplot(1,5,2:5); hold on
+ax(2) = subplot(4,1,4); hold on
 h = area(time/60,state_probability);
 for i = 1:length(h)
 	h(i).LineStyle = 'none';
@@ -134,19 +136,24 @@ ax(2).YLim = [-.01 1.2];
 
 xlabel(ax(2),'Time since decentralization (min)')
 
-ax(1).Position = [.05 .1 .2 .85];
 
 plot(ax(2),[0 0],[0 1],'w--');
 
-r1.Position = [0 84 2000 2];
 ax(1).YLim = [0 88];
 
 
 
+ax(1).Position = [.1 .47 .8 .5];
+ax(2).Position = [.1 .1 .8 .35];
+
 
 figlib.pretty()
 
+figlib.label('FontSize',30,'XOffset',-.01,'YOffset',-.05)
+
+% cleanup
+figlib.saveall('Location',display.saveHere)
 
 
-figlib.saveall
+
 init()

@@ -74,6 +74,7 @@ ax.examples(1).YTick = [.5 1.5];
 ax.examples(1).YTickLabel = {'PD','LP'};
 
 
+figlib.saveall('Location',display.saveHere)
 
-% clean up workspace
-clearvars -except alldata p data
+
+init()

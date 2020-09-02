@@ -12,6 +12,10 @@ function ax = pairedMondrian(ax,alldata, A, B, A_label, B_label)
 arguments
 	ax (1,1) matlab.graphics.axis.Axes
 	alldata (1,1) embedding.DataStore
+	A (:,1) logical
+	B (:,1) logical
+	A_label char
+	B_label char
 end
 
 

@@ -56,7 +56,7 @@ P.intact = decdata.probState(~decdata.decentralized);
 
 
 ax(3) = subplot(2,2,4); hold on	
-display.pairedMondrian(ax(3),decdata,~decdata.decentralized, decdata.decentralized,'baseline','decentralized');
+ax_mon = display.pairedMondrian(ax(3),decdata,~decdata.decentralized, decdata.decentralized,'baseline','decentralized');
 
 
 
@@ -65,7 +65,12 @@ figlib.pretty('FontSize',15)
 
 ax(2).Position = [.6 .62 .33 .35];
 
+h = axlib.label(ax(1),'a','FontSize',28,'XOffset',0,'YOffset',-.02);
+h = axlib.label(ax(2),'b','FontSize',28,'XOffset',-.04,'YOffset',-.02);
+h = axlib.label(ax(3),'c','FontSize',28,'XOffset',-.03,'YOffset',-.02);
+h = axlib.label(ax_mon(3),'d','FontSize',28,'XOffset',-.02,'YOffset',-.02);
 
 
-figlib.saveall
+
+figlib.saveall('Location',display.saveHere)
 init()

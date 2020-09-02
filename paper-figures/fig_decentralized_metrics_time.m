@@ -113,8 +113,8 @@ display.plotMetricsVsTime(time,PD_T_norm,PD_color)
 set(gca,'YLim',[0.9 2])
 plot([min(time) max(time)],[1 1],':','Color',[.5 .5 .5])
 
-
-
+size(PD_T_norm)
+size(time)
 
 
 % plot phases of things vs. periods
@@ -194,9 +194,9 @@ ylabel(ax(2),'Firing rate (fold change)')
 
 figlib.pretty()
 
+figlib.label('FontSize',30,'XOffset',-.02,'YOffset',-.02)
 
-
-figlib.saveall
+figlib.saveall('Location',display.saveHere)
 
 % this init clears all the junk this script
 init()

@@ -5,7 +5,7 @@
 init()
 close all
 
-figure('outerposition',[300 300 1200 999],'PaperUnits','points','PaperSize',[1200 999]); hold on
+figure('outerposition',[300 300 1400 999],'PaperUnits','points','PaperSize',[1400 999]); hold on
 
 clear ax
 for i = 1:18
@@ -147,6 +147,11 @@ t = text(ax(1),.01,ax(1).YLim(2)-900,'200s ','HorizontalAlignment','right','Font
 ax(1).XLim(1) = .00901;
 
 
+for i = 2:length(ax)
+	ax(i).XColor ='w';
+end
 
-figlib.saveall
+% cleanup
+figlib.saveall('Location',display.saveHere)
+
 init()

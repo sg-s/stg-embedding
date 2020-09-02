@@ -210,18 +210,11 @@ ax.phases.Position(4) = .2;
 ax.delays.Position(2) = .35;
 
 
+
+figlib.saveall('Location',display.saveHere)
+
+
 % another init to clear away all extra variables
 init()
 
 
-
-% X = struct2array(p);
-% C = zeros(20);
-% for i = 1:20
-% 	for j = 1:20
-% 		if i == j
-% 			continue
-% 		end
-% 		C(i,j) = statlib.correlation(P(:,i),P(:,j));
-% 	end
-% end

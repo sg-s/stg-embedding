@@ -35,6 +35,8 @@ set(gca,'YTick',[2:2:2*length(experimenters)],'YTickLabel',cellfun(@char,categor
 set(gca,'XAxisLocation','top')
 xlabel('p(normal)')
 
+axis off
+cla(gca)
 
 
 
@@ -285,8 +287,11 @@ ax.PD01.Position(4) =  ax.PD01.Position(4)*.9;
 ax.T_PD.Position(4) =  ax.T_PD.Position(4)*.9;
 ax.T_LP.Position(4) =  ax.T_LP.Position(4)*.9;
 
+% labels
+figlib.label('XOffset',-.01,'FontSize',28,'ColumnFirst',true,'YOffset',-.01)
 
-figlib.saveall
+% cleanup
+figlib.saveall('Location',display.saveHere)
 
 
 % this init clears all the junnk this script creates

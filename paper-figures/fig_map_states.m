@@ -2,6 +2,7 @@
 % assuming it exists, and shows illustrative examples from
 % each class 
 
+close all
 init
 
 % unpack
@@ -111,7 +112,10 @@ th = text(ax.examples(1),-1.5, 1.5, 'LP');
 th.FontSize = 16;
 th.Color = LP_color;
 
+h = axlib.label(ax.main,'a','FontSize',36,'XOffset',.01);
+h = axlib.label(ax.examples(1),'b','FontSize',36,'XOffset',-.025,'YOffset',-.01);
 
+figlib.saveall('Location',display.saveHere)
 
 % clean up workspace
 init()
