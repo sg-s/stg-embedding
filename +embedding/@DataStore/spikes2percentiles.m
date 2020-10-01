@@ -102,8 +102,8 @@ for i = 1:length(neurons)
 		p.([neurons{i} '_' neurons{i} '_2'])(j) = nanmax(isis2)/nanmax(isis);
 
 	
-		isis = sort(isis,'descend','MissingPlacement','last');
-		p.([neurons{i} '_' neurons{i} '_ratio'])(j,:) = isis(1)./isis(2:5); 
+		% isis = sort(isis,'descend','MissingPlacement','last');
+		% p.([neurons{i} '_' neurons{i} '_ratio'])(j,:) = isis(1)./isis(2:5); 
 
 	end
 
@@ -113,8 +113,8 @@ end
 
 
 % truncate ratios
-p.PD_PD_ratio(p.PD_PD_ratio>3) = 3;
-p.LP_LP_ratio(p.LP_LP_ratio>3) = 3;
+% p.PD_PD_ratio(p.PD_PD_ratio>3) = 3;
+% p.LP_LP_ratio(p.LP_LP_ratio>3) = 3;
 
 % % compute cross ISI percentiles
 % for i = 1:length(neurons)
@@ -280,7 +280,7 @@ end
 % p.LP_PD2 = 1./p.LP_PD;
 % p.PD_LP2 = 1./p.PD_LP;
 
-VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases, p.PD_PD_ratio, p.LP_LP_ratio, exp(p.PD_PD_2), exp(p.LP_LP_2)]);
+VectorizedData = ([p.PD_PD, p.LP_LP, p.PDphases, p.LPphases, exp(p.PD_PD_2), exp(p.LP_LP_2)]);
 
 VectorizedData(isinf(VectorizedData)) = NaN;
 

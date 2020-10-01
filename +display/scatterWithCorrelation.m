@@ -15,8 +15,8 @@ assert(length(X)==length(Y),'Lengths dont match')
 
 
 plot(X,Y,'.','MarkerSize',10,'Color',[.5 .5 .5])
-[~,p]=corr(X,Y,'Type','Spearman');
-th = text(10,.3,['\itp=' mat2str(p,2)]);
+[rho,p]=corr(X,Y,'Type','Spearman');
+th = text(10,.3,['\rho=' mat2str(rho,2) ', \itp=' mat2str(p,2)]);
 
 th.Position(1) = prctile(X,20);
 th.Position(2) = max(Y)*1.1;

@@ -26,11 +26,10 @@ m.idx = embedding.readAnnotations(idx,H,m.RawData,m.idx);
 clearvars H idx midx
 
 
-% fitData = VectorizedData;
 
 % original
-% u = umap('min_dist',0, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
-% R = u.fit(fitData);
+u = umap('min_dist',0, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
+R = u.fit(fitData);
 
 m.ReducedData = R;
 m.RawData = raw_spike_data;
