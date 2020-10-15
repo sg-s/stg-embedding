@@ -19,3 +19,15 @@ neurolib.raster(ax,data(:,1),'yoffset',0,'deltat',1,'center',false,'Color','k')
 neurolib.raster(ax,data(:,2),'yoffset',1,'deltat',1,'center',false,'Color','r')	
 
 set(ax,'YLim',[0 2],'XLim',[-.1 20.1],'YTickLabel',{'LP','PD'},'YTick',[.5 1.5])
+
+% write current point to workspace
+C = evalin('base','m.CurrentPoint');
+AB = [1; 1];
+try
+	AB = evalin('base','AB');
+catch
+end
+
+
+AB = [AB(2); C];
+assignin('base','AB',AB);

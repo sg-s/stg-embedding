@@ -1,7 +1,11 @@
 % searches all the data and returns baseline data
-function alldata = getAllData()
+function alldata = getAllData(UseCache)
 
-if exist('../cache/alldata.mat','file')
+arguments
+    UseCache (1,1) logical = true
+end
+
+if exist('../cache/alldata.mat','file') & UseCache
     load('../cache/alldata.mat')
     return
 end
@@ -29,8 +33,6 @@ for i = 1:length(all_exps)
 	end
 
 	this_exp = all_exps(i).name;
-	
-
 
     % get the consolidated data from crabsort
     % this is internally cached
@@ -62,7 +64,12 @@ for i = 1:length(all_exps)
         data.PD = transpose(data.PD);
         data.LP = transpose(data.LP);
 
-    	data = embedding.DataStore(data);
+        try
+    	   data = embedding.DataStore(data);
+        catch
+            % something went wrong, give up
+            continue
+        end
 
     	if ~any(data.mask)
             save(cache_path,'data','-v7.3')
@@ -105,6 +112,11 @@ for i = 1:length(all_exps)
 
 end
 
+
+% make sure the idx is the same size as the mask
+for i = 1:length(alldata)
+    alldata(i).idx = repmat(categorical(NaN),length(alldata(i).mask),1);
+end
 
 clearvars data
 

@@ -2,7 +2,7 @@
 
 
 
-% this is passed to the interactive labeler so we can look at the spikes
+% this is passed to the interactive labeller so we can look at the spikes
 raw_spike_data = [alldata.LP, alldata.PD];
 
 
@@ -17,8 +17,6 @@ m.labels = categories(m.idx);
 
 
 
-
-
 % load saved data
 
 load('../annotations/labels.cache','H','idx','-mat')
@@ -28,8 +26,9 @@ clearvars H idx midx
 
 
 % original
-u = umap('min_dist',0, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
-R = u.fit(fitData);
+% u = umap('min_dist',0, 'metric','euclidean','n_neighbors',75,'negative_sample_rate',25);
+% R = u.fit(fitData);
+% load('R.mat','R')
 
 m.ReducedData = R;
 m.RawData = raw_spike_data;
@@ -55,3 +54,5 @@ m.handles.ax(2).Box = 'on'
 embed_button = uicontrol(m.handles.main_fig,'Units','normalized','Style','pushbutton','String','Embed using uMAP','FontSize',24,'Position',[.75 .4 .2 .1]);
 
 embed_button.Callback = @embedding.embed;
+
+embedding.quality(R,alldata.idx)

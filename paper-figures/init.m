@@ -24,42 +24,16 @@ if ~exist('hashes','var') | any(isundefined(alldata.idx))
 	[decdata.idx, hashes.decdata] = decdata.getLabelsFromCache;
 end
 
-assert(~any(isundefined(alldata.idx)),'Some data is unlabeled')
 
-% get the embedding
+
+% get the embedding for the basedata
 if ~exist('R','var')
-	[p,NormalizedMetrics, VectorizedData] = alldata.vectorizeSpikes2;
-	u = umap('min_dist',.75, 'metric','euclidean','n_neighbors',100,'negative_sample_rate',75, 'repulsion_strength',2);
-	u.labels = alldata.idx;
+	VectorizedData = alldata.spikes2percentiles;
+
+	u = umap;
+	u.n_neighbors = 50;
+	u.negative_sample_rate = 50;
 	R = u.fit(VectorizedData);
-end
-
-
-if ~exist('allmetrics','var')
-	disp('Computing metrics for all data...')
-	allmetrics = alldata.ISI2BurstMetrics;
-	allmetrics = structlib.scalarify(allmetrics);
-
-
-	% we are not cenosoring the metrics in the non-normal states
-	% because we want to show these metrics in the embedding
-
-
-end
-
-
-if ~exist('decmetrics','var')
-	disp('Computing metrics for decentralized data...')
-	decmetrics = decdata.ISI2BurstMetrics;
-	decmetrics = structlib.scalarify(decmetrics);
-
-
-	% censor metrics in non-normal states
-	fn = fieldnames(decmetrics);
-	for i = 1:length(fn)
-		decmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
-	end
-
 end
 
 
@@ -80,4 +54,23 @@ end
 
 
 
-clearvars -except alldata data R metrics basedata decdata hashes decmetrics basemetrics allmetrics
+
+if ~exist('decmetrics','var')
+	disp('Computing metrics for decentralized data...')
+	decmetrics = decdata.ISI2BurstMetrics;
+	decmetrics = structlib.scalarify(decmetrics);
+
+
+	% censor metrics in non-normal states
+	fn = fieldnames(decmetrics);
+	for i = 1:length(fn)
+		decmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
+	end
+
+end
+
+
+
+
+
+

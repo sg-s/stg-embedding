@@ -1,10 +1,24 @@
-function [PDphases, LPphases] = spikePhase(alldata,DelayPercentileVec)
+% computes the pseudo-phase of every spike in A as
+% defined by the time in B
+% this can always be defined, no matter what the activity
+% of A and B are. 
+
+function [PDphasesPrcTile, LPphasesPrcTile, PDphases, LPphases] = spikePhase(alldata,DelayPercentileVec)
+
+arguments
+	alldata (1,1) embedding.DataStore
+	DelayPercentileVec (:,1) = [0 5 95 100]
+end
 
 N = length(alldata.mask);
 
 % measure a "phase" for every spike defined by timing of the other neuron
-PDphases = NaN(N,length(DelayPercentileVec));
-LPphases = NaN(N,length(DelayPercentileVec));
+PDphasesPrcTile = NaN(N,length(DelayPercentileVec));
+LPphasesPrcTile = NaN(N,length(DelayPercentileVec));
+
+
+PDphases = NaN(N,1e3);
+LPphases = NaN(N,1e3);
 
 disp('Computing pseudo phases...')
 
@@ -31,10 +45,20 @@ for i = 1:N
 			continue
 		end
 
+
+
 		phases(j) = (spikes(j)-prev_other_spike)/(next_other_spike-prev_other_spike);
+
+		% override phases if this spike occurs between two closely occurring spikes on the other neuron
+		if next_other_spike-prev_other_spike < .1
+			phases(j) = 0;
+		end
 	end
 
-	PDphases(i,:) = prctile(phases,DelayPercentileVec);
+	PDphases(i,:) = phases;
+
+	PDphasesPrcTile(i,:) = prctile(phases,DelayPercentileVec);
+
 
 
 
@@ -59,9 +83,16 @@ for i = 1:N
 		end
 
 		phases(j) = (spikes(j)-prev_other_spike)/(next_other_spike-prev_other_spike);
+
+		% override phases if this spike occurs between two closely occurring spikes on the other neuron
+		if next_other_spike-prev_other_spike < .1
+			phases(j) = 0;
+		end
 	end
 
-	LPphases(i,:) = prctile(phases,DelayPercentileVec);
+	LPphases(i,:) = phases;
+	LPphasesPrcTile(i,:) = prctile(phases,DelayPercentileVec);
+
 
 
 end
