@@ -1,13 +1,14 @@
-function data = cronin(data, metadata_loc)
+% script that adds on metadata for the cronin data
 
-mods = {'RPCH','proctolin','CCAP'};
-p = properties(data(1));
-mods = setdiff(mods,p);
-for i = 1:length(mods)
-	addprop(data,mods{i});
+function data = cronin(data)
+
+arguments
+	data (1,1) embedding.DataStore
 end
 
-allfiles = dir(fullfile(metadata_loc,'*.txt'));
+
+
+allfiles = dir('../annotations/cronin-metadata/*.txt');
 
 
 assert(~isempty(allfiles),'No metadata files found')
@@ -25,34 +26,15 @@ for i = 1:length(allfiles)
 	end
 
 	this_exp = allfiles(i).name(1:end-4);
-	data_idx = [];
-	for j = 1:length(data)
-		if strcmp(char(data(j).experiment_idx(1)),this_exp)
-			data_idx = j;
-		end
-	end
 
-	if isempty(data_idx)
-		keyboard
-		disp('Could not locate data...')
-		continue
-	end
+	assert(any(data.experiment_idx == this_exp),'Could not find this experiment in the cronin data')
+
+	these_pts = find(data.experiment_idx == this_exp);
+
 
 	% make a time vector
-	% assumes 20 second chunks
-	time = data(data_idx).time_offset;
+	time = data.time_offset(these_pts);
 
-	for j = 2:length(data(data_idx).mask)
-		if data(data_idx).filename(j) ~= data(data_idx).filename(j-1)
-			time(j:end) = time(j:end) - time(j);
-		end
-	end
-
-	% zero out the decentralized and modulators 
-	data(data_idx).decentralized(:) = false;
-	data(data_idx).RPCH(:) = 0;
-	data(data_idx).proctolin(:) = 0;
-	data(data_idx).CCAP(:) = 0;
 
 	% figure out when decentralization happens
 	for j = 1:length(lines)
@@ -76,8 +58,11 @@ for i = 1:length(allfiles)
 		start_time = str2double(this_line{2});
 		fieldname = this_line{3};
 
-		data = metadata.update(data, data_idx, time, start_time, fileid, fieldname, value);
+		file_ok = these_pts(cellfun(@(x) any(strfind(x,fileid)),corelib.categorical2cell(data.filename(these_pts))));
+		a = file_ok(find(start_time < data.time_offset(file_ok) ,1,'first'));
 
+
+		data.(fieldname)(a:these_pts(end)) = value;
 
 	end
 
