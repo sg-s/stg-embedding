@@ -3,6 +3,10 @@
 % 
 function data = rosenbaum(data)
 
+arguments
+	data (:,1) embedding.DataStore
+end
+
 % mark the modulator on
 load('../annotations/rosenbaum_modulator_on.mat','mmm')
 

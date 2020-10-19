@@ -38,7 +38,6 @@ isiLP(isiLP>10) = NaN;
 isiLP(isiLP<1e-2) = NaN;
 
 
-
 plot(ax,isiPD,PD,'.','Color',PD_color,'MarkerSize',1)
 plot(ax,isiLP*100,LP,'.','Color',LP_color,'MarkerSize',1)
 
@@ -67,4 +66,3 @@ ax.YLim = [decentralized_at - 300 decentralized_at + 1050];
 
 ax.XLim = [.01 200];
 
-end

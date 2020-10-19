@@ -1,9 +1,7 @@
 
 % this script makes an ethogram of all experiments, and wordclouds for differnet regions
 
-if ~exist('alldata','var')
-    init()
-end
+init()
 
 % unpack
 idx = alldata.idx;
@@ -17,7 +15,7 @@ figure('outerposition',[300 300 1333 900],'PaperUnits','points','PaperSize',[133
 
 
 % figure out the modulator used in each prep
-modulator_used = sourcedata.modulatorUsed(data);
+modulator_used = sourcedata.modulatorUsedByPrep(moddata);
 
 [~,sidx] = sort(lower(corelib.categorical2cell(modulator_used)));
 sorted_mods = modulator_used(sidx);
@@ -69,6 +67,8 @@ cats = corelib.categorical2cell(unique(idx));
 yoffset = 1;
 
 linepos = [];
+
+return
 
 for i = 1:length(data)
 

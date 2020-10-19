@@ -41,16 +41,16 @@ axis square
 
 
 show_these_states = dictionary;
-show_these_states.normal = [1888 41282];
-show_these_states.('LP-silent-PD-bursting') = [31773 25244];
-show_these_states.('PD-silent-LP-bursting') = [36034 32041];
-show_these_states.('aberrant-spikes') = [7836 33573];
-show_these_states.('interrupted-bursting') = [8744 13255];
-show_these_states.irregular = [47580 30426];
-show_these_states.('LP-skipped-bursts') = [42062 5547];
-show_these_states.('LP-weak-skipped') = [43599 18080];
-show_these_states.('PD-weak-skipped') = [27110 34743];
-show_these_states.('LP-PD-01') = [26569 37344];
+show_these_states.normal = {'daf06c66a4b297bd14e82f7589e7cab6','eb02c69951660235217d56152865b7a3'};
+show_these_states.('aberrant-spikes') = {'a6e1101b62a277aeb05c465dcb251de3','194d195827f25260fa79f37acfd9ff50'};
+show_these_states.('interrupted-bursting') = {'1ccc6ca1b96bf1e5b1642bc71ed907c7','6f886cb836f53c4529807dcf706436d1'};
+show_these_states.irregular = {'0e3b65f24ab42bab86564ef693c4cfb5','ad3ee389335fc4b365fed7b2f531610e'};
+show_these_states.('irregular-bursting') = {'84e3bad1b986fd40e3103e0b2c5261c3','e66fdc5e7121689b0c06f7dc6bb1ba2c'};
+show_these_states.('LP-weak-skipped') = {'c8dd020a7e6c3633291c1ae6ba19264b','5b41adb21f64ab8cdc0414a266539aa2'};
+show_these_states.('PD-weak-skipped') = {'07a41b92d6745e75680e115a395b539c','16729e1f5824028e23f5495d1322f108'};
+show_these_states.('PD-skipped-bursts') = {'28db2f63a24284aa4e29742b856a683b','6011b078db9c37207cb56dac3a153400'};
+show_these_states.('LP-silent-PD-bursting') = {'d2ec80d287ea0673b2991d147ab61101','f197e54d593c546fb74b6c5e6d97a403'};
+show_these_states.('LP-PD-01') = {'840452581fc6a4862761989700ab3a96','52596dfc5ab8d953d0cb264a1414a32e'};
 
 
 
@@ -66,8 +66,10 @@ for i = 1:length(ax.examples)
 
     for j = 1:2
 
-        PD = alldata.PD(show_these(j),:);
-        LP = alldata.LP(show_these(j),:);
+        show_this = find(strcmp(hashes.alldata,show_these{j}));
+
+        PD = alldata.PD(show_this,:);
+        LP = alldata.LP(show_this,:);
         offset = nanmin([LP(:); PD(:)]);
         PD = PD - offset;
         LP = LP - offset;
@@ -79,7 +81,7 @@ for i = 1:length(ax.examples)
 
     end
 
-    title([char(idx(show_these(1))) ' (n=' mat2str(sum(idx==fn{i})) ')'],'FontWeight','normal')
+    title([char(idx(show_this)) ' (n=' mat2str(sum(idx==fn{i})) ')'],'FontWeight','normal')
 
     
 
@@ -87,7 +89,7 @@ for i = 1:length(ax.examples)
     ax.examples(i).XTick = [];
     ax.examples(i).Box = 'on';
     axis(ax.examples(i),'on')
-    this_color = colors(idx(show_these(1)));
+    this_color = colors(idx(show_this));
     plotlib.vertline(ax.examples(i),-.45,'Color',this_color,'LineWidth',10);
     ax.examples(i).Color = [.95 .95 .95];
 
@@ -111,6 +113,8 @@ th.Color = PD_color;
 th = text(ax.examples(1),-1.5, 1.5, 'LP');
 th.FontSize = 16;
 th.Color = LP_color;
+
+drawnow()
 
 h = axlib.label(ax.main,'a','FontSize',36,'XOffset',.01);
 h = axlib.label(ax.examples(1),'b','FontSize',36,'XOffset',-.025,'YOffset',-.01);

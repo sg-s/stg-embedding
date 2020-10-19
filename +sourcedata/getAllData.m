@@ -125,7 +125,7 @@ alldata = alldata(:);
 
 
 % need to read metadata for the cronin data because fuck me 
-alldata = metadata.cronin(alldata,fullfile(getpref('embedding','cache_loc'),'cronin-metadata'));
+alldata = metadata.cronin(alldata);
 
 
 % need to read metadata for the rosenbaum data because fuck me

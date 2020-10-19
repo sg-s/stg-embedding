@@ -1,12 +1,12 @@
-% script that adds on metadata for the cronin data
+function data = cronin(data, metadata_loc)
 
-function data = cronin(data)
 
-arguments
-	data (1,1) embedding.DataStore
+arguments 
+	data (:,1) embedding.DataStore
 end
 
 
+assert(length(data)>1,'This will not work on a combined dataStore')
 
 allfiles = dir('../annotations/cronin-metadata/*.txt');
 
@@ -26,15 +26,34 @@ for i = 1:length(allfiles)
 	end
 
 	this_exp = allfiles(i).name(1:end-4);
+	data_idx = [];
+	for j = 1:length(data)
+		if strcmp(char(data(j).experiment_idx(1)),this_exp)
+			data_idx = j;
+		end
+	end
 
-	assert(any(data.experiment_idx == this_exp),'Could not find this experiment in the cronin data')
-
-	these_pts = find(data.experiment_idx == this_exp);
-
+	if isempty(data_idx)
+		keyboard
+		disp('Could not locate data...')
+		continue
+	end
 
 	% make a time vector
-	time = data.time_offset(these_pts);
+	% assumes 20 second chunks
+	time = data(data_idx).time_offset;
 
+	for j = 2:length(data(data_idx).mask)
+		if data(data_idx).filename(j) ~= data(data_idx).filename(j-1)
+			time(j:end) = time(j:end) - time(j);
+		end
+	end
+
+	% zero out the decentralized and modulators 
+	data(data_idx).decentralized(:) = false;
+	data(data_idx).RPCH(:) = 0;
+	data(data_idx).proctolin(:) = 0;
+	data(data_idx).CCAP(:) = 0;
 
 	% figure out when decentralization happens
 	for j = 1:length(lines)
@@ -58,11 +77,8 @@ for i = 1:length(allfiles)
 		start_time = str2double(this_line{2});
 		fieldname = this_line{3};
 
-		file_ok = these_pts(cellfun(@(x) any(strfind(x,fileid)),corelib.categorical2cell(data.filename(these_pts))));
-		a = file_ok(find(start_time < data.time_offset(file_ok) ,1,'first'));
+		data = metadata.update(data, data_idx, time, start_time, fileid, fieldname, value);
 
-
-		data.(fieldname)(a:these_pts(end)) = value;
 
 	end
 

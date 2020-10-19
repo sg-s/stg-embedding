@@ -14,6 +14,9 @@ if ~exist('basedata','var')
 	disp('Filtering data for baseline and other conditions...')
 	basedata = filter(alldata,sourcedata.DataFilter.Baseline);
 	decdata = filter(alldata,sourcedata.DataFilter.Decentralized);
+
+	moddata = filter(alldata,sourcedata.DataFilter.Neuromodulator);
+
 end
 
 
@@ -34,6 +37,15 @@ if ~exist('R','var')
 	u.n_neighbors = 50;
 	u.negative_sample_rate = 50;
 	R = u.fit(VectorizedData);
+end
+
+
+if ~exist('allmetrics','var')
+	disp('Computing metrics for all data...')
+	allmetrics = alldata.ISI2BurstMetrics;
+	allmetrics = structlib.scalarify(allmetrics);
+
+
 end
 
 

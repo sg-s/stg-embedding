@@ -55,4 +55,4 @@ embed_button = uicontrol(m.handles.main_fig,'Units','normalized','Style','pushbu
 
 embed_button.Callback = @embedding.embed;
 
-embedding.quality(R,alldata.idx)
+% embedding.quality(R,alldata.idx)

@@ -7,15 +7,15 @@ init()
 
 PDf = sum(~isnan(alldata.PD),2)/20;
 
-C = [allmetrics.PD_burst_period allmetrics.LP_burst_period  allmetrics.PD_duty_cycle allmetrics.LP_duty_cycle allmetrics.LP_phase_on PDf];
-Limits = [0 2; 0 2; 0 1; 0 1; 0 1; 0 20];
-Labels = {'T_{PD} (s)','T_{LP} (s)','Duty cycle_{PD}','Duty cycle_{LP}','LP phase','<f_{PD}> (Hz)'};
+C = [allmetrics.PD_burst_period allmetrics.LP_phase_on PDf];
+Limits = [0 2; 0 1; 0 20];
+Labels = {'T_{PD} (s)','LP phase','<f_{PD}> (Hz)'};
 
 
-figure('outerposition',[300 100 1901 1201],'PaperUnits','points','PaperSize',[1901 1201]); hold on
+figure('outerposition',[300 100 1901 801],'PaperUnits','points','PaperSize',[1901 801]); hold on
 clear ax
-for i = 1:6
-	ax(i) = subplot(2,3,i); hold on
+for i = 1:3
+	ax(i) = subplot(1,3,i); hold on
 	plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',24)
 	scatter(R(:,1),R(:,2),6,C(:,i),'filled')
 	axis square
