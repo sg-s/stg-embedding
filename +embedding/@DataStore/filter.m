@@ -2,8 +2,11 @@
 
 function data = filter(data, FilterSpec)
 
+arguments
+	data embedding.DataStore
+	FilterSpec (1,1) sourcedata.DataFilter
+end
 
-assert(isa(FilterSpec,'sourcedata.DataFilter'),'Filter needs to be of type sourcedata.DataFilter')
 
 
 switch FilterSpec
@@ -64,55 +67,73 @@ case sourcedata.DataFilter.AllUsable
 case sourcedata.DataFilter.Neuromodulator
 
 
-	error('Not coded')
+	assert(min(data.mask) == 1,'Expected all data to be mask-free, but this not the case. First filter with the "AllUsable" filter');
 
-	% first, remove all pieces of data that are not at 11C
-	for i = 1:length(data)
-		% except if it's Philipp's data
-		if data(i).experimenter(1) == 'rosenbaum'
-			continue
-		end
-		rm_this = data(i).temperature < 10 | data(i).temperature > 15;
-		data(i) = sourcedata.purge(data(i),rm_this);
+
+	modulators = sourcedata.modulators;
+
+
+	% remove data where more than 1 neuromodulator is used
+	% at the same time
+	N_mod = zeros(length(data.mask),1);
+	for modulator = List(modulators)
+		N_mod = N_mod + data.(modulator)>0;
 	end
-
-	% remove empty datasets
-	data(cellfun(@sum,{data.mask}) == 0) = [];
+	if any(N_mod>1)
+		data = data.purge(N_mod>1);
+	end
 
 
 	% remove data where no modulator is used
-	modulator = sourcedata.modulatorUsed(data);
-	data = data(~isundefined(modulator));
+	unique_exps = unique(data.experiment_idx);
+	rm_this = true(length(unique_exps),1);
 
-	
+	for i = 1:length(unique_exps)
 
-	modulator = sourcedata.modulatorUsed(data);
+		for modulator = List(modulators)
+			if any(data.(modulator)(data.experiment_idx == unique_exps(i)))
+				rm_this(i) = false;
+				break
+			end
 
-	
-	rm_this = false(length(data),1);
-	for i = 1:length(data)
-
-		% prep should be decentralized at some point with no modulator
-		if ~any(data(i).(char(modulator(i))) == 0 & data(i).decentralized)
-			rm_this(i) = true;
-		end
-
-		% prep should be not-decentralized with no modulator 
-		if ~any(~data(i).decentralized & data(i).(char(modulator(i))) == 0)
-			rm_this(i) = true;
-		end
-
-		% prep should be decentralized and have modulator on it 
-		if  ~any(data(i).decentralized & data(i).(char(modulator(i))))
-			rm_this(i) = true;
-		end
-
-		if rm_this(i)
-			disp(data(i).experiment_idx(1))
 		end
 	end
 
 
+	bad_preps = unique_exps(rm_this);
+	data = data.purge(ismember(data.experiment_idx,bad_preps));
+
+
+
+	% OK now we have a list of preps where modulator was used at some point in time
+	unique_exps = unique(data.experiment_idx);
+	bad_preps = true(length(unique_exps),1);
+
+	for i = 1:length(unique_exps)
+
+		thisdata = data.slice(data.experiment_idx == unique_exps(i));
+
+
+		% prep should be decentralized at some point with no modulator
+		if ~any(~thisdata.modulator & thisdata.decentralized)
+			continue
+		end
+
+		% prep should be not-decentralized with no modulator 
+		if ~any(~thisdata.modulator & ~thisdata.decentralized)
+			continue
+		end
+
+		% prep should be decentralized and have modulator on it
+		if ~any(thisdata.modulator & thisdata.decentralized)
+			continue
+		end
+
+		bad_preps(i) = false;
+
+	end
+
+	data = data.purge(ismember(data.experiment_idx,unique_exps(bad_preps)));
 
 
 
