@@ -2,10 +2,13 @@
 % the point is to show that baseline data is surprisingly variable
 
 
-init
+init()
 close all
 
-subidx = embedding.watersegment(R);
+cats = categories(alldata.idx);
+colors = display.colorscheme(alldata.idx);
+
+
 
 
 dec_hashes = hashes.decdata(decdata.decentralized);
@@ -16,9 +19,7 @@ clear ax
 
 % show baseline occupancy
 ax(1) = subplot(1,2,1); hold on
-fh = display.plotSubClusters(gca,alldata.idx,R,.1,subidx);
-cats = categories(alldata.idx);
-colors = display.colorscheme(alldata.idx);
+plot(R(:,1),R(:,2),'.','Color',[.85 .85 .85],'MarkerSize',30)
 
 for i = 1:length(cats)
 	plot(R(alldata.idx == cats(i) & is_decentralized,1),R(alldata.idx == cats(i) & is_decentralized,2),'.','Color',colors(cats{i}),'MarkerSize',5)
@@ -26,6 +27,7 @@ end
 
 axis(ax(1),'off')
 axis square
+
 
 
 ax(2) = subplot(2,2,2); hold on
@@ -37,7 +39,7 @@ for i = 1:length(X)
 end
 
 sorted_cats = cats(sort_order);
-set(gca,'XScale','log','YTick',[1:length(X)],'YTickLabel',sorted_cats)
+
 
 for i = 1:length(sorted_cats)
 	bh(i).FaceColor = colors.(sorted_cats{i});
@@ -62,6 +64,7 @@ ax_mon = display.pairedMondrian(ax(3),decdata,~decdata.decentralized, decdata.de
 
 figlib.pretty('FontSize',15)
 
+set(ax(2),'XScale','log','YTick',[1:length(X)],'YTickLabel',sorted_cats)
 
 ax(2).Position = [.6 .62 .33 .35];
 

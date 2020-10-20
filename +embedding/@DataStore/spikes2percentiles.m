@@ -26,6 +26,8 @@ LP_ratios = (max(LP_LP2,[],2)./max(data.LP_LP,[],2));
 
 
 % also include a metric that accounts for differences in biggest and 2nd biggest bursts 
+% TOD: this has a flaw if there are 2 bursts being skipped, it will not be detected
+% 
 temp = sort(data.PD_PD,2,'descend','MissingPlacement','last');
 temp = temp(:,1)./temp(:,2);
 temp(temp>2) = 2;
@@ -44,6 +46,15 @@ PD_ratios(PD_ratios<1.3) = 1;
 LP_ratios(LP_ratios<1.3) = 1;
 
 
+% choose missing values intelligently 
+PD_ratios(isnan(PD_ratios)) = 2;
+LP_ratios(isnan(LP_ratios)) = 2;
+
+
+PD_ratios = normalize(PD_ratios);
+LP_ratios = normalize(LP_ratios);
+
+
 % compute spike phases
 
 try evalin('base','PD_LP;');
@@ -56,8 +67,6 @@ catch
 end
 
 
-
-
 % pad ISIs to account for truncated segments
 [data.PD_PD, data.LP_LP] = embedding.padISIsToCompensateForTerminalSilence(data.PD,data.LP,data.PD_PD,data.LP_LP);
 
@@ -67,32 +76,23 @@ end
 
 
 
-
-Percentiles = [0 100];
+% normally [0 25 75 100];
+Percentiles =  [0:10:100];
 P_ISIs = [prctile(data.PD_PD,Percentiles,2) prctile(data.LP_LP,Percentiles,2)];
 
 P_ISIs(isnan(P_ISIs)) = 20;
 P_ISIs = normalize(P_ISIs);
 
+% exxagerate the last ISIs 
+P_ISIs(:,length(Percentiles):length(Percentiles):end) = P_ISIs(:,length(Percentiles):length(Percentiles):end)*10;
 
 
-
-Percentiles = [0 5 10 50 90 95 100];
+Percentiles =  [0:10:100];
 P_Phases = [prctile(PD_LP,Percentiles,2) prctile(LP_PD,Percentiles,2)];
 P_Phases(isnan(P_Phases)) = 1;
-
-% choose missing values intelligently 
-PD_ratios(isnan(PD_ratios)) = 2;
-LP_ratios(isnan(LP_ratios)) = 2;
-
-% normalize columns. This is because it doesn't make 
-% any sense for the small ISIs, or the small phases to be 
-% "closer" than the larger ones. 
-
 P_Phases = normalize(P_Phases);
 
-PD_ratios = normalize(PD_ratios);
-LP_ratios = normalize(LP_ratios);
+
 
 
 % exxagerate the smallest phases because we care about that too
@@ -108,10 +108,10 @@ longest_silence = normalize(longest_silence);
 FiringRates = normalize(embedding.firingRates(data));
 
 % magic numbers and hyperparameters
-Bias.ISI2 = 10;  % 10
-Bias.Phase = 5;   % 5
-Bias.LongestSilence = 10;   % 10
-Bias.f = 4; % 4
+Bias.ISI2 = 5;  % 5
+Bias.Phase = 1;   % 2
+Bias.LongestSilence = 5;   % 5
+Bias.f = 5; % 2
 
 VectorizedData = 	[P_ISIs ...
 					Bias.Phase*P_Phases ...

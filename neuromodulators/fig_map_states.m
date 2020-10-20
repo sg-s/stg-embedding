@@ -80,6 +80,4 @@ ax.examples(1).YTickLabel = {'PD','LP'};
 
 
 figlib.saveall('Location',display.saveHere)
-
-
 init()

@@ -180,7 +180,9 @@ th = text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
 figlib.pretty('PlotLineWidth',1)
 
 
-return
+figlib.saveall('Location',display.saveHere)
+
+
 
 % clean up
 init()

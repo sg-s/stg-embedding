@@ -3,10 +3,12 @@
 
 function P = probState(data, OnlyWhen)
 
-assert(isscalar(data),'Expected a scalar DataStore')
-assert(~any(isundefined(data.idx)),'States not defined!')
+arguments
 
-all_states = categories(data.idx);
+	data(1,1) embedding.DataStore
+	OnlyWhen (:,1) logical 
+	
+end
 
 
 if nargin == 1
@@ -14,8 +16,11 @@ if nargin == 1
 end
 
 
-assert(islogical(OnlyWhen),'Expected OnlyWhen to be a logical vector')
+
 assert(length(OnlyWhen) == length(data.mask),'OnlyWhen has an incongruent length')
+assert(~any(isundefined(data.idx)),'States not defined!')
+
+all_states = categories(data.idx);
 
 
 all_preps = unique(data.experiment_idx);

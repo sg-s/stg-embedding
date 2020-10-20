@@ -8,6 +8,9 @@ arguments
 	keep_this (:,1) logical 
 end
 
+
+assert(length(keep_this) == length(data.mask),'keep_this must match the length of vectors in the dataStore')
+
 props = properties(data);
 
 for i = 1:length(props)

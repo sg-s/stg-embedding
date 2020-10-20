@@ -13,14 +13,18 @@ end
 % get the labels and hashes
 if ~exist('hashes','var') | any(isundefined(alldata.idx))
 	[alldata.idx, hashes.alldata] = alldata.getLabelsFromCache;
+
 end
 
 if ~exist('basedata','var')
 	disp('Filtering data for baseline and other conditions...')
 	basedata = filter(alldata,sourcedata.DataFilter.Baseline);
+
 	decdata = filter(alldata,sourcedata.DataFilter.Decentralized);
+	[decdata.idx, hashes.decdata] = decdata.getLabelsFromCache;
 
 	moddata = filter(alldata,sourcedata.DataFilter.Neuromodulator);
+	[~, hashes.moddata] = moddata.getLabelsFromCache;
 
 end
 
@@ -35,7 +39,7 @@ if ~exist('R','var')
 
 	u = umap;
 	u.n_neighbors = 50;
-	u.negative_sample_rate = 50;
+	u.negative_sample_rate = 20;
 	R = u.fit(VectorizedData);
 end
 
@@ -83,6 +87,6 @@ end
 
 
 
-
+clearvars -except alldata decdata basedata moddata decmetrics basemetrics allmetrics R PD_LP LP_PD hashes
 
 

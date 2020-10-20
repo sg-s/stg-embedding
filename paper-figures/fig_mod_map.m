@@ -2,13 +2,10 @@
 % the state is indicated by a shading in the background,
 % and sub-clusters are found using watershed
 
-if ~exist('alldata','var')
-    init()
-end
+init()
 
-clearvars -except data alldata p
 
-R = double(alldata.R);
+
 cats = categories(alldata.idx);
 colors = display.colorscheme(cats);
 
@@ -29,20 +26,28 @@ end
 
 figlib.pretty('LineWidth',1)
 
-sub_idx = embedding.watersegment(alldata);
 
 
-conditions = {'baseline','decentralized','CabTrp1a','RPCH','proctolin','oxotremorine'};
+
+modulators = {'serotonin','CabTrp1a','RPCH','proctolin','oxotremorine','CCAP'};
 
 
-for ci = 1:length(conditions)
-	fh = display.plotSubClusters(ax(ci),alldata,.1,sub_idx);
-	plot_this = filterData(alldata,conditions{ci});
+for ci = 1:length(modulators)
+
+
+	% plot all points as a background
+	plot(ax(ci),R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
+
+	% find all pts where the modulator is used
+	plot_this = hashes.moddata(moddata.(modulators{ci})>0);
+	plot_this = ismember(hashes.alldata,plot_this);
+
+
 	for i = 1:length(cats)
-		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',10)
+		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',20)
 	end
 
-	title(ax(ci),conditions{ci},'FontWeight','normal')
+	title(ax(ci),modulators{ci},'FontWeight','normal')
 
 	
 end
@@ -50,6 +55,7 @@ end
 axlib.move(ax(4:6),'down',.02)
 
 
+return
 
 
-clearvars -except data alldata p
+init()
