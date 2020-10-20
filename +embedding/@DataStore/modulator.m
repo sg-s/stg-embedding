@@ -2,6 +2,7 @@
 % a modulator is applied, and also returns the identity
 % of the modulator(s) used
 
+
 function [TF, ModulatorUsed] = modulator(self)
 
 
@@ -12,14 +13,10 @@ TF = false(length(self.mask),1);
 modulators = sourcedata.modulators;
 ModulatorUsed = {};
 for modulator = List(modulators)
-	
-
 	if any(self.(modulator))
 		TF = TF | logical(self.(modulator));
 		ModulatorUsed = [ModulatorUsed; modulator];
 	end
 
 end
-
-
 

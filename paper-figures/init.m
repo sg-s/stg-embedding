@@ -10,6 +10,11 @@ if ~exist('alldata','var')
 end
 
 
+% get the labels and hashes
+if ~exist('hashes','var') | any(isundefined(alldata.idx))
+	[alldata.idx, hashes.alldata] = alldata.getLabelsFromCache;
+end
+
 if ~exist('basedata','var')
 	disp('Filtering data for baseline and other conditions...')
 	basedata = filter(alldata,sourcedata.DataFilter.Baseline);
@@ -20,12 +25,7 @@ if ~exist('basedata','var')
 end
 
 
-% get the labels and hashes
-if ~exist('hashes','var') | any(isundefined(alldata.idx))
-	[alldata.idx, hashes.alldata] = alldata.getLabelsFromCache;
-	[basedata.idx, hashes.basedata] = basedata.getLabelsFromCache;
-	[decdata.idx, hashes.decdata] = decdata.getLabelsFromCache;
-end
+
 
 
 

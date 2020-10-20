@@ -7,7 +7,7 @@ arguments
     ax (1,1) matlab.graphics.axis.Axes
     states (:,1) categorical
     time (:,1) double
-    YOffset(1,1) double 
+    YOffset (1,1) double 
 end
 
 
@@ -25,7 +25,7 @@ for j = 1:length(cats)
 
     % this effectively plots lines of continuous blocks
     
-    plot(ax,time(:),y(:),'Color',colors(cats{j}),'LineWidth',2.5)
+    plot(ax,time(:),y(:),'Color',colors(cats{j}),'LineWidth',2)
 
     % now what about single pts? 
     y1 = circshift(y,1);
@@ -33,7 +33,7 @@ for j = 1:length(cats)
 
     isolated_pts = ~isnan(y) & isnan(y1) & isnan(y2);
 
-    plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',10,'Color',colors(cats{j}),'LineStyle','none')
+    plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',5,'Color',colors(cats{j}),'LineStyle','none')
 
 
 end

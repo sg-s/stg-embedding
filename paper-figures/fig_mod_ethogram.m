@@ -1,36 +1,38 @@
 
-% this script makes an ethogram of all experiments, and wordclouds for differnet regions
+% this script makes an ethogram of all experiments, and mondrian plots of the differnet cases
 
+close all
 init()
 
 % unpack
-idx = alldata.idx;
+idx = moddata.idx;
 cats = categories(idx);
 colors = display.colorscheme(cats);
 
 
-close all
+
 figure('outerposition',[300 300 1333 900],'PaperUnits','points','PaperSize',[1333 900]); hold on
 
 
 
 % figure out the modulator used in each prep
-modulator_used = sourcedata.modulatorUsedByPrep(moddata);
+[modulator_used, unique_preps] = sourcedata.modulatorUsedByPrep(moddata);
 
 [~,sidx] = sort(lower(corelib.categorical2cell(modulator_used)));
 sorted_mods = modulator_used(sidx);
+unique_preps = unique_preps(sidx);
 
 clearvars ax
 
 
 ax.control = subplot(1,4,1); hold on
-set(ax.control,'XLim',[0 600]) % 10 minutes
+set(ax.control,'XLim',[-600 0]) % 10 minutes
 
 ax.decentralized = subplot(1,4,2); hold on
-set(ax.decentralized,'XLim',[-600 0]) % 10 minutes before and after mod addition
+set(ax.decentralized,'XLim',[-600 0]) % 10 minutes before modulator addition
 
 ax.modulator = subplot(1,4,3:4); hold on
-set(ax.modulator,'XLim',[0 1200]) % 10 minutes before and after mod addition
+set(ax.modulator,'XLim',[0 1200]) % 20 minutes after mod addition
 
 
 axis(ax.control,'off')
@@ -68,48 +70,40 @@ yoffset = 1;
 
 linepos = [];
 
-return
+for i = 1:length(unique_preps)
 
-for i = 1:length(data)
+    prep = moddata.slice(moddata.experiment_idx == unique_preps(i));
 
-    prep = data(sidx(i)).experiment_idx(1);
-    use_these = (alldata.experiment_idx == prep);
-    decentralized = alldata.decentralized(use_these);
-    time_since_mod_on = alldata.time_since_mod_on(use_these);
 
-    % get states
-    states = idx(use_these);
+    % plot modulator
+    mod_on = find(prep.modulator,1,'first');
+    time = prep.time_offset(mod_on:end);
+    time = time - time(1);
+    idx = prep.idx(mod_on:end);
+    display.plotStates(ax.modulator, idx, time, yoffset);
 
-    y = time_since_mod_on*0 + yoffset;
 
-    % plot 10 minutes of decentralized just before ANY neuromod is added
-    display.plotStates(ax.decentralized, cats, states, time_since_mod_on, y);
-
+    % plot decentralized
+    time = prep.time_offset(find(prep.decentralized,1,'first'):mod_on-1);
+    time = time - time(end);
+    idx = prep.idx(find(prep.decentralized,1,'first'):mod_on-1);
+    display.plotStates(ax.decentralized, idx, time, yoffset);
+    
+    % plot control 
+    % we're going to cheat a little and relax the restriction on using
+    % the strict definition of time and instead plot everything we have
+    % this should be OK
+    idx = prep.idx(1:find(prep.decentralized,1,'first')-1);
+    time = (1:length(idx))*20;
+    time = time - time(end);
+    display.plotStates(ax.control, idx, time, yoffset);
     
 
-    % plot neuromodulator at the highest concentration
-    this_mod = alldata.(char(sorted_mods(i)))(use_these);
-    a = find(this_mod == max(this_mod),1,'first');
-    if  length(unique(this_mod)) > 2
-        % cronin data with more than 1 conc
-         display.plotStates(ax.modulator, cats, states,  time_since_mod_on -  time_since_mod_on(a), y);
-    else
-        % should be OK, just plot
-        display.plotStates(ax.modulator, cats, states, time_since_mod_on, y);
-    end
-
-
-    % plot 10 minutes of control
-    display.plotStates(ax.control, cats, states, time_since_mod_on - time_since_mod_on(1), y);
-
-    if nanmax(data(sidx(i)).RPCH) > 0
-        disp(data(sidx(i)).experiment_idx(1))
-    end
 
 
     yoffset = yoffset + 1;
 
-    if i < length(data)
+    if i < length(unique_preps)
         if sorted_mods(i) ~=  sorted_mods(i+1)
             plotlib.horzline(ax.control,yoffset + 1,'k:');
             plotlib.horzline(ax.decentralized,yoffset + 1,'k:');
@@ -124,24 +118,28 @@ for i = 1:length(data)
 end
 
 
+
 % plot control states
 axes(ax.tree.control)
-states = alldata.idx(alldata.decentralized == false);
+states = moddata.idx(moddata.decentralized == false);
 display.mondrian(states,colors);
+
+
 
 % plot decentralized
 axes(ax.tree.decentralized)
-states = alldata.idx(alldata.decentralized == true & alldata.time_since_mod_on < 0);
+states = moddata.idx(moddata.decentralized == true & moddata.modulator == 0);
 display.mondrian(states,colors);
+
+
 
 % show treemaps for modulators
 for j = 3:length(show_these)
     axes(ax.tree.(show_these{j}))
-    states = alldata.idx(alldata.(show_these{j}) > 0);
+    states = moddata.idx(moddata.(show_these{j}) > 0);
     display.mondrian(states,colors);
 
 end
-
 
 
 % make fake plots for a legend
@@ -182,6 +180,7 @@ th = text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
 figlib.pretty('PlotLineWidth',1)
 
 
+return
 
-% clean up worksapce
-clearvars -except alldata data p
+% clean up
+init()

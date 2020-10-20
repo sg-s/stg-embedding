@@ -9,6 +9,7 @@ arguments
 end
 
 props = properties(data);
+
 for i = 1:length(props)
 	data.(props{i}) = data.(props{i})(keep_this,:);
 end

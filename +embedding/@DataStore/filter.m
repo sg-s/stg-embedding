@@ -89,17 +89,13 @@ case sourcedata.DataFilter.Neuromodulator
 	rm_this = true(length(unique_exps),1);
 
 	for i = 1:length(unique_exps)
-
 		for modulator = List(modulators)
 			if any(data.(modulator)(data.experiment_idx == unique_exps(i)))
 				rm_this(i) = false;
 				break
 			end
-
 		end
 	end
-
-
 	bad_preps = unique_exps(rm_this);
 	data = data.purge(ismember(data.experiment_idx,bad_preps));
 
@@ -134,6 +130,39 @@ case sourcedata.DataFilter.Neuromodulator
 	end
 
 	data = data.purge(ismember(data.experiment_idx,unique_exps(bad_preps)));
+
+
+
+	% remove preps where the baseline is really weird. 
+	unique_exps = unique(data.experiment_idx);
+	p_normal = zeros(length(unique_exps),1);
+	for i = 1:length(unique_exps)
+		temp = data.idx(data.experiment_idx == unique_exps(i) & data.decentralized == false);
+		if length(temp) > 30
+			temp = temp(end-29:end);
+		end
+		p_normal(i) = mean(temp == 'normal');
+	end
+
+	data = data.purge(ismember(data.experiment_idx,unique_exps(p_normal<.8)));
+
+
+
+	% finally, we remove all data where the non-maximum value of the modulator was used. 
+	unique_exps = unique(data.experiment_idx);
+	rm_this = false(length(data.mask),1);
+	for i = 1:length(unique_exps)
+		for modulator = List(modulators)
+			this_exp = find(data.experiment_idx == unique_exps(i));
+			this_mod_values = data.(modulator)(this_exp);
+			rm_these = this_exp(this_mod_values > 0 & this_mod_values < max(this_mod_values));
+			rm_this(rm_these) = true;
+		end
+	end
+
+	data = data.purge(rm_this);
+
+
 
 
 
