@@ -1,4 +1,6 @@
-% searches all the data and returns baseline data
+% searches all the data and returns all data
+% in a vector of embedding.DataStore objects
+
 function alldata = getAllData(UseCache)
 
 arguments

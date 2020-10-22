@@ -7,8 +7,12 @@ arguments
 	data (:,1) embedding.DataStore
 end
 
+assert(length(data)>1,'This will not work on a combined dataStore')
+
 % mark the modulator on
 load('../annotations/rosenbaum_modulator_on.mat','mmm')
+
+disp('Modifying Rosenbaum metadata...')
 
 for i = 1:length(data)
 
@@ -25,6 +29,8 @@ for i = 1:length(data)
 	end
 
 
+	disp(data(i).experiment_idx(1))
+
 	filestart = find(data(i).filename == mmm(use_this).filename,1,'first');
 	time_offset = data(i).time_offset;
 	time_offset = time_offset - time_offset(filestart);
@@ -35,11 +41,18 @@ for i = 1:length(data)
 		keyboard
 	end
 
-	mod_name = char(sourcedata.modulatorUsed(data(i)));
+
+	[~,mod_name]=data(i).modulator;
+	mod_name = unique(mod_name);
+	if length(mod_name) ~= 1
+		keyboard
+	end
+	mod_name = mod_name{1};
 	max_mod = max(data(i).(mod_name));
 
 	data(i).(mod_name)(:) = 0;
 	data(i).(mod_name)(mod_on:end) = max_mod;
+
 
 end
 
@@ -47,6 +60,8 @@ clearvars mmm
 
 % now mark decentralized 
 load('../annotations/rosenbaum_decentralized.mat','mmm')
+
+disp('Updating decentralization times for Rosenbaum data...')
 
 for i = 1:length(data)
 
@@ -76,6 +91,7 @@ for i = 1:length(data)
 
 	data(i).decentralized(:) = false;
 	data(i).decentralized(decentralized:end) = true;
+
 
 
 end

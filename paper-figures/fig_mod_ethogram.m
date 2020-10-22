@@ -58,9 +58,9 @@ end
 
 ax.tree.control.Position = [.05 .85 .15 .11];
 ax.tree.decentralized.Position = [.21 .85 .15 .11];
-ax.tree.RPCH.Position = [.8 .56 .15 .11];
-ax.tree.proctolin.Position = [.8 .39 .15 .11];
-ax.tree.oxotremorine.Position = [.8 .24 .15 .11];
+ax.tree.RPCH.Position = [.8 .61 .15 .11];
+ax.tree.proctolin.Position = [.8 .44 .15 .11];
+ax.tree.oxotremorine.Position = [.8 .29 .15 .11];
 
 
 

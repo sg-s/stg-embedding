@@ -24,3 +24,16 @@ colors('PD-weak-skipped') = color.aqua('green');
 colors('sparse-irregular') = color.aqua('indigo');
 colors('LP-silent-PD-bursting') = color.aqua('orange');
 colors('LP-silent') = color.aqua('pink');
+colors('irregular') = color.aqua('gray');
+colors('slow-weak-bursting') = color.aqua('lime');
+
+colors('silent') = color.aqua('teal');
+
+%  'purple'
+% 	C = [175 82 222]/255;
+% case 'red'
+% 	C = [255 59 48]/255;
+% case 'teal'
+% 	C = [90 200 250]/255;
+% case 'yellow'
+% 	C = [255 204 0]/255;

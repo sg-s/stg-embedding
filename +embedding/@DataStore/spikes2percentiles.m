@@ -73,10 +73,7 @@ end
 
 
 
-
-
-
-% normally [0 25 75 100];
+% normally [0:10:100];
 Percentiles =  [0:10:100];
 P_ISIs = [prctile(data.PD_PD,Percentiles,2) prctile(data.LP_LP,Percentiles,2)];
 
@@ -109,9 +106,9 @@ FiringRates = normalize(embedding.firingRates(data));
 
 % magic numbers and hyperparameters
 Bias.ISI2 = 5;  % 5
-Bias.Phase = 1;   % 2
+Bias.Phase = 1;   % 1
 Bias.LongestSilence = 5;   % 5
-Bias.f = 5; % 2
+Bias.f = 5; % 5
 
 VectorizedData = 	[P_ISIs ...
 					Bias.Phase*P_Phases ...

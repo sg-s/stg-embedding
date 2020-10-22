@@ -1,4 +1,4 @@
-function data = cronin(data, metadata_loc)
+function data = cronin(data)
 
 
 arguments 
@@ -10,6 +10,8 @@ assert(length(data)>1,'This will not work on a combined dataStore')
 
 allfiles = dir('../annotations/cronin-metadata/*.txt');
 
+
+disp('Modifying metadata for cronin data...')
 
 assert(~isempty(allfiles),'No metadata files found')
 
@@ -34,10 +36,12 @@ for i = 1:length(allfiles)
 	end
 
 	if isempty(data_idx)
-		keyboard
 		disp('Could not locate data...')
 		continue
 	end
+
+
+	disp(allfiles(i).name)
 
 	% make a time vector
 	% assumes 20 second chunks
@@ -81,8 +85,6 @@ for i = 1:length(allfiles)
 
 
 	end
-
-
 
 end
 

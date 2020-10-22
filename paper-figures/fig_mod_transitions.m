@@ -8,7 +8,7 @@ cats = categories(moddata.idx);
 colors = display.colorscheme(cats);
 
 
-figure('outerposition',[300 300 1333 901],'PaperUnits','points','PaperSize',[1333 901]); hold on
+figure('outerposition',[300 300 1600 901],'PaperUnits','points','PaperSize',[1400 901]); hold on
 
 % first show the decentralized case
 ax(1) = subplot(2,3,1); hold on

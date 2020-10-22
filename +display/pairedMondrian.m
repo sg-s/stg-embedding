@@ -61,14 +61,20 @@ view([90 -90])
 ax(1).XLim = [0 1];
 ax(1).YLim = [0 1];
 axis(ax(1),'off')
-p = display.mondrian(mean(P.A),cats);
+
+
+% p = display.mondrian(mean(P.A),cats);
+p = display.mondrian(histcounts(alldata.idx(A)),cats);
 
 axes(ax(2))
 axis(ax(2),'off')
 ax(2).XLim = [0 1];
 ax(2).YLim = [0 1];
 view([90 -90])
-p2 = display.mondrian(mean(P.B),cats);
+
+
+%p2 = display.mondrian(mean(P.B),cats);
+p2 = display.mondrian(histcounts(alldata.idx(B)),cats);
 
 
 p_values = NaN(length(cats),1);

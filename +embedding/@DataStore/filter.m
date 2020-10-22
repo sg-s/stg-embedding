@@ -68,6 +68,7 @@ case sourcedata.DataFilter.Neuromodulator
 
 
 	assert(min(data.mask) == 1,'Expected all data to be mask-free, but this not the case. First filter with the "AllUsable" filter');
+	assert(length(data)==1,'Expected a scalar DataStore. Use "combine" first')
 
 
 	modulators = sourcedata.modulators;
@@ -133,18 +134,18 @@ case sourcedata.DataFilter.Neuromodulator
 
 
 
-	% remove preps where the baseline is really weird. 
-	unique_exps = unique(data.experiment_idx);
-	p_normal = zeros(length(unique_exps),1);
-	for i = 1:length(unique_exps)
-		temp = data.idx(data.experiment_idx == unique_exps(i) & data.decentralized == false);
-		if length(temp) > 30
-			temp = temp(end-29:end);
-		end
-		p_normal(i) = mean(temp == 'normal');
-	end
+	% remove preps where the baseline is really weird ( defined as spending more than 20% of its time in non-normal states just before decentralization). This should allow for some transient behaviour which might emerge from the stress of early prep. handling
+	% unique_exps = unique(data.experiment_idx);
+	% p_normal = zeros(length(unique_exps),1);
+	% for i = 1:length(unique_exps)
+	% 	temp = data.idx(data.experiment_idx == unique_exps(i) & data.decentralized == false);
+	% 	if length(temp) > 30
+	% 		temp = temp(end-29:end);
+	% 	end
+	% 	p_normal(i) = mean(temp == 'normal' | temp == 'LP-weak-skipped' | temp == 'aberrant-spikes');
+	% end
 
-	data = data.purge(ismember(data.experiment_idx,unique_exps(p_normal<.8)));
+	% data = data.purge(ismember(data.experiment_idx,unique_exps(p_normal<.5)));
 
 
 
@@ -169,15 +170,15 @@ case sourcedata.DataFilter.Neuromodulator
 
 case sourcedata.DataFilter.Baseline
 
-
+	assert(isscalar(data),'expected data to be scalar')
+	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
 
 	rm_this = data.temperature < 10 | data.temperature > 12;
 	data = purge(data,rm_this);
 	
 
 
-	assert(isscalar(data),'expected data to be scalar')
-	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
+	
 
 
 
@@ -208,7 +209,7 @@ case sourcedata.DataFilter.Decentralized
 	% filtering is expected to happen after we combine all the data
 	% and embed it
 	% so we also assume that it has already gone through the 
-	% AllUsable filter
+	% AllUsable filter and been combined
 	assert(isscalar(data),'expected data to be scalar')
 	assert(min(data.mask)==1,'Some data is masked, are you sure this data has gone through the AllUsable filter?')
 
@@ -256,6 +257,22 @@ case sourcedata.DataFilter.Decentralized
 	end
 
 	data = purge(data,rm_this);
+
+
+	% remove preps where the baseline is really weird ( defined as spending more than 20% of its time in non-normal states just before decentralization). This should allow for some transient behaviour which might emerge from the stress of early prep. handling
+	unique_exps = unique(data.experiment_idx);
+	p_normal = zeros(length(unique_exps),1);
+	for i = 1:length(unique_exps)
+		temp = data.idx(data.experiment_idx == unique_exps(i) & data.decentralized == false);
+		if length(temp) > 30
+			temp = temp(end-29:end);
+		end
+		p_normal(i) = mean(temp == 'normal');
+	end
+
+	data = data.purge(ismember(data.experiment_idx,unique_exps(p_normal<.8)));
+
+
 
 
 otherwise

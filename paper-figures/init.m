@@ -38,8 +38,8 @@ if ~exist('R','var')
 	VectorizedData = alldata.spikes2percentiles;
 
 	u = umap;
-	u.n_neighbors = 50;
-	u.negative_sample_rate = 20;
+	u.n_neighbors = 50;          % 50
+	u.negative_sample_rate = 20;  % 20
 	R = u.fit(VectorizedData);
 end
 

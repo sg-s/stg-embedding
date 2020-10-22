@@ -18,6 +18,8 @@ for i = 1:length(modnames)
 	preps = unique(moddata.experiment_idx(moddata.(modnames{i}) > 0));
 	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized);
 
+	%preps = preps.slice(preps.PD_channel ~= 'PD' | preps.LP_channel ~= 'LP');
+
 
 	display.pairedMondrian(ax(i),preps, preps.(modnames{i}) == 0, preps.(modnames{i}) > 0, 'decentralized', ['+' modnames{i}]);
 

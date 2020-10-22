@@ -44,7 +44,7 @@ for ci = 1:length(modulators)
 
 
 	for i = 1:length(cats)
-		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',20)
+		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',25)
 	end
 
 	title(ax(ci),modulators{ci},'FontWeight','normal')
