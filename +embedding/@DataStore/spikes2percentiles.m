@@ -104,15 +104,20 @@ longest_silence = normalize(longest_silence);
 
 FiringRates = normalize(embedding.firingRates(data));
 
+
+Burstiness = normalize(embedding.burstiness(data));
+
 % magic numbers and hyperparameters
 Bias.ISI2 = 5;  % 5
 Bias.Phase = 1;   % 1
 Bias.LongestSilence = 5;   % 5
 Bias.f = 5; % 5
+Bias.Burstiness = 2;
 
 VectorizedData = 	[P_ISIs ...
 					Bias.Phase*P_Phases ...
 					Bias.ISI2*PD_ratios ...
 					Bias.ISI2*LP_ratios ...
 					Bias.LongestSilence*longest_silence ...
-					Bias.f*FiringRates];
+					Bias.f*FiringRates...
+					Bias.Burstiness*Burstiness];
