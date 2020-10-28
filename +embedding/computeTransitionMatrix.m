@@ -2,6 +2,11 @@
 % and return that 
 function J = computeTransitionMatrix(idx, time)
 
+arguments
+	idx (:,1) categorical
+	time (:,1) double
+end
+
 validation.categoricalTime(idx,time);
 
 cats = categories(idx);

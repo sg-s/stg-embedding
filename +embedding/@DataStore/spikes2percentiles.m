@@ -112,7 +112,7 @@ Bias.ISI2 = 5;  % 5
 Bias.Phase = 1;   % 1
 Bias.LongestSilence = 5;   % 5
 Bias.f = 5; % 5
-Bias.Burstiness = 2;
+Bias.Burstiness = 2;  % 2
 
 VectorizedData = 	[P_ISIs ...
 					Bias.Phase*P_Phases ...

@@ -4,20 +4,7 @@
 close all
 clearvars ax
 
-% get data
-if ~exist('data','var')
-	data = sourcedata.getAllData();
-	data = filter(data,sourcedata.DataFilter.Baseline);
-
-	% convert into a scalar 
-	alldata = data.combine;
-
-	% compute sub-dominant period
-
-	metricsLP = alldata.ISIAutocorrelationPeriod('LP');
-	metricsPD = alldata.ISIAutocorrelationPeriod('PD');
-
-end
+init()
 
 
 metricsLP.DominantPeriod(metricsLP.DominantPeriod>5) = NaN;
