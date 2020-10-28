@@ -98,14 +98,14 @@ P_Phases(:,1:length(Percentiles):end) = P_Phases(:,1:length(Percentiles):end)*10
 
 
 % compute longest silence. this should help with separating interrupted bursting
-longest_silence = (embedding.longestSilence(data));
+longest_silence = longestSilence(data);
 longest_silence(longest_silence>3) = 3;
 longest_silence = normalize(longest_silence);
 
-FiringRates = normalize(embedding.firingRates(data));
+FiringRates = normalize(firingRates(data));
 
 
-Burstiness = normalize(embedding.burstiness(data));
+Burstiness = normalize(burstiness(data));
 
 % magic numbers and hyperparameters
 Bias.ISI2 = 5;  % 5

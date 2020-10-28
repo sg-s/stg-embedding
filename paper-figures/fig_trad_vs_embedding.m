@@ -8,7 +8,7 @@ close all
 allmetrics.LP_phase_on(allmetrics.LP_phase_on>1) = NaN;
 allmetrics.PD_burst_period(allmetrics.PD_burst_period>5) = NaN;
 allmetrics.LP_burst_period(allmetrics.LP_burst_period>5) = NaN;
-F = embedding.firingRates(alldata);
+F = alldata.firingRates;
 
 % drawing constants
 lp_color = color.aqua('red');
@@ -26,9 +26,6 @@ figlib.showImageInAxes(ax.circuit,I)
 
 
 
-% show the rasters of some example states
-
-
 % hashes of examples
 examples = {'f339a5d3558c2d54788d992479d1cd6b',
     'e972805d6eff58fdd7f8d5c7f8b5e201',
@@ -38,6 +35,24 @@ examples = {'f339a5d3558c2d54788d992479d1cd6b',
     'dcf177efe29c79ef38eccfac23e7bc1f'};
 
 examples = find(ismember(hashes.alldata,examples));
+
+% show the rasters of some example states
+ax.rasters1 = subplot(4,4,2:3); hold on
+
+for i = 1:3
+	alldata.raster(examples(i),4*i)
+end
+
+% show the rasters of some example states
+ax.rasters2 = subplot(4,4,4); hold on
+
+for i = 4:length(examples)
+	alldata.raster(examples(i),4*i)
+end
+
+
+
+
 
 % show the classical metrics
 
@@ -98,27 +113,12 @@ ax.map.YTick = [];
 ax.map.XTick = [];
 ax.firing_rates.Position(1) = .75;
 ax.duty_cycles.Position(1) = .45;
-return
 
+ax.rasters2.Position(1) = .66;
+ax.rasters1.Position(3) = .25;
+ax.rasters2.Position(3) = .25;
 
+axis(ax.rasters1,'off')
+axis(ax.rasters2,'off')
 
-close all
-
-% find two points close together in embedding
-temp = [allmetrics.PD_burst_period, allmetrics.LP_burst_period];
-
-
-
-
-A = 859;
-B = 57804;
-[A,B]=analysis.findCloseInXButFarInY(temp,R,A,B);
-
-
-subplot(4,1,3); hold on
-neurolib.raster(alldata.PD(A,:),'Color',pd_color,'center',false)
-neurolib.raster(alldata.LP(A,:),'Color',lp_color,'center',false,'yoffset',1)
-
-subplot(4,1,4); hold on
-neurolib.raster(alldata.PD(B,:),'Color',pd_color,'center',false)
-neurolib.raster(alldata.LP(B,:),'Color',lp_color,'center',false,'yoffset',1)
+ax.firing_rates.XTickLabel{end-1} = [];

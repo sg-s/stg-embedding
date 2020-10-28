@@ -29,6 +29,10 @@ colors('slow-weak-bursting') = color.aqua('lime');
 
 colors('silent') = color.aqua('teal');
 
+
+colors('LP') = color.aqua('red');
+colors('PD') = color.aqua('indigo');
+
 %  'purple'
 % 	C = [175 82 222]/255;
 % case 'red'
