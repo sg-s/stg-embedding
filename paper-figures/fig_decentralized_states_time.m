@@ -23,14 +23,15 @@ set(ax(1),'XLim',[-600 1800])
 
 YOffset = 0;
 
+
 for i = 1:length(all_preps)
 	use_this = decdata.experiment_idx == all_preps(i);
 	states = decdata.idx(use_this);
 	time = time_since_decentralization(use_this);
 
-	if sum(time == -600) == 0
-		continue
-	end
+	% if sum(time == -600) == 0
+	% 	continue
+	% end
 
 	if sum(time == 600) == 0
 		continue
@@ -41,9 +42,11 @@ for i = 1:length(all_preps)
 
 	YOffset = YOffset + 1;
 
+
 end
 
 disp(YOffset)
+ax(1).YLim = [0 YOffset];
 
 
 r1 = rectangle(ax(1),'Position',[.205 .04 .47 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
@@ -139,7 +142,6 @@ xlabel(ax(2),'Time since decentralization (min)')
 
 plot(ax(2),[0 0],[0 1],'w--');
 
-ax(1).YLim = [0 88];
 
 
 

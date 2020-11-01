@@ -27,12 +27,12 @@ figlib.showImageInAxes(ax.circuit,I)
 
 
 % hashes of examples
-examples = {'f339a5d3558c2d54788d992479d1cd6b',
-    'e972805d6eff58fdd7f8d5c7f8b5e201',
-    'cd7cf44fe2c0c205b6328210a7fb073a',
-    '8e015606a5820f2ee825c8897da39e5a',
-    'f26eb2ff90ec64ed641cb2c92f5ab8ab',
-    'dcf177efe29c79ef38eccfac23e7bc1f'};
+examples = {'903cb5a8f5433a52cc397f09cb7ffd64',
+    'd837ae2690b8588ce7ee2912bfccff4b',
+    '0e3b65f24ab42bab86564ef693c4cfb5',
+    '334208844ff04688cc5dfa580ef68a95',
+    '6e554e9ffb2d580cffa8c3bc9bc7d505',
+    '07a41b92d6745e75680e115a395b539c'};
 
 examples = find(ismember(hashes.alldata,examples));
 
@@ -87,6 +87,15 @@ ylabel('f_{LP} (Hz)')
 % show embedding
 ax.map = subplot(2,2,4); hold on
 sh = scatter(R(:,1),R(:,2),2);
+
+sh.Marker = 'o';
+sh.MarkerEdgeColor = 'k';
+sh.MarkerEdgeAlpha = .0;
+sh.MarkerFaceColor = 'k';
+sh.MarkerFaceAlpha = .05;
+
+sh = scatter(R(:,1)+randn(length(R),1)/2,R(:,2)+randn(length(R),1)/2,2);
+
 sh.Marker = 'o';
 sh.MarkerEdgeColor = 'k';
 sh.MarkerEdgeAlpha = .0;
@@ -106,8 +115,8 @@ end
 
 figlib.pretty('LineWidth',1,'PlotLineWidth',1,'FontSize',16)
 
-ax.map.XLim = [-30 40];
-ax.map.YLim = [-20 35];
+ax.map.YLim = [-30 30];
+ax.map.XLim = [-30 30];
 ax.map.Position = [.4 .05 .55 .4];
 ax.map.YTick = [];
 ax.map.XTick = [];
@@ -122,3 +131,10 @@ axis(ax.rasters1,'off')
 axis(ax.rasters2,'off')
 
 ax.firing_rates.XTickLabel{end-1} = [];
+
+
+% cleanup
+figlib.saveall('Location',display.saveHere)
+
+
+init()

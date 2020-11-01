@@ -63,7 +63,7 @@ ax(1).YLim = [0 1];
 axis(ax(1),'off')
 
 
-p = display.mondrian(mean(P.A),cats);
+p = display.mondrian(nanmean(P.A),cats);
 % p = display.mondrian(histcounts(alldata.idx(A)),cats);
 
 axes(ax(2))
@@ -72,8 +72,7 @@ ax(2).XLim = [0 1];
 ax(2).YLim = [0 1];
 view([90 -90])
 
-
-p2 = display.mondrian(mean(P.B),cats);
+p2 = display.mondrian(nanmean(P.B),cats);
 % p2 = display.mondrian(histcounts(alldata.idx(B)),cats);
 
 
@@ -96,7 +95,7 @@ end
 
 
 % alternative -- plot fold change 
-fold_change = (mean(P.B) - mean(P.A))./(mean(P.B) + mean(P.A));
+fold_change = (nanmean(P.B) - nanmean(P.A))./(nanmean(P.B) + nanmean(P.A));
 
 
 [~,sidx] = sort(fold_change);

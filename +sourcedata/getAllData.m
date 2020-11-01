@@ -47,24 +47,22 @@ for i = 1:length(all_exps)
 	% check the cache
 	if exist(cache_path) ~= 2 
 		% cache miss
-		disp(this_exp)
+		disp(['cache miss: ' this_exp])
 
-        % stack and chunk
+
+        % chunk into 20 s segments
         options.dt = 1e-3;
         options.ChunkSize = 20;
         options.neurons = {'PD','LP'};
 
-        % make sure spikes are all sorted
+        % make sure spikes are all sorted in ascending order
         for j = 1:length(data)
             data(j).LP = sort(data(j).LP,'ascend');
             data(j).PD = sort(data(j).PD,'ascend');
         end
 
-        data = crabsort.analysis.stack(data,options);
-        data = crabsort.analysis.chunk(data,options);
 
-        data.PD = transpose(data.PD);
-        data.LP = transpose(data.LP);
+        data = crabsort.analysis.chunk(data,options);
 
         try
     	   data = embedding.DataStore(data);
@@ -106,7 +104,7 @@ for i = 1:length(all_exps)
         alldata(i) = data;
     else
     	% cache hit
-        disp(all_exps(i).name)
+        disp(['cache hit: ' all_exps(i).name])
     	load(cache_path,'data')
 
     	alldata(i) = data;

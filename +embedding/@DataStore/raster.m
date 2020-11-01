@@ -2,8 +2,8 @@ function raster(data, X, YOffset)
 
 arguments
 	data (1,1) embedding.DataStore
-	X (:,1) double 
-	YOffset (:,1) = zeros(length(X),1)
+	X (:,1) double = 1:length(data.mask)
+	YOffset (:,1) = 1:3:3*length(data.mask)
 end
 
 colors = display.colorscheme(data.idx);
@@ -11,8 +11,8 @@ colors = display.colorscheme(data.idx);
 
 for i = 1:length(X)
 
-	PD = data.PD(X(1),:);
-	LP = data.LP(X(1),:);
+	PD = data.PD(X(i),:);
+	LP = data.LP(X(i),:);
 
 	xoffset = min([PD(:); LP(:)]);
 	PD = PD - xoffset;

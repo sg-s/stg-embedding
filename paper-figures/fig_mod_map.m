@@ -14,13 +14,15 @@ clf;
 ax = axlib.tight_subplot(2,3);
 
 for i = 1:6
-	ax(i).XLim = [min(R(:)) max(R(:))];
-	ax(i).YLim = [min(R(:)) max(R(:))];
+	ax(i).XLim = [min(R(:))-5 max(R(:))+5];
+	ax(i).YLim = [min(R(:))-5 max(R(:))+5];
 	axis(ax(i),'on')
 	box(ax(i),'on')
 	ax(i).XTick = [];
 	ax(i).YTick = [];
 	hold(ax(i),'on')
+
+	display.plotBackgroundLabels(ax(i),alldata, R)
 end
 
 
@@ -33,10 +35,6 @@ modulators = {'serotonin','CabTrp1a','RPCH','proctolin','oxotremorine','CCAP'};
 
 
 for ci = 1:length(modulators)
-
-
-	% plot all points as a background
-	plot(ax(ci),R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
 
 	% find all pts where the modulator is used
 	plot_this = hashes.moddata(moddata.(modulators{ci})>0);

@@ -73,6 +73,8 @@ methods
 			return
 		end
 
+		assert(isstruct(data),'DataStore should be constructed using a struct')
+
 		fn = fieldnames(data);
 		for i = 1:length(fn)
 			DS.(fn{i}) = data.(fn{i});

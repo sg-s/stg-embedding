@@ -22,4 +22,3 @@ z = find(modulator(a:end)==0,1,'first');
 
 time(a+z-1:end) = NaN;
 
-keyboard

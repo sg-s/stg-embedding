@@ -41,15 +41,15 @@ axis square
 
 
 show_these_states = dictionary;
-show_these_states.normal = {'daf06c66a4b297bd14e82f7589e7cab6','eb02c69951660235217d56152865b7a3'};
-show_these_states.('aberrant-spikes') = {'44e25b9221f776de2e52bd1bae8e0eab','5b7a4f3f010cf7e12782e72d2628bf8c'};
-show_these_states.('interrupted-bursting') = {'1ccc6ca1b96bf1e5b1642bc71ed907c7','6f886cb836f53c4529807dcf706436d1'};
-show_these_states.irregular = {'0e3b65f24ab42bab86564ef693c4cfb5','ad3ee389335fc4b365fed7b2f531610e'};
-show_these_states.('irregular-bursting') = {'84e3bad1b986fd40e3103e0b2c5261c3','e66fdc5e7121689b0c06f7dc6bb1ba2c'};
-show_these_states.('LP-weak-skipped') = {'c8dd020a7e6c3633291c1ae6ba19264b','5b41adb21f64ab8cdc0414a266539aa2'};
+show_these_states.normal = {'903cb5a8f5433a52cc397f09cb7ffd64','fddcf31e6a6d4e9087b3495e3aa9f586'};
+show_these_states.('aberrant-spikes') = {'d837ae2690b8588ce7ee2912bfccff4b','3ce2bbd03458b642691974508d5d9c0a'};
+show_these_states.('interrupted-bursting') = {'d933191a837c1d6cb0073aff8d2e16c2','5d0b3af5ef7b5c05089812711f36006e'};
+show_these_states.irregular = {'0e3b65f24ab42bab86564ef693c4cfb5','c7c77a5d614187c2e48e342442d62284'};
+show_these_states.('irregular-bursting') = {'334208844ff04688cc5dfa580ef68a95','aaf0eec597ab2ed8f3825513b1958d92'};
+show_these_states.('LP-weak-skipped') = {'6e554e9ffb2d580cffa8c3bc9bc7d505','d6c0c36a4428785597a3b321c41336c7'};
 show_these_states.('PD-weak-skipped') = {'07a41b92d6745e75680e115a395b539c','16729e1f5824028e23f5495d1322f108'};
-show_these_states.('PD-skipped-bursts') = {'28db2f63a24284aa4e29742b856a683b','6011b078db9c37207cb56dac3a153400'};
-show_these_states.('LP-silent-PD-bursting') = {'d2ec80d287ea0673b2991d147ab61101','f197e54d593c546fb74b6c5e6d97a403'};
+show_these_states.('LP-silent-PD-bursting') = {'a4aeb01d81c31f51f46b9e424b02c447','5eabf649107f7dc40b4c2feb869143fa'};
+show_these_states.('PD-silent') = {'8c2382765f32dde0d2afe95008893959','4e8f00b1e593425abc635051b56036d5'};
 show_these_states.('silent') = {'b45625f4f424657001b0b42d3cebd833','b45625f4f424657001b0b42d3cebd833'};
 
 
@@ -67,6 +67,11 @@ for i = 1:length(ax.examples)
     for j = 1:2
 
         show_this = find(strcmp(hashes.alldata,show_these{j}));
+
+        if isempty(show_this)
+            disp(fn{i})
+        end
+
         show_this = show_this(1);
         
         PD = alldata.PD(show_this,:);

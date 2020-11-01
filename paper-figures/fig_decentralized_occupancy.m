@@ -19,7 +19,7 @@ clear ax
 
 % show baseline occupancy
 ax(1) = subplot(1,2,1); hold on
-plot(R(:,1),R(:,2),'.','Color',[.85 .85 .85],'MarkerSize',30)
+display.plotBackgroundLabels(ax(1),alldata, R)
 
 for i = 1:length(cats)
 	plot(R(alldata.idx == cats(i) & is_decentralized,1),R(alldata.idx == cats(i) & is_decentralized,2),'.','Color',colors(cats{i}),'MarkerSize',5)

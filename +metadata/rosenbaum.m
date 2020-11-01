@@ -33,7 +33,11 @@ for i = 1:length(data)
 
 	filestart = find(data(i).filename == mmm(use_this).filename,1,'first');
 	time_offset = data(i).time_offset;
-	time_offset = time_offset - time_offset(filestart);
+	try
+		time_offset = time_offset - time_offset(filestart);
+	catch
+		keyboard
+	end
 
 	mod_on = find(time_offset == mmm(use_this).time & data(i).filename == mmm(use_this).filename);
 

@@ -22,7 +22,6 @@ assert(isa(ax,'matlab.graphics.axis.Axes'),'Axes handle is not valid')
 
 time_since_decentralization = analysis.timeSinceDecentralization(data);
 
-
 data.PD(isnan(time_since_decentralization),:) = NaN;
 data.LP(isnan(time_since_decentralization),:) = NaN;
 
@@ -48,11 +47,6 @@ ax.XScale = 'log';
 
 decentralized_at = nanmin(data.PD(find(time_since_decentralization>0,1,'first'),:));
 
-try
-	r.Position = [.01 decentralized_at 300 1050];
-	ax.YLim = [nanmin(data.PD(:)) nanmax(data.PD(:))];
-catch
-end
 r.FaceColor = [.95 .95 .95];
 r.LineStyle = 'none';
 
@@ -61,8 +55,10 @@ ax.YDir = 'reverse';
 ax.YColor = 'w';
 ax.YTick = [];
 
-
-ax.YLim = [decentralized_at - 300 decentralized_at + 1050];
+if ~isempty(decentralized_at)
+	r.Position = [.01 decentralized_at 300 1050];
+	ax.YLim = [decentralized_at - 300 decentralized_at + 1050];
+end
 
 ax.XLim = [.01 200];
 

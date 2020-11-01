@@ -7,7 +7,7 @@ function idx = watersegment(R)
 
 assert(isnumeric(R),'Expected a double argument')
 
-nbins = 130; % increasing this will result in more clusters
+nbins = 10; % increasing this will result in more clusters
 blur_radius = 1;
 max_value = 2;
 

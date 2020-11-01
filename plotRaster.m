@@ -5,6 +5,7 @@
 function plotRaster(self, ax)
 
 
+
 cla(ax)
 
 neurolib.ISIraster(ax,self.RawData(:,self.CurrentPoint))

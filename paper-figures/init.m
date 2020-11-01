@@ -7,6 +7,8 @@ if ~exist('alldata','var')
 	data = sourcedata.getAllData();
 	alldata = filter(data,sourcedata.DataFilter.AllUsable);
 	alldata = alldata.combine();
+
+	alldata = analysis.correctTimeOffsets(alldata);
 end
 
 
@@ -19,6 +21,7 @@ end
 if ~exist('basedata','var')
 	disp('Filtering data for baseline and other conditions...')
 	basedata = filter(alldata,sourcedata.DataFilter.Baseline);
+	[basedata.idx, hashes.basedata] = basedata.getLabelsFromCache;
 
 	decdata = filter(alldata,sourcedata.DataFilter.Decentralized);
 	[decdata.idx, hashes.decdata] = decdata.getLabelsFromCache;
@@ -37,10 +40,12 @@ end
 if ~exist('R','var')
 	VectorizedData = alldata.spikes2percentiles;
 
-	u = umap;
-	u.n_neighbors = 50;          % 50
-	u.negative_sample_rate = 20;  % 20
-	R = u.fit(VectorizedData);
+	tsne_data;
+
+	% u = umap;
+	% u.n_neighbors = 50;          % 50
+	% u.negative_sample_rate = 20;  % 20
+	% R = u.fit(VectorizedData);
 end
 
 
@@ -87,6 +92,6 @@ end
 
 
 
-clearvars -except alldata decdata basedata moddata decmetrics basemetrics allmetrics R PD_LP LP_PD hashes
+clearvars -except alldata decdata basedata moddata decmetrics basemetrics allmetrics R PD_LP LP_PD hashes VectorizedData
 
 
