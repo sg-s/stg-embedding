@@ -170,7 +170,7 @@ set(gca,'YLim',[0 1])
 ax(6) = subplot(2,3,6); hold on
 display.plotMetricsVsTime(time,PD_dc,PD_color)
 display.plotMetricsVsTime(time,LP_dc,LP_color)
-set(gca,'YLim',[0.1 .4])
+set(gca,'YLim',[0 .4])
 
 
 ax(2).XAxisLocation = 'top';
@@ -193,6 +193,9 @@ ylabel(ax(3),'Burst period (fold change)')
 ylabel(ax(2),'Firing rate (fold change)')
 
 figlib.pretty()
+
+
+ax(1).YTickLabel = L;
 
 figlib.label('FontSize',30,'XOffset',-.02,'YOffset',-.02)
 
