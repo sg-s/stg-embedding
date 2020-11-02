@@ -1,5 +1,15 @@
 % embedding using t-SNE
 
+
+function R = tsne_data(alldata, PD_LP, LP_PD,VectorizedData)
+
+arguments
+	alldata (1,1) embedding.DataStore 
+	PD_LP
+	LP_PD 
+	VectorizedData
+end
+
 opts = struct;
 opts.perplexity = 100;
 opts.late_exag_coeff = 2.5;

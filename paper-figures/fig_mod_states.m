@@ -38,7 +38,5 @@ end
 figlib.pretty('FontSize',16)
 
 
-return
-
 figlib.saveall('Location',display.saveHere)
 init()

@@ -190,7 +190,7 @@ ylabel(ax(4),'Phase')
 ylabel(ax(6),'Duty cycle')
 
 ylabel(ax(3),'Burst period (fold change)')
-ylabel(ax(2),'Firing rate (fold change)')
+ylabel(ax(2),'Firing rate (Hz)')
 
 figlib.pretty()
 

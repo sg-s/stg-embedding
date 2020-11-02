@@ -42,7 +42,7 @@ for ci = 1:length(modulators)
 
 
 	for i = 1:length(cats)
-		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',25)
+		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',15)
 	end
 
 	title(ax(ci),modulators{ci},'FontWeight','normal')
@@ -53,7 +53,7 @@ end
 axlib.move(ax(4:6),'down',.02)
 
 
-return
 
 
+figlib.saveall('Location',display.saveHere)
 init()

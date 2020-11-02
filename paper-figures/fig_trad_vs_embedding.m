@@ -133,8 +133,95 @@ axis(ax.rasters2,'off')
 ax.firing_rates.XTickLabel{end-1} = [];
 
 
+
 % cleanup
 figlib.saveall('Location',display.saveHere)
 
+
+
+figure('outerposition',[300 300 601 901],'PaperUnits','points','PaperSize',[601 901]); hold on
+clear ax
+
+% show the ISIs
+ax.isis=subplot(3,2,1); hold on
+isis = alldata.PD_PD(examples(3),:);
+spiketimes = alldata.PD(examples(3),:);
+spiketimes = spiketimes - min(spiketimes);
+plot(spiketimes,isis','.','Color',colors.PD)
+set(gca,'YScale','log','YLim',[.01 1])
+ylabel('ISI (s)')
+plot([0 20],[.01 .01],'k','LineWidth',3)
+ax.isis.XColor = 'w';
+
+ax.isisp = subplot(3,2,3); hold on
+ah = area(prctile(isis,[0:10:100]));
+ah.FaceColor = colors.PD;
+ylabel('ISI (s)')
+ax.isip.XColor = 'w';
+
+isis = alldata.LP_LP(examples(3),:);
+spiketimes = alldata.LP(examples(3),:);
+spiketimes = spiketimes - min(spiketimes);
+spiketimes =  spiketimes + 25;
+plot(ax.isis,spiketimes,isis','.','Color',colors.LP)
+
+
+ah = area(ax.isisp,prctile(isis,[0:10:100]));
+ah.XData = ah.XData + 12;
+ah.FaceColor = colors.LP;
+
+
+% show the phases
+ax.phase = subplot(3,2,2); hold on
+isis = PD_LP(examples(3),:);
+spiketimes = alldata.PD(examples(3),:);
+spiketimes = spiketimes - min(spiketimes);
+plot(spiketimes,isis','.','Color',colors.PD)
+set(gca,'YLim',[0 1])
+ylabel('Phase')
+
+ax.phasep = subplot(3,2,4); hold on
+ah = area(prctile(isis,[0:10:100]));
+ah.FaceColor = colors.PD;
+ylabel('Phase')
+set(gca,'YLim',[0 1])
+
+
+isis = LP_PD(examples(3),:);
+spiketimes = alldata.LP(examples(3),:);
+spiketimes = spiketimes - min(spiketimes);
+spiketimes =  spiketimes + 25;
+plot(ax.phase,spiketimes,isis','.','Color',colors.LP)
+
+
+ah = area(ax.phasep,prctile(isis,[0:10:100]));
+ah.FaceColor = colors.LP;
+ah.XData = ah.XData + 12;
+
+
+% show the vectorized data
+subplot(3,1,3); hold on
+temp = VectorizedData(1:2000:end,:);
+temp(size(temp,1)-2:end,:) = NaN;
+temp(end,:) = VectorizedData(examples(3),:);
+plotlib.imagescnan(temp)
+axis off
+axis tight
+
+
+figlib.pretty()
+
+ax.isisp.XColor = 'w';
+ax.phase.XColor = 'w';
+ax.phasep.XColor = 'w';
+
+ax.isisp.Position(4) = .14;
+ax.isis.Position(4) = .14
+ax.phase.Position(4) = .14;
+ax.phasep.Position(4) = .14;
+
+
+ax.phase.Position(1) = .6;
+ax.phasep.Position(1) = .6;
 
 init()
