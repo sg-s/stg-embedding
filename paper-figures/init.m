@@ -40,7 +40,7 @@ end
 if ~exist('R','var')
 	VectorizedData = alldata.spikes2percentiles;
 
-	tsne_data;
+	R = embedding.tsne_data(alldata, PD_LP, LP_PD, VectorizedData);
 
 	% u = umap;
 	% u.n_neighbors = 50;          % 50

@@ -30,8 +30,11 @@ for i = 1:length(modnames)
 		continue
 	end
 
+
 	display.pairedMondrian(ax(i),preps, preps.(modnames{i}) == 0, preps.(modnames{i}) > 0, 'decentralized', ['+' modnames{i}]);
 
+
+	error
 
 end
 
