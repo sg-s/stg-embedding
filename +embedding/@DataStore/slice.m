@@ -9,7 +9,7 @@ arguments
 end
 
 
-assert(length(keep_this) == length(data.mask),'keep_this must match the length of vectors in the dataStore')
+% assert(length(keep_this) == length(data.mask),'keep_this must match the length of vectors in the dataStore')
 
 props = properties(data);
 

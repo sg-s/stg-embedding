@@ -30,7 +30,7 @@ NSpikesVar = T;
 
 
 
-parfor i = 1:DataSize
+for i = 1:DataSize
 %for i = 1030
 
 

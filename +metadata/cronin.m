@@ -1,92 +1,84 @@
+% this helper function fixed metadata in the Cronin data
+% because we have a differnet source of metadata in a 
+% different format 
+
 function data = cronin(data)
 
 
 arguments 
-	data (:,1) embedding.DataStore
+	data (1,1) struct
 end
 
 
-assert(length(data)>1,'This will not work on a combined dataStore')
-
 allfiles = dir('../annotations/cronin-metadata/*.txt');
-
-
-disp('Modifying metadata for cronin data...')
-
 assert(~isempty(allfiles),'No metadata files found')
 
+disp(['Modifying metadata for cronin data... ' char(data.experiment_idx(1))])
 
-for i = 1:length(allfiles)
-	% read metadata.txt
-	lines = strsplit(fileread([allfiles(i).folder filesep allfiles(i).name]),'\n');
+this_name = [char(data.experiment_idx(1)) '.txt'];
+
+use_this = find(strcmp({allfiles.name},this_name));
+
+assert(length(use_this)==1,'Could not find metadata file!')
 
 
-	% clean up lines
-	for j = 1:length(lines)
-		lines{j} = regexprep(lines{j}, '\t', ' ');
-		lines{j} = strip(lines{j});
+lines = strsplit(fileread([allfiles(use_this).folder filesep allfiles(use_this).name]),'\n');
+
+
+% clean up lines
+for j = 1:length(lines)
+	lines{j} = regexprep(lines{j}, '\t', ' ');
+	lines{j} = strip(lines{j});
+end
+
+
+
+
+% make a time vector
+% assumes 20 second chunks
+time = data.time_offset;
+
+for j = 2:length(data.mask)
+	if data.filename(j) ~= data.filename(j-1)
+		time(j:end) = time(j:end) - time(j);
 	end
+end
 
-	this_exp = allfiles(i).name(1:end-4);
-	data_idx = [];
-	for j = 1:length(data)
-		if strcmp(char(data(j).experiment_idx(1)),this_exp)
-			data_idx = j;
-		end
-	end
+% create vectors to hold metadata
+N = length(data.mask);
+data.decentralized = false(N,1);
+data.RPCH = zeros(N,1);
+data.proctolin = zeros(N,1);
+data.CCAP = zeros(N,1);
+data.PTX = zeros(N,1);
 
-	if isempty(data_idx)
-		disp('Could not locate data...')
+% figure out when decentralization happens
+for j = 1:length(lines)
+	if isempty(lines{j})
 		continue
 	end
 
+	this_line = strsplit(lines{j},' ');
 
-	disp(allfiles(i).name)
 
 
-	% make a time vector
-	% assumes 20 second chunks
-	time = data(data_idx).time_offset;
-
-	for j = 2:length(data(data_idx).mask)
-		if data(data_idx).filename(j) ~= data(data_idx).filename(j-1)
-			time(j:end) = time(j:end) - time(j);
-		end
+	if length(this_line) == 3
+		value = true; % decentralized
+	elseif length(this_line) == 4
+		value = str2double(this_line{4});
+	else
+		error('Cannot parse line')
 	end
 
-	% zero out the decentralized and modulators 
-	data(data_idx).decentralized(:) = false;
-	data(data_idx).RPCH(:) = 0;
-	data(data_idx).proctolin(:) = 0;
-	data(data_idx).CCAP(:) = 0;
+	fileid = this_line{1};
+	start_time = str2double(this_line{2});
+	fieldname = this_line{3};
 
-	% figure out when decentralization happens
-	for j = 1:length(lines)
-		if isempty(lines{j})
-			continue
-		end
+	data = metadata.update(data, time, start_time, fileid, fieldname, value);
 
-		this_line = strsplit(lines{j},' ');
-
-
-
-		if length(this_line) == 3
-			value = true; % decentralized
-		elseif length(this_line) == 4
-			value = str2double(this_line{4});
-		else
-			error('Cannot parse line')
-		end
-
-		fileid = this_line{1};
-		start_time = str2double(this_line{2});
-		fieldname = this_line{3};
-
-		data = metadata.update(data, data_idx, time, start_time, fileid, fieldname, value);
-
-
-	end
 
 end
+
+
 
 

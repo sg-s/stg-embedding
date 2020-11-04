@@ -7,10 +7,10 @@ arguments
     UseCache (1,1) logical = true
 end
 
-if exist('../cache/alldata.mat','file') & UseCache
-    load('../cache/alldata.mat')
-    return
-end
+% if exist('../cache/alldata.mat','file') & UseCache
+%     load('../cache/alldata.mat')
+%     return
+% end
 
 
 filelib.mkdir(getpref('embedding','cache_loc'))
@@ -34,11 +34,34 @@ for i = 1:length(all_exps)
 		continue
 	end
 
+
+    if str2double(all_exps(i).name(1:3)) ~= 140
+        continue
+    end
+
+
 	this_exp = all_exps(i).name;
 
     % get the consolidated data from crabsort
     % this is internally cached
     data = crabsort.consolidate(this_exp,'neurons',{'PD','LP'});
+
+    % chunk into 20 s segments
+    options.dt = 1e-3;
+    options.ChunkSize = 20;
+    options.neurons = {'PD','LP'};
+
+    data = crabsort.analysis.chunk(data,options);
+
+    % some metadata tweaks
+    if any(data.experimenter == 'cronin')
+        data = metadata.cronin(data);
+    end
+
+    if any(data.experimenter == 'rosenbaum')
+        data = metadata.rosenbaum(data);
+    end
+
 
     H = structlib.md5hash(data);
 
@@ -50,50 +73,24 @@ for i = 1:length(all_exps)
 		disp(['cache miss: ' this_exp])
 
 
-        % chunk into 20 s segments
-        options.dt = 1e-3;
-        options.ChunkSize = 20;
-        options.neurons = {'PD','LP'};
-
-        % make sure spikes are all sorted in ascending order
-        for j = 1:length(data)
-            data(j).LP = sort(data(j).LP,'ascend');
-            data(j).PD = sort(data(j).PD,'ascend');
-        end
-
-
-        data = crabsort.analysis.chunk(data,options);
-
         try
     	   data = embedding.DataStore(data);
         catch
             % something went wrong, give up
+            disp(['Something went wrong with: ' all_exps(i).name])
             continue
         end
 
+
+        save(cache_path,'data','-v7.3')
+
+
     	if ~any(data.mask)
-            save(cache_path,'data','-v7.3')
     		continue
     	end
 
 
-        % delete spikes that are closer than 3ms to other spikes
-        min_isi = .003;
-        for j = 1:length(data.mask)
-            spikes = data.LP(j,:);
-            delete_these = find(diff(spikes)<min_isi);
-            if ~isempty(delete_these)
-                data.LP(j,delete_these) = NaN;
-                data.LP(j,:) = sort(data.LP(j,:));
-            end
 
-            spikes = data.PD(j,:);
-            delete_these = find(diff(spikes)<min_isi);
-            if ~isempty(delete_these)
-                data.PD(j,delete_these) = NaN;
-                data.PD(j,:) = sort(data.PD(j,:));
-            end
-        end
 
 
     	% measure ISIs
@@ -110,34 +107,33 @@ for i = 1:length(all_exps)
     	alldata(i) = data;
 	end
 
+
+    assert(~any(isundefined(alldata(i).filename)))
+
+    if any(isundefined(alldata(i).filename))
+        keyboard
+    end
+
 end
 
 
-% make sure the idx is the same size as the mask
-for i = 1:length(alldata)
-    alldata(i).idx = repmat(categorical(NaN),length(alldata(i).mask),1);
-end
 
 clearvars data
 
 alldata = alldata(:);
 
 
+% throw out all the placeholder data (defined as data where filename isn't defined)
 
-% need to read metadata for the cronin data because fuck me 
-alldata = metadata.cronin(alldata);
+rm_this = false(length(alldata),1);
 
-
-% need to read metadata for the rosenbaum data because fuck me
-alldata = metadata.rosenbaum(alldata);
-
-
-
-% clean up the channel names a little
 for i = 1:length(alldata)
-    alldata(i).LP_channel(alldata(i).LP_channel == 'LP2') = 'LP';
-    alldata(i).PD_channel(alldata(i).PD_channel == 'PD2') = 'PD';
-    alldata(i).PD_channel(alldata(i).PD_channel == 'pdn2') = 'pdn';
+    if any(isundefined(alldata(i).filename))
+        rm_this(i) = true;
+    end
 end
+
+alldata(rm_this) = [];
+
 
 save('../cache/alldata.mat','alldata')
