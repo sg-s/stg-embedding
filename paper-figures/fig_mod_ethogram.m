@@ -74,20 +74,24 @@ for i = 1:length(unique_preps)
 
     prep = moddata.slice(moddata.experiment_idx == unique_preps(i));
 
+    % if yoffset == 137
+    %     keyboard
+    % end
 
     % plot modulator
-    mod_on = find(prep.modulator,1,'first');
-    time = prep.time_offset(mod_on:end);
-    time = time - time(1);
-    idx = prep.idx(mod_on:end);
-    display.plotStates(ax.modulator, idx, time, yoffset);
+    time = analysis.timeSinceModOn(prep);
+
+    display.plotStates(ax.modulator, prep.idx, time, yoffset);
 
 
     % plot decentralized
-    time = prep.time_offset(find(prep.decentralized,1,'first'):mod_on-1);
-    time = time - time(end);
-    idx = prep.idx(find(prep.decentralized,1,'first'):mod_on-1);
-    display.plotStates(ax.decentralized, idx, time, yoffset);
+    % plot the last possible bits we have for decentralized data
+    time = analysis.timeSinceDecentralization(prep);
+    time(isinf(time)) = NaN;
+    time = time - max(time);
+
+
+    display.plotStates(ax.decentralized, prep.idx, time, yoffset);
     
     % plot control 
     % we're going to cheat a little and relax the restriction on using
@@ -159,7 +163,7 @@ umods = sorted_mods(temp);
 linepos = [0; linepos] + diff([0; linepos; yoffset])/2;
 
 for i = 1:length(umods)
-    text(ax.decentralized,1.3e3,linepos(i),char(umods(i)),'HorizontalAlignment','left','FontSize',20)
+    th(i) = text(ax.decentralized,1.3e3,linepos(i),char(umods(i)),'HorizontalAlignment','left','FontSize',20);
 end
 
 r1 = rectangle(ax.base,'Position',[.205 .04 .47 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
@@ -173,12 +177,18 @@ uistack(r1,'bottom');
 
 
 
-th = text(ax.base,0.1,.8,'control','FontSize',20,'Color',[0 0 0]);
-th = text(ax.base,.23,.8,'decentralized','FontSize',20,'Color',[.6 .6 .6]);
-th = text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
+text(ax.base,0.1,.8,'control','FontSize',20,'Color',[0 0 0]);
+text(ax.base,.23,.8,'decentralized','FontSize',20,'Color',[.6 .6 .6]);
+text(ax.base,.4,.82,'+modulator','FontSize',24,'Color',[1 .5 .5]);
 
 figlib.pretty('PlotLineWidth',1)
 
+
+% align treemaps to text labels
+align_these = {'RPCH','proctolin','oxotremorine'};
+for i = 1:length(align_these)
+    ax.tree.(align_these{i}).Position(2) = (th(umods == align_these{i}).Position(2)/yoffset)*ax.modulator.Position(4);
+end
 
 figlib.saveall('Location',display.saveHere)
 

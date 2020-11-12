@@ -182,7 +182,6 @@ for i = 1:length(Show2)
 	plot([0 2],ff([0 2]),'Color',C(i,:))
 end
 
-
 figlib.pretty('FontSize',14)
 
 

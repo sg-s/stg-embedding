@@ -7,10 +7,10 @@ arguments
     UseCache (1,1) logical = true
 end
 
-% if exist('../cache/alldata.mat','file') & UseCache
-%     load('../cache/alldata.mat')
-%     return
-% end
+if exist('../cache/alldata.mat','file') & UseCache
+    load('../cache/alldata.mat')
+    return
+end
 
 
 filelib.mkdir(getpref('embedding','cache_loc'))
@@ -34,11 +34,9 @@ for i = 1:length(all_exps)
 		continue
 	end
 
-
-    if str2double(all_exps(i).name(1:3)) ~= 140
-        continue
-    end
-
+    % if str2double(all_exps(i).name(1:3)) ~= 876
+    %     continue
+    % end
 
 	this_exp = all_exps(i).name;
 
@@ -47,11 +45,10 @@ for i = 1:length(all_exps)
     data = crabsort.consolidate(this_exp,'neurons',{'PD','LP'});
 
     % chunk into 20 s segments
-    options.dt = 1e-3;
-    options.ChunkSize = 20;
-    options.neurons = {'PD','LP'};
+    data = crabsort.analysis.chunk(data);
 
-    data = crabsort.analysis.chunk(data,options);
+
+    assert(isfield(data,'experimenter'),'Experimenter not set!')
 
     % some metadata tweaks
     if any(data.experimenter == 'cronin')
@@ -59,7 +56,8 @@ for i = 1:length(all_exps)
     end
 
     if any(data.experimenter == 'rosenbaum')
-        data = metadata.rosenbaum(data);
+        data = metadata.rosenbaumDecentralized(data);
+        data = metadata.rosenbaumModulatorOn(data);
     end
 
 
@@ -81,24 +79,17 @@ for i = 1:length(all_exps)
             continue
         end
 
+    	if any(data.mask==1)
+    		% measure ISIs
+            data = computeISIs(data);
+            alldata(i) = data;
+
+    	end
 
         save(cache_path,'data','-v7.3')
 
 
-    	if ~any(data.mask)
-    		continue
-    	end
-
-
-
-
-
-    	% measure ISIs
-		data = computeISIs(data);
-
-    	save(cache_path,'data','-v7.3')
-
-        alldata(i) = data;
+    	
     else
     	% cache hit
         disp(['cache hit: ' all_exps(i).name])
@@ -106,13 +97,6 @@ for i = 1:length(all_exps)
 
     	alldata(i) = data;
 	end
-
-
-    assert(~any(isundefined(alldata(i).filename)))
-
-    if any(isundefined(alldata(i).filename))
-        keyboard
-    end
 
 end
 

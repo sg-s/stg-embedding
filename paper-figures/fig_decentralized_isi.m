@@ -151,6 +151,7 @@ for i = 2:length(ax)
 	ax(i).XColor ='w';
 end
 
+
 % cleanup
 figlib.saveall('Location',display.saveHere)
 

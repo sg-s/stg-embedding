@@ -9,11 +9,14 @@ arguments
 end
 
 
-% assert(length(keep_this) == length(data.mask),'keep_this must match the length of vectors in the dataStore')
+assert(length(keep_this) == length(data.mask),'keep_this must match the length of vectors in the dataStore')
 
 props = properties(data);
 
+DS = struct;
+
 for i = 1:length(props)
-	data.(props{i}) = data.(props{i})(keep_this,:);
+	DS.(props{i}) = data.(props{i})(keep_this,:);
 end
 
+data = embedding.DataStore(DS);

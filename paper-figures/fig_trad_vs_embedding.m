@@ -1,6 +1,7 @@
 
 
 close all
+init()
 
 % show traditional metrics
 
@@ -86,15 +87,12 @@ ylabel('f_{LP} (Hz)')
 
 % show embedding
 ax.map = subplot(2,2,4); hold on
-sh = scatter(R(:,1),R(:,2),2);
 
-sh.Marker = 'o';
-sh.MarkerEdgeColor = 'k';
-sh.MarkerEdgeAlpha = .0;
-sh.MarkerFaceColor = 'k';
-sh.MarkerFaceAlpha = .05;
+sh = plot(R(:,1)+randn(length(R),1)/2,R(:,2)+randn(length(R),1)/2,'.','MarkerSize',5,'Color',[.9 .9 .9]);
 
-sh = scatter(R(:,1)+randn(length(R),1)/2,R(:,2)+randn(length(R),1)/2,2);
+
+
+sh = scatter(R(:,1),R(:,2),5);
 
 sh.Marker = 'o';
 sh.MarkerEdgeColor = 'k';
@@ -136,6 +134,29 @@ ax.firing_rates.XTickLabel{end-1} = [];
 
 % cleanup
 figlib.saveall('Location',display.saveHere)
+
+
+
+
+
+% what if we PCA all the data
+temp = normalize(struct2array(allmetrics));
+temp(isnan(temp)) = 0;
+P = pca(temp');
+
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+plot(P(:,1),P(:,2),'k.')
+
+colors = display.colorscheme(alldata.idx);
+for i = 1:length(examples)
+	x = P(examples(i),1);
+	y = P(examples(i),2);
+	C = colors.(alldata.idx(examples(i)));
+	plot(x,y,'.','MarkerSize',30,'Color',C)
+end
+
+
+
 
 
 

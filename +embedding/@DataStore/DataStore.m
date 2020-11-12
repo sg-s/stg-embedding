@@ -10,6 +10,14 @@
 classdef DataStore
 
 
+
+properties
+
+	% stores the manually assigned labels
+	idx categorical = categorical(NaN)
+
+end
+
 % these properties may be modified, but only by 
 % methods of DataStore
 properties (SetAccess = private)
@@ -27,6 +35,7 @@ properties (SetAccess = private)
 	% time_offset is going to be fiddled with
 	% to account for breaks in files 
 	time_offset double = 0 
+
 
 end
 
@@ -81,8 +90,7 @@ properties (SetAccess = immutable)
 	atropine double = 0  
 	RPCH double = 0  
 
-	% stores the manually assigned labels
-	idx categorical = categorical(NaN)
+	
 
 end % props
 

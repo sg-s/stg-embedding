@@ -26,6 +26,8 @@ for i = 1:length(cats)
 end
 
 axis(ax(1),'off')
+ax(1).XLim = [-31 31];
+ax(1).YLim = [-31 31];
 axis square
 
 
@@ -64,7 +66,7 @@ ax_mon = display.pairedMondrian(ax(3),decdata,~decdata.decentralized, decdata.de
 
 figlib.pretty('FontSize',15)
 
-set(ax(2),'XScale','log','YTick',[1:length(X)],'YTickLabel',sorted_cats)
+set(ax(2),'XScale','log','YTick',[1:length(X)],'YTickLabel',sorted_cats,'XLim',[1e-3 1])
 
 ax(2).Position = [.6 .62 .33 .35];
 

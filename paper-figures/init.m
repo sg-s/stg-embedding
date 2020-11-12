@@ -8,7 +8,7 @@ if ~exist('alldata','var')
 	alldata = filter(data,sourcedata.DataFilter.AllUsable);
 	alldata = alldata.combine();
 
-	alldata = analysis.correctTimeOffsets(alldata);
+	alldata = correctTimeOffsets(alldata);
 end
 
 

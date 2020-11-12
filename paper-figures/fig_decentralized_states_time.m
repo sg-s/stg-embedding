@@ -50,11 +50,13 @@ ax(1).YLim = [0 YOffset];
 
 
 r1 = rectangle(ax(1),'Position',[.205 .04 .47 .745],'FaceColor',[.85 .85 .85 ],'EdgeColor',[.85 .85 .85]);
-r1.Position = [0 0 2e3 85];
+r1.Position = [0 -2 2e3 YOffset+4];
 uistack(r1,'bottom');
 
 ax(1).XColor = 'w';
 ax(1).YColor = 'w';
+
+
 
 
 
@@ -120,7 +122,7 @@ end
 switching_rate(end) = switching_rate(end-1);
 switching_rate = switching_rate/max(switching_rate);
 switching_rate = switching_rate*.2;
-switching_rate = filtfilt(ones(2,1),2,switching_rate);
+%^switching_rate = filtfilt(ones(2,1),2,switching_rate);
 
 YOffset = 1.03;
 switching_rate = switching_rate + YOffset;

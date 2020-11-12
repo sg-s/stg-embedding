@@ -2,6 +2,8 @@
 % the state is indicated by a shading in the background,
 % and sub-clusters are found using watershed
 
+
+close all
 init()
 
 

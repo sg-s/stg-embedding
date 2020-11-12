@@ -98,9 +98,9 @@ P_Phases(:,1:length(Percentiles):end) = P_Phases(:,1:length(Percentiles):end)*10
 
 
 % compute longest silence. this should help with separating interrupted bursting
-longest_silence = longestSilence(data);
-longest_silence(longest_silence>3) = 3;
-longest_silence = normalize(longest_silence);
+% longest_silence = longestSilence(data);
+% longest_silence(longest_silence>3) = 3;
+% longest_silence = normalize(longest_silence);
 
 FiringRates = normalize(firingRates(data));
 
@@ -110,7 +110,6 @@ Burstiness = normalize(burstiness(data));
 % magic numbers and hyperparameters
 Bias.ISI2 = 5;  % 5
 Bias.Phase = 1;   % 1
-Bias.LongestSilence = 5;   % 5
 Bias.f = 5; % 5
 Bias.Burstiness = 2;  % 2
 
@@ -118,6 +117,5 @@ VectorizedData = 	[P_ISIs ...
 					Bias.Phase*P_Phases ...
 					Bias.ISI2*PD_ratios ...
 					Bias.ISI2*LP_ratios ...
-					Bias.LongestSilence*longest_silence ...
 					Bias.f*FiringRates...
 					Bias.Burstiness*Burstiness];

@@ -68,6 +68,7 @@ ax(1) = subplot(2,3,1); hold on
 fn = fieldnames(decmetrics);
 fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','LP_burst_period','LP_durations','PD_durations','PD_phase_on'});
 L = {};
+MX = -1;
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
 		C = PD_color;
@@ -89,10 +90,11 @@ for i = 1:length(fn)
 	if p*length(fn) < .05
 		plot(max(X) + .2,2*i,'k*','MarkerSize',12);
 	end
+	MX = max([MX; max(X)]);
 end
 set(ax(1),'YTick',[2:2:2*length(fn)],'YTickLabel',L)
 ax(1).YLim = [0 2*i+2];
-ax(1).XLim = [-.5 1.2];
+ax(1).XLim = [-.5 MX+.5];
 
 
 
@@ -110,7 +112,7 @@ set(gca,'YLim',[0 10])
 
 ax(3) = subplot(2,3,3); hold on
 display.plotMetricsVsTime(time,PD_T_norm,PD_color)
-set(gca,'YLim',[0.9 2])
+set(gca,'YLim',[0.9 2.5])
 plot([min(time) max(time)],[1 1],':','Color',[.5 .5 .5])
 
 size(PD_T_norm)

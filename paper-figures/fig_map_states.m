@@ -43,15 +43,14 @@ axis square
 show_these_states = dictionary;
 show_these_states.normal = {'903cb5a8f5433a52cc397f09cb7ffd64','fddcf31e6a6d4e9087b3495e3aa9f586'};
 show_these_states.('aberrant-spikes') = {'d837ae2690b8588ce7ee2912bfccff4b','3ce2bbd03458b642691974508d5d9c0a'};
-show_these_states.('interrupted-bursting') = {'d933191a837c1d6cb0073aff8d2e16c2','5d0b3af5ef7b5c05089812711f36006e'};
-show_these_states.irregular = {'0e3b65f24ab42bab86564ef693c4cfb5','c7c77a5d614187c2e48e342442d62284'};
+show_these_states.irregular = {'79211dc0e0d96b5e8260261cb6eb616d','87ab89c08e56cc3d924d5a184d20ef85'};
 show_these_states.('irregular-bursting') = {'334208844ff04688cc5dfa580ef68a95','aaf0eec597ab2ed8f3825513b1958d92'};
 show_these_states.('LP-weak-skipped') = {'6e554e9ffb2d580cffa8c3bc9bc7d505','d6c0c36a4428785597a3b321c41336c7'};
 show_these_states.('PD-weak-skipped') = {'07a41b92d6745e75680e115a395b539c','16729e1f5824028e23f5495d1322f108'};
 show_these_states.('LP-silent-PD-bursting') = {'a4aeb01d81c31f51f46b9e424b02c447','5eabf649107f7dc40b4c2feb869143fa'};
 show_these_states.('PD-silent') = {'8c2382765f32dde0d2afe95008893959','4e8f00b1e593425abc635051b56036d5'};
 show_these_states.('silent') = {'b45625f4f424657001b0b42d3cebd833','b45625f4f424657001b0b42d3cebd833'};
-
+show_these_states.('sparse-irregular') = {'325d109577cb31df5f3f8a667946bb23','5e4b4217bc2d5c6dcbe86c18af9512c6'};
 
 
 
