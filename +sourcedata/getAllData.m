@@ -34,14 +34,16 @@ for i = 1:length(all_exps)
 		continue
 	end
 
-    % if str2double(all_exps(i).name(1:3)) ~= 876
+    % debug
+    % if str2double(all_exps(i).name(1:3)) ~= 138
     %     continue
     % end
 
 	this_exp = all_exps(i).name;
 
     % get the consolidated data from crabsort
-    % this is internally cached
+    % this is internally cached by crabsort so
+    % should chug along quickly 
     data = crabsort.consolidate(this_exp,'neurons',{'PD','LP'});
 
     % chunk into 20 s segments
@@ -51,13 +53,17 @@ for i = 1:length(all_exps)
     assert(isfield(data,'experimenter'),'Experimenter not set!')
 
     % some metadata tweaks
-    if any(data.experimenter == 'cronin')
+    if any(data.experimenter(1) == 'cronin')
         data = metadata.cronin(data);
     end
 
-    if any(data.experimenter == 'rosenbaum')
+    if any(data.experimenter(1) == 'rosenbaum')
         data = metadata.rosenbaumDecentralized(data);
-        data = metadata.rosenbaumModulatorOn(data);
+        data = metadata.modifyModulatorOn(data,'../annotations/rosenbaum-modulator-on.txt');
+    end
+
+    if any(data.experimenter(1) == 'schneider')
+        data = metadata.modifyModulatorOn(data,'../annotations/schneider-modulator-on.txt');
     end
 
 

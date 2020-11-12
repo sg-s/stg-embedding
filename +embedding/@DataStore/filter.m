@@ -80,6 +80,7 @@ case sourcedata.DataFilter.Neuromodulator
 	for modulator = List(modulators)
 		N_mod = N_mod + double(data.(modulator)>0);
 	end
+
 	if any(N_mod>1)
 		data = data.purge(N_mod>1);
 	end

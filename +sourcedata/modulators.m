@@ -2,4 +2,4 @@
 function M = modulators()
 
 
-M = {'oxotremorine','serotonin','CCAP','CabTrp1a','serotonin','dopamine','RPCH','atropine','octopamine','pilocarpine','proctolin','FLRFamide','TNRNFLRFamide'};
+M = unique({'oxotremorine','CCAP','CabTrp1a','serotonin','dopamine','RPCH','atropine','octopamine','pilocarpine','proctolin','FLRFamide','TNRNFLRFamide'});

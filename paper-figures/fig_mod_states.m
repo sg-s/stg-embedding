@@ -16,7 +16,7 @@ for i = 1:length(modnames)
 
 	% find all preps where this mod is used
 	preps = unique(moddata.experiment_idx(moddata.(modnames{i}) > 0));
-	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized & moddata.experimenter == 'schneider');
+	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized);
 
 
 	if length(preps.mask) == 0
