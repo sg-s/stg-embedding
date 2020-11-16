@@ -1,7 +1,7 @@
 % computes the probability of all states in the data
 % on a per-prep basis
 
-function P = probState(data, OnlyWhen)
+function P  = probState(data, OnlyWhen)
 
 arguments
 

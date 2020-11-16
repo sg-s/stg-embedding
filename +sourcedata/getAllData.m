@@ -35,7 +35,7 @@ for i = 1:length(all_exps)
 	end
 
     % debug
-    % if str2double(all_exps(i).name(1:3)) ~= 138
+    % if str2double(all_exps(i).name(1:3)) ~= 887
     %     continue
     % end
 
@@ -64,6 +64,10 @@ for i = 1:length(all_exps)
 
     if any(data.experimenter(1) == 'schneider')
         data = metadata.modifyModulatorOn(data,'../annotations/schneider-modulator-on.txt');
+    end
+
+    if any(data.experimenter(1) == 'haley')
+        data = metadata.haley(data);
     end
 
 

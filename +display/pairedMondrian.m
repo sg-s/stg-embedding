@@ -79,6 +79,7 @@ p2 = display.mondrian(nanmean(P.B),cats);
 p_values = NaN(length(cats),1);
 for i = 1:length(p_values)
 	p_values(i) = ranksum(P.A(:,i),P.B(:,i));
+	[~,p_values(i)] = ttest(P.A(:,i),P.B(:,i));
 end
 
 
