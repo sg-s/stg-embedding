@@ -15,51 +15,19 @@ switch FilterSpec
 
 case sourcedata.DataFilter.AllUsable
 
+	% This throws out the following data:
+	% masked data
+	% PTX data
+	% TTX data
+	% unusable data
 
-	% purge masked data
+
 	for i = 1:length(data)
 		data(i) = data(i).purge(~data(i).mask);
+		data(i) = data(i).purge(data(i).PTX > 0);
+		data(i) = data(i).purge(data(i).TTX > 0);
+		data(i) = data(i).purge(data(i).unusable);
 	end
-
-
-	% remove empty datasets
-	data(cellfun(@sum,{data.mask}) == 0) = [];
-
-
-	% first, remove all pieces of data that are not at 11C
-	for i = 1:length(data)
-		% except if it's Philipp's data
-		if data(i).experimenter(1) == 'rosenbaum'
-			continue
-		end
-		rm_this = data(i).temperature < 10 | data(i).temperature > 15;
-		data(i) = purge(data(i),rm_this);
-	end
-
-
-
-	% remove empty datasets
-	data(cellfun(@sum,{data.mask}) == 0) = [];
-
-
-	% remove non-default values for things
-	defaults = rmfield(embedding.DataStore.defaults,'decentralized');
-	defaults = rmfield(defaults,'temperature');
-	defaults = rmfield(defaults,'baseline');
-	defaults = rmfield(defaults,sourcedata.modulators);
-
-	fn = fieldnames(defaults);
-
-	for i = 1:length(data)
-		rm_this = false(length(data(i).mask),1);
-		for j = 1:length(fn)
-			rm_this(data(i).(fn{j}) ~= defaults.(fn{j})) = true;
-		end
-		data(i) = purge(data(i),rm_this);
-	end
-
-
-	% remove empty datasets
 	data(cellfun(@sum,{data.mask}) == 0) = [];
 
 

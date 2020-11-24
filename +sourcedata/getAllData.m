@@ -35,7 +35,7 @@ for i = 1:length(all_exps)
 	end
 
     % debug
-    % if str2double(all_exps(i).name(1:3)) ~= 887
+    % if str2double(all_exps(i).name(1:3)) ~= 897
     %     continue
     % end
 
@@ -71,12 +71,13 @@ for i = 1:length(all_exps)
     end
 
 
+
     H = structlib.md5hash(data);
 
     cache_path = fullfile(getpref('embedding','cache_loc'),[H '.mat']);
 
 	% check the cache
-	if exist(cache_path) ~= 2 
+	if exist(cache_path) ~= 2  
 		% cache miss
 		disp(['cache miss: ' this_exp])
 

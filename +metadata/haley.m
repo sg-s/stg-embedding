@@ -33,7 +33,7 @@ end
 
 
 % now modify the pH in the structure we are given
-
+data.pH = NaN*data.mask;
 for i = 1:length(phdata)
 	[~,filename] = fileparts(phdata(i).filename);
 	write_here = find(data.filename == filename);
@@ -45,4 +45,5 @@ for i = 1:length(phdata)
 	data.pH(write_here) = ph;
 
 end
+
 
