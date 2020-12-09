@@ -29,10 +29,6 @@ for i = 1:length(all_preps)
 	states = decdata.idx(use_this);
 	time = time_since_decentralization(use_this);
 
-	% if sum(time == -600) == 0
-	% 	continue
-	% end
-
 	if sum(time == 600) == 0
 		continue
 	end
@@ -76,9 +72,11 @@ for i = 1:length(time)
 	prep_counts(i) = length(unique(preps));
 end
 
+
+
 switching_rate = 0*time;
 switching_rate_N = 0*time;
-% find the swithcing rates by going prep by prep
+% find the switching rates by going prep by prep
 for i = 1:length(all_preps)
 	use_this = decdata.experiment_idx == all_preps(i);
 	idx = decdata.idx(use_this);
@@ -122,7 +120,6 @@ end
 switching_rate(end) = switching_rate(end-1);
 switching_rate = switching_rate/max(switching_rate);
 switching_rate = switching_rate*.2;
-%^switching_rate = filtfilt(ones(2,1),2,switching_rate);
 
 YOffset = 1.03;
 switching_rate = switching_rate + YOffset;

@@ -32,6 +32,11 @@ colors('silent') = color.aqua('teal');
 
 colors('irregular-bursting') = [0 144 81]/255;
 
+
+
+
+
+
 colors('LP') = color.aqua('red');
 colors('PD') = color.aqua('indigo');
 

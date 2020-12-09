@@ -42,7 +42,17 @@ for i = 1:length(all_preps)
 	time(1:first_usable) = -Inf;
 	time(last_usable+1:end) = Inf;
 
-	time_since_decentralization(use_this) = time - time(find(decentralized,1,'first'));
+	time = time - time(find(decentralized,1,'first'));
+
+	% sanity checks
+	try
+		assert(length(unique(time(~isinf(time)))) == length(time(~isinf(time))),'Lengths not equal. FATAL')
+
+		time_since_decentralization(use_this) = time;
+	catch
+		
+	end
+
 	
 
 end

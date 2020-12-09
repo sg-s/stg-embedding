@@ -21,13 +21,12 @@ end
 if ~exist('basedata','var')
 	disp('Filtering data for baseline and other conditions...')
 	basedata = filter(alldata,sourcedata.DataFilter.Baseline);
-	[basedata.idx, hashes.basedata] = basedata.getLabelsFromCache;
-
 	decdata = filter(alldata,sourcedata.DataFilter.Decentralized);
-	[decdata.idx, hashes.decdata] = decdata.getLabelsFromCache;
-
 	moddata = filter(alldata,sourcedata.DataFilter.Neuromodulator);
-	[~, hashes.moddata] = moddata.getLabelsFromCache;
+
+	[basedata.idx, hashes.basedata] = basedata.getLabelsFromCache;
+	[decdata.idx, hashes.decdata] = decdata.getLabelsFromCache;
+	[moddata.idx, hashes.moddata] = moddata.getLabelsFromCache;
 
 end
 

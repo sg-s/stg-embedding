@@ -19,6 +19,7 @@ for i = length(unique_cats):-1:1
 
 	X = R(this,:);
 	X = datasample(X,length(X)*10);
+
 	X = X + randn(length(X),2)/5;
 
 	ph = plot(ax,X(:,1),X(:,2),'.','MarkerSize',20,'MarkerFaceColor',colors.(this_cat));

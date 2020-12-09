@@ -1,21 +1,29 @@
 % embedding using t-SNE
 
 
-function R = tsne_data(alldata, PD_LP, LP_PD,VectorizedData)
+function R = tsne_data(alldata, PD_LP, LP_PD,VectorizedData, perplexity)
 
 arguments
 	alldata (1,1) embedding.DataStore 
 	PD_LP
 	LP_PD 
-	VectorizedData
+	VectorizedData double
+	perplexity (1,1) double = 100
 end
 
 opts = struct;
-opts.perplexity = 100;
+opts.perplexity = perplexity;
 opts.late_exag_coeff = 2.5;
 opts.start_late_exag_iter = 800;
 
+% cache 
+hash = hashlib.md5hash([hashlib.md5hash(VectorizedData) structlib.md5hash(opts)]);
 
+cache_loc = (fullfile('../cache',[hash '.mat']));
+if exist(cache_loc,'file') == 2
+	load(cache_loc,'R')
+	return
+end
 
 
 % compute 2nd order ISIs
@@ -37,3 +45,6 @@ R0 = normalize(R0);
 opts.initialization = R0;
 
 R = fast_tsne(VectorizedData,opts);
+
+% save to cache
+save(cache_loc,'R')
