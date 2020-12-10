@@ -31,7 +31,12 @@ for perplexity = all_perplexity
 
 	drawnow
 	axis off
+	title(['p = ' mat2str(perplexity)])
 
 end
 
 figlib.pretty()
+
+
+figlib.saveall('Location',display.saveHere)
+init()
