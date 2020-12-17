@@ -19,25 +19,6 @@ colors = display.colorscheme(basedata.idx);
 figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 
 
-ax.experimenter = subplot(3,3,1); hold on
-[means, group_idx] = probStateGroupedBy(basedata, 'normal', 'experimenter');
-C = lines;
-group_idx = removecats(group_idx);
-experimenters = unique(group_idx);
-for i = 1:length(experimenters)
-	[S,P] = plotlib.raincloud(means(group_idx == experimenters(i)),'YOffset',i*2,'Color',C(i,:));
-	P.MarkerSize = 10;
-end
-group_idx = removecats(group_idx);
-set(gca,'YTick',[2:2:2*length(experimenters)],'YTickLabel',cellfun(@char,categories(experimenters),'UniformOutput',false))
-
-
-set(gca,'XAxisLocation','top')
-xlabel('p(normal)')
-
-axis off
-cla(gca)
-
 
 
 % does recording type correlate with normal behavior? 

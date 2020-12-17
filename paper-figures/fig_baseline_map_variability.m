@@ -80,8 +80,6 @@ ax.nice.Position = [.75 .58 .11 .33];
 
 drawnow;
 
-return
-
 figlib.saveall('Location',display.saveHere)
 
 

@@ -16,8 +16,12 @@ S = NaN(N,1);
 
 for i = 1:N
 
-	M(i) = nanmean(X(Group == unique_groups(i)));
-	S(i) = nanstd(X(Group == unique_groups(i)));
+	% purge Inf
+	this = X(Group == unique_groups(i));
+	this(isinf(this)) = [];
+
+	M(i) = nanmean(this);
+	S(i) = nanstd(this);
 end
 
 

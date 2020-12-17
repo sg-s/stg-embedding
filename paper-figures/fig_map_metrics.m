@@ -7,15 +7,15 @@ init()
 
 PDf = sum(~isnan(alldata.PD),2)/20;
 
-C = [allmetrics.PD_burst_period allmetrics.LP_phase_on PDf];
-Limits = [0 2; 0 1; 0 20];
-Labels = {'T_{PD} (s)','LP phase','<f_{PD}> (Hz)'};
+C = [allmetrics.PD_burst_period allmetrics.LP_phase_on PDf allmetrics.LP_nspikes];
+Limits = [0 2; 0 1; 0 20; 0 10];
+Labels = {'T_{PD} (s)','LP phase','<f_{PD}> (Hz)','<#spikes/burst_{LP}>'};
 
 
-figure('outerposition',[300 100 1901 801],'PaperUnits','points','PaperSize',[1901 801]); hold on
+figure('outerposition',[300 100 1301 1201],'PaperUnits','points','PaperSize',[1301 1201]); hold on
 clear ax
-for i = 1:3
-	ax(i) = subplot(1,3,i); hold on
+for i = 1:4
+	ax(i) = subplot(2,2,i); hold on
 	plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',24)
 	scatter(R(:,1),R(:,2),6,C(:,i),'filled')
 	axis square

@@ -12,17 +12,32 @@ D = log(min(D,D2));
 
 figure('outerposition',[300 300 1555 901],'PaperUnits','points','PaperSize',[1555 901]); hold on
 clear ax
-ax(2) = subplot(2,2,4); hold on
-x = linspace(-10,5,101);
-y = histcounts(D,x);
-y = y/sum(y);
-h = area(x(2:end) + diff(x),y);
-xlabel('log Speed (a.u.)')
-ylabel('Probability')
-h.FaceAlpha = .5;
+ax(2) = subplot(1,2,2); hold on
 
 
-subplot(1,2,1); hold on
+% plot speed distribution grouped by state
+
+% show each state with correct color
+colors = display.colorscheme(alldata.idx);
+unique_cats = unique(alldata.idx);
+
+[~,idx]=sort(analysis.averageBy(D,alldata.idx));
+unique_cats = unique_cats(idx);
+
+for i = 1:length(unique_cats)
+	this = D(alldata.idx==unique_cats(i));
+	this(isinf(this)) = [];
+	this(isnan(this)) = [];
+	plotlib.raincloud(this,'YOffset',i*2,'Color',colors(unique_cats(i)))
+end
+
+set(gca,'YTick',2:2:2*i,'YTickLabels',corelib.categorical2cell(unique_cats))
+xlabel('log speed (a.u.)')
+
+
+
+
+ax(1) = subplot(1,2,1); hold on
 plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8])
 axis off
 axis square
@@ -40,16 +55,20 @@ scatter(R(this,1),R(this,2),6,(D_segments(this)),'filled')
 
 caxis([-3 1])
 
-[N,u]=histcounts(alldata.experiment_idx);
-[~,idx] = sort(N,'descend');
-u = u(idx);
+ch = colorbar;
+ch.Location = 'southoutside';
+title(ch,'log speed (a.u.)')
 
-subplot(2,2,2); hold on
-y = R(alldata.experiment_idx == u{3},1);
-x = (1:length(y))*20/60;
-plot(x,y,'r')
-set(gca,'XLim',[0 100],'YLim',[-5 20])
-xlabel('Time (min)')
-ylabel('X-position in map (a.u.)')
+
+ax(2).YLim = [1 25];
+ax(1).Position = [.07 .11 .38 .8];
+
 
 figlib.pretty()
+
+
+ch.Position = [.07 .08 .2 .01];
+
+
+figlib.saveall('Location',display.saveHere)
+init()

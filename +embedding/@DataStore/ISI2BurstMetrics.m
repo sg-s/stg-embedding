@@ -48,6 +48,11 @@ for i = 1:N
 	[PD_burst_starts, PD_burst_stops] = embedding.findBurstStartsStopsUsingISIs(PD);
 	[LP_burst_starts, LP_burst_stops] = embedding.findBurstStartsStopsUsingISIs(LP);
 
+
+	% [PD_burst_starts, PD_burst_stops] = embedding.findNominalBurstStartsStops(PD,LP);
+	% [LP_burst_starts, LP_burst_stops] = embedding.findNominalBurstStartsStops(LP,PD);
+
+
 	PD_burst_periods = diff(PD_burst_starts);
 	LP_burst_periods = diff(LP_burst_starts);
 

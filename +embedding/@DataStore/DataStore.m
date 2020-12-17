@@ -15,6 +15,11 @@ properties
 	% stores the manually assigned labels
 	idx categorical = categorical(NaN)
 
+
+	% these props may be changed for some temporary analysis
+	LP_channel categorical  = categorical(NaN)
+	PD_channel  categorical = categorical(NaN)
+
 end
 
 % these properties may be modified, but only by 
@@ -61,10 +66,6 @@ properties (SetAccess = immutable)
 	experimenter categorical = categorical(NaN)
 
 
-	
-
-	LP_channel categorical  = categorical(NaN)
-	PD_channel  categorical = categorical(NaN)
 
 	filename categorical = categorical(NaN)
 

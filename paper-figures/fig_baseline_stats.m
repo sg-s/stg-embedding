@@ -12,32 +12,7 @@ pd_color = color.aqua('indigo');
 figure('outerposition',[300 300 1500 901],'PaperUnits','points','PaperSize',[1500 901]); hold on
 
 clear ax
-ax.states = subplot(3,1,1); hold on
-[h,P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx);
 
-[~,sort_order]= sort(P(:,1),'descend');
-delete(h)
-P = P(sort_order,:);
-h = bar(P,'stacked','LineStyle','-','BarWidth',1);
-xlabel('Preparation')
-ylabel('Fraction of time in state')
-ax.states.XLim(1) = 1;
-ax.states.YLim = [0 1];
-
-% get the colors right
-cats = categories(basedata.idx);
-colors = display.colorscheme(cats);
-
-for i = 1:length(h)
-	h(i).FaceColor = colors(cats{i});
-end
-
-
-
-% find the duration of data for each prep
-all_preps = unique(basedata.experiment_idx);
-T = histcounts(basedata.experiment_idx, all_preps);
-T = T(sort_order);
 
 
 
@@ -45,18 +20,36 @@ T = T(sort_order);
 p = struct;
 CV = struct; % stores the CVs of each metric
 fn = fieldnames(basemetrics);
+fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','PD_phase_on','LP_burst_period'});
+sort_mean = NaN;
 for i = 1:length(fn)
 	[M,S] = analysis.averageBy(basemetrics.(fn{i}),basedata.experiment_idx);
-	p.([fn{i}]) = M;
-	CV.([fn{i}]) = S./M;
+	p.(fn{i}) = M;
+	CV.(fn{i}) = S./M;
+	within_prep(i) = nanmean(CV.(fn{i}));
+	sort_mean(i) = nanmean(M);
 end
 
 
+% reorder metrics by within_prep variability
+[~, sidx] = sort(sort_mean);
+within_prep = within_prep(sidx);
+fn = fn(sidx);
+
+
+
+% shuffle the data and recalculate
+[p_shuffled, CV_shuffled] = analysis.bootstrapMetrics(basemetrics, basedata.experiment_idx, fn);
+
+across_prep_shuffled = NaN*CV_shuffled;
+for i = 1:length(fn)
+	for j = 1:size(CV_shuffled,2)
+		across_prep_shuffled(i,j) = statlib.cv(p_shuffled(j).(fn{i}));
+	end
+end
 
 % show raincloud plots of all metrics we measure
-ax.means = subplot(3,4,[5 9]); hold on
-fn = fieldnames(p);
-fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','PD_phase_on','LP_burst_period'});
+ax.means = subplot(1,4,1); hold on
 L = {};
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
@@ -81,7 +74,7 @@ title(ax.means,'Mean of...','FontWeight','normal')
 
 
 % another raincloud to compare variability between different measures
-ax.variability = subplot(3,4,[6 10]); hold on
+ax.variability = subplot(1,4,2); hold on
 
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
@@ -111,8 +104,9 @@ title(ax.variability,'CV of...','FontWeight','normal')
 
 
 % compare within prep and between-prep variability 
-ax.var_vs_var = subplot(3,4,[7 11]); hold on
-
+ax.var_vs_var = subplot(1,4,3); hold on
+ax.excess_var = subplot(1,4,4); hold on
+xlabel('Across animal - within animal variability')
 clear ph
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
@@ -121,93 +115,60 @@ for i = 1:length(fn)
 		C = lp_color;
 	end
 
-	within_prep = nanmean(CV.(fn{i}));
-	across_prep = nanmean(CV.(fn{i})./p.(fn{i}));
+	
+	across_prep = statlib.cv(p.(fn{i}));
 
-	h = plot([within_prep across_prep], [2*i 2*i],'LineWidth',3,'Color','k');
+	h = plot(ax.var_vs_var,[within_prep(i) across_prep], [2*i 2*i],'LineWidth',3,'Color','k');
 
-	plot(within_prep,2*i,'o','MarkerSize',10,'Color',C,'MarkerFaceColor',C)
-	plot(across_prep,2*i,'^','MarkerSize',10,'Color',C,'MarkerFaceColor',C)
+	plot(ax.var_vs_var,within_prep(i),2*i,'o','MarkerSize',10,'Color',C,'MarkerFaceColor',C)
+	plot(ax.var_vs_var,across_prep,2*i,'^','MarkerSize',10,'Color',C,'MarkerFaceColor',C)
 
 	
 
-	if within_prep > across_prep
-		h.Color = 'g';
-	end
 
+	% plot excess variance in shuffled data
+	plot_this = across_prep_shuffled(i,:) - CV_shuffled(i,:);
+	axes(ax.excess_var)
+	plotlib.raincloud(plot_this,'YOffset',2*i,'Height',.5,'Color',[.5 .5 .5]);
 
-	% fake a plot for the legend
-	ph(1) = plot(NaN,NaN,'ko','MarkerSize',10,'MarkerFaceColor','k');
-	ph(2) = plot(NaN,NaN,'k^','MarkerSize',10,'MarkerFaceColor','k');
+	% plot excess variance
+	plot(ax.excess_var,across_prep - within_prep(i), 2*i,'o','MarkerSize',10,'MarkerFaceColor',C,'Color',C);
 
 end
+
+% fake a plot for the legend
+ph(1) = plot(ax.var_vs_var,NaN,NaN,'ko','MarkerSize',10,'MarkerFaceColor','k');
+ph(2) = plot(ax.var_vs_var,NaN,NaN,'k^','MarkerSize',10,'MarkerFaceColor','k');
+
 ax.var_vs_var.YLim = [0 2*i+2];
+ax.excess_var.YLim = [0 2*i+2];
 set(ax.var_vs_var,'YTick',[2:2:2*length(fn)],'YTickLabel',{})
+set(ax.excess_var,'YTick',[2:2:2*length(fn)],'YTickLabel',{})
 xlabel(ax.var_vs_var,'Variability')
 ax.var_vs_var.XLim = [0 1];
 l = legend(ph,{'<CV>','CV(mean)'});
-l.Position = [.58 .4 .06 .04];
-
-% compare latencies and phases and show phase constancy
-Show1 = {'PD_durations','LP_delay_on','LP_delay_off'};
-Show2 = {'PD_duty_cycle','LP_phase_on','LP_phase_off'};
-C = lines;
-X = p.PD_burst_period;
-
-ax.delays = subplot(3,4,8); hold on
-clear h
-for i = 1:length(Show1)
-	Y = p.(Show1{i});
-	plot(X,Y,'.','Color',C(i,:));
-	this = ~isnan(X) & ~isnan (Y);
-	ff = fit(X(this),Y(this),'poly1');
-	plot([0 2],ff([0 2]),'Color',C(i,:))
-
-	% fake plot
-	h(i) = plot(NaN,NaN,'.','Color',C(i,:),'MarkerSize',34);
-
-end
-lh = legend(h,{'PD off','LP on','LP off'},'Location','northwest');
 
 
-% phases vs periods to show constancy?
 
-ax.phases = subplot(3,4,12); hold on
 
-for i = 1:length(Show2)
-	Y = p.(Show2{i});
-	plot(X,Y,'.','Color',C(i,:))
-	this = ~isnan(X) & ~isnan (Y);
-	ff = fit(X(this),Y(this),'poly1');
-	plot([0 2],ff([0 2]),'Color',C(i,:))
-end
 
 figlib.pretty('FontSize',14)
 
 
 
-
-
-xlabel(ax.delays,'Burst period (s)')
-xlabel(ax.phases,'Burst period (s)')
-ax.phases.YLim = [0 1];
-ax.delays.YLim = [0 1.3];
-ylabel(ax.delays,'Delays (s)')
-ylabel(ax.phases,'Phase')
-ax.delays.XAxisLocation = 'top';
-ax.var_vs_var.YAxisLocation = 'right';
+ax.excess_var.YAxisLocation = 'right';
 ax.variability.YColor = 'w';
+ax.var_vs_var.YColor = 'w';
+ax.excess_var.XLim = [-.25 1];
 
+plotlib.vertline(ax.excess_var,0,'k:');
 
-% minor positioning fixes
-ax.states.Position = [.13 .75 .75 .18];
-ax.variability.Position(1) = .31;
-ax.var_vs_var.Position(1) = .5;
+% ax.excess_var.YGrid = 'on';
+% ax.means.YGrid = 'on';
+% ax.variability.YGrid = 'on';
+% ax.var_vs_var.YGrid = 'on';
 
-ax.delays.Position(4) = .2;
-ax.phases.Position(4) = .2;
-ax.delays.Position(2) = .35;
-
+return
 
 
 figlib.saveall('Location',display.saveHere)
@@ -217,3 +178,31 @@ figlib.saveall('Location',display.saveHere)
 init()
 
 
+
+
+
+% ax.states = subplot(3,1,1); hold on
+% [h,P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx);
+
+% [~,sort_order]= sort(P(:,1),'descend');
+% delete(h)
+% P = P(sort_order,:);
+% h = bar(P,'stacked','LineStyle','-','BarWidth',1);
+% xlabel('Preparation')
+% ylabel('Fraction of time in state')
+% ax.states.XLim(1) = 1;
+% ax.states.YLim = [0 1];
+
+% % get the colors right
+% cats = categories(basedata.idx);
+% colors = display.colorscheme(cats);
+
+% for i = 1:length(h)
+% 	h(i).FaceColor = colors(cats{i});
+% end
+
+
+% find the duration of data for each prep
+% all_preps = unique(basedata.experiment_idx);
+% T = histcounts(basedata.experiment_idx, all_preps);
+% T = T(sort_order);

@@ -39,6 +39,12 @@ for perplexity = all_perplexity
 	axis off
 	title(['P = ' mat2str(perplexity)])
 
+	if perplexity == 100
+		axis on
+		set(gca,'XColor','r','YColor','r','YTick',[],'XTick',[])
+		box on
+	end 
+
 end
 
 figlib.pretty()
