@@ -39,6 +39,21 @@ xlabel(Labels{1})
 ax(2).dist = subplot(3,4,[11 12]); hold on
 xlabel(Labels{2})
 
+
+% PCA the data and triangulate it
+P = pca(VectorizedData');
+P = P(:,1:2);
+DTP = triangulation(delaunay(P),P(:,1),P(:,2));
+assert(all(P(:,1) == DTP.Points(:,1)),'triangulation is flawed!')
+incentersP = incenter(DTP);
+
+MetricsDiffP = struct;
+
+for i = 1:length(metrics)
+	MetricsDiffP.(metrics{i}) = nanmax(allmetrics.(metrics{i})(DTP.ConnectivityList),[],2) - nanmin(allmetrics.(metrics{i})(DTP.ConnectivityList),[],2);
+end
+
+
 for i = 1:2
 	
 
@@ -62,12 +77,15 @@ for i = 1:2
 		Limits(2) = 3;
 	end
 
-	% also show distribution and compare with null distribution
 
-	hy = histcounts(MetricsDiff.(metrics{i}),linspace(0,Limits(2),100),'Normalization','pdf');
-	h = area(ax(i).dist,linspace(0,Limits(2),99),hy);
-	h.FaceColor = 'r';
-	h.FaceAlpha = .6;
+
+	% also show distribution and compare with null distribution and distribution for PCA
+
+	axes(ax(i).dist)
+
+	display.plotCDFWithError(MetricsDiff.(metrics{i}),[1 0 0],1e3)
+
+	display.plotCDFWithError(MetricsDiffP.(metrics{i}),[0 0 1],1e3)
 
 	clear V
 	V(:,1) = veclib.shuffle(DT.ConnectivityList(:,1));
@@ -76,16 +94,19 @@ for i = 1:2
 
 	ShuffledDiff = nanmax(allmetrics.(metrics{i})(V),[],2) - nanmin(allmetrics.(metrics{i})(V),[],2);
 
-	hy = histcounts(ShuffledDiff,linspace(0,Limits(2),100),'Normalization','pdf');
-	h = area(ax(i).dist,linspace(0,Limits(2),99),hy);
-	h.FaceColor = 'k';
-	h.FaceAlpha = .3;
+
+	
+	display.plotCDFWithError(ShuffledDiff,[0 0 0],1e3)
 	
 end
 
 colormap(flipud(gray))
 
 
+set(ax(1).dist,'XScale','log')
+set(ax(2).dist,'XScale','log')
+
+return
 
 
 figlib.pretty()

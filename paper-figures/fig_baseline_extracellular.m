@@ -20,6 +20,12 @@ figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[120
 
 
 
+% distribution of p(normal) across all preps
+p = basedata.probState();
+
+ax.prob_normal = subplot(3,3,1); hold on
+display.plotCDFWithError(p(:,1));
+
 
 % does recording type correlate with normal behavior? 
 
@@ -269,7 +275,7 @@ ax.T_PD.Position(4) =  ax.T_PD.Position(4)*.9;
 ax.T_LP.Position(4) =  ax.T_LP.Position(4)*.9;
 
 % labels
-figlib.label('XOffset',-.01,'FontSize',28,'ColumnFirst',true,'YOffset',-.01)
+figlib.label('XOffset',-.01,'FontSize',24,'ColumnFirst',true,'YOffset',-.01)
 
 % cleanup
 figlib.saveall('Location',display.saveHere)

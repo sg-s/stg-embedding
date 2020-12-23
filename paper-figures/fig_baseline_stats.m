@@ -68,7 +68,7 @@ end
 set(ax.means,'YTick',[2:2:2*length(fn)],'YTickLabel',L)
 ax.means.YLim = [0 2*i+2];
 ax.means.XLim = [0 2];
-title(ax.means,'Mean of...','FontWeight','normal')
+xlabel(ax.means,'Mean','FontWeight','normal')
 
 
 
@@ -98,7 +98,7 @@ ax.variability.YLim = [0 2*i+2];
 
 % convert to log ticks
 ax.variability.XTickLabel = axlib.makeLogTickLabels(10.^(ax.variability.XTick));
-title(ax.variability,'CV of...','FontWeight','normal')
+xlabel(ax.variability,'CV','FontWeight','normal')
 
 
 
@@ -168,8 +168,7 @@ plotlib.vertline(ax.excess_var,0,'k:');
 % ax.variability.YGrid = 'on';
 % ax.var_vs_var.YGrid = 'on';
 
-return
-
+figlib.label('XOffset',-.01,'YOffset',-0.04)
 
 figlib.saveall('Location',display.saveHere)
 

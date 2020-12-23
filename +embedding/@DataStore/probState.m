@@ -6,13 +6,8 @@ function P  = probState(data, OnlyWhen)
 arguments
 
 	data(1,1) embedding.DataStore
-	OnlyWhen (:,1) logical 
+	OnlyWhen (:,1) logical = true(length(data.mask),1)
 	
-end
-
-
-if nargin == 1
-	OnlyWhen = true(length(data.mask),1);
 end
 
 

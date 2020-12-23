@@ -28,6 +28,10 @@ for i = length(unique_cats):-1:1
 
 end
 
-r = patch(ax,[-35 35 35 -35],[-35 -35 35 35],'w');
+r = patch(ax,[-40 40 40 -40],[-40 -40 40 40],'w');
 r.FaceAlpha = .8;
 r.EdgeColor = 'w';
+axis(ax,'off')
+axis(ax,'square')
+ax.XLim = [-30 30];
+ax.YLim = [-30 30];
