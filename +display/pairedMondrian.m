@@ -77,14 +77,20 @@ p2 = display.mondrian(nanmean(P.B),cats);
 
 
 p_values = NaN(length(cats),1);
-for i = 1:length(p_values)
-	p_values(i) = ranksum(P.A(:,i),P.B(:,i));
-	[~,p_values(i)] = ttest(P.A(:,i),P.B(:,i));
+N = 1e5;
+tic
+parfor i = 1:length(p_values)
+	%p_values(i) = ranksum(P.A(:,i),P.B(:,i));
+	p_values(i) = statlib.pairedPermutationTest(P.A(:,i),P.B(:,i),N);
 end
+toc
 
+disp(['p-values using ' mat2str(N) ' permutations'])
+
+table(p_values,cats)
 
 for i = 1:length(p_values)
-	if p_values(i) < .05
+	if p_values(i) < .05/length(p_values)
 		p2(i).EdgeColor = 'k';
 		p(i).EdgeColor = 'k';
 		p2(i).LineWidth = 3;
@@ -95,7 +101,7 @@ for i = 1:length(p_values)
 end
 
 
-% alternative -- plot fold change 
+%  plot fold change 
 fold_change = (nanmean(P.B) - nanmean(P.A))./(nanmean(P.B) + nanmean(P.A));
 
 
