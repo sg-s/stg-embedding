@@ -79,12 +79,12 @@ end
 
 
 
-figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+figure('outerposition',[300 300 1200 601],'PaperUnits','points','PaperSize',[1200 601]); hold on
 
-ax = subplot(3,3,1:3); hold on
+ax = subplot(2,3,1:3); hold on
 plot([ExpDates.date],[ExpDates.Temperature],'k.','MarkerSize',10)
 ax.XLim(1) = datetime('2013','InputFormat','yyyy');
-ylabel('Sea Surface Temp (C)')
+ylabel('Sea Surface Temp. (C)')
 xlabel('Experiment date')
 
 xx = [ExpDates.date];
@@ -95,44 +95,55 @@ xs = linspace(min(xx),max(xx),1e3);
 plot(datetime(datestr(xs)),ff(xs),'r')
 
 
-subplot(3,3,4); hold on
+subplot(2,3,4); hold on
 display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_mean]);
 ylabel('<T_{PD}> (s)')
-set(gca,'XAxisLocation','top')
+xlabel('Sea Surface Temp. (C)')
 
-subplot(3,3,5); hold on
+subplot(2,3,5); hold on
 display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_dc]);
 ylabel('<DC_{PD}>')
-set(gca,'XAxisLocation','top')
+xlabel('Sea Surface Temp. (C)')
 
-subplot(3,3,6); hold on
+subplot(2,3,6); hold on
 display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal]);
 ylabel('<p(normal)>')
-set(gca,'XAxisLocation','top')
+xlabel('Sea Surface Temp. (C)')
 
-subplot(3,3,7); hold on
-display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal_dec]);
-
-ylabel('<p(normal)> (decentralized)')
-
-
-subplot(3,3,8); hold on
-display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.T_change]);
-ylabel('\DeltaT_{PD} (s)')
-xlabel('Sea Surface Temperature (C)')
-
-subplot(3,3,9); hold on
-display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_f_change]);
-
-ylabel('\Deltaf_{PD} (Hz)')
 
 
 figlib.pretty('LineWidth',1)
 
-ax.Position = [.13 .75 .77 .2];
-
 
 figlib.label('XOffset',-.001,'FontSize',28,'YOffset',.01)
+
+
+
+
+
+
+figure('outerposition',[300 300 1701 600],'PaperUnits','points','PaperSize',[1701 600]); hold on
+
+subplot(1,3,1); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal_dec]);
+
+ylabel('<p(normal)> (decentralized)')
+xlabel('Sea Surface Temp. (C)')
+
+subplot(1,3,2); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.T_change]);
+ylabel('\DeltaT_{PD} (s)')
+xlabel('Sea Surface Temp. (C)')
+
+subplot(1,3,3); hold on
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_f_change]);
+
+ylabel('\Deltaf_{PD} (Hz)')
+xlabel('Sea Surface Temp. (C)')
+
+figlib.pretty('LineWidth',1)
+figlib.label('XOffset',-.001,'FontSize',28,'YOffset',.01)
+
 
 % cleanup
 figlib.saveall('Location',display.saveHere)

@@ -29,7 +29,7 @@ colors('slow-weak-bursting') = color.aqua('lime');
 
 colors('silent') = color.aqua('teal');
 
-
+colors('aberrant-spikes') = [1.0000    0.8276         0];
 colors('irregular-bursting') = [0 144 81]/255;
 
 

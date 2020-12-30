@@ -96,8 +96,9 @@ end
 set(ax.variability,'YTick',[2:2:2*length(fn)],'YTickLabel',{})
 ax.variability.YLim = [0 2*i+2];
 
+
+
 % convert to log ticks
-ax.variability.XTickLabel = axlib.makeLogTickLabels(10.^(ax.variability.XTick));
 xlabel(ax.variability,'CV','FontWeight','normal')
 
 
@@ -134,6 +135,9 @@ for i = 1:length(fn)
 	% plot excess variance
 	plot(ax.excess_var,across_prep - within_prep(i), 2*i,'o','MarkerSize',10,'MarkerFaceColor',C,'Color',C);
 
+	disp(fn{i})
+	disp(mean(plot_this > across_prep - within_prep(i)))
+
 end
 
 % fake a plot for the legend
@@ -154,6 +158,7 @@ l = legend(ph,{'<CV>','CV(mean)'});
 
 figlib.pretty('FontSize',14)
 
+ax.variability.XTickLabel = axlib.makeLogTickLabels(10.^(ax.variability.XTick));
 
 
 ax.excess_var.YAxisLocation = 'right';

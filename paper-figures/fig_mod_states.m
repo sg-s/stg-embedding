@@ -10,9 +10,12 @@ clear ax
 
 modnames = {'RPCH','proctolin','oxotremorine','serotonin'};
 
+
+
 for i = 1:length(modnames)
 	ax(i) = subplot(2,2,i); hold on
 
+	axlib.label(ax(i),char(96+i),'XOffset',-.04,'FontSize',24);
 
 	% find all preps where this mod is used
 	preps = unique(moddata.experiment_idx(moddata.(modnames{i}) > 0));
