@@ -77,6 +77,8 @@ p2 = display.mondrian(nanmean(P.B),cats);
 
 
 p_values = NaN(length(cats),1);
+n_A = histcounts(alldata.idx(A),cats);
+n_B = histcounts(alldata.idx(B),cats);
 N = 1e5;
 tic
 parfor i = 1:length(p_values)
@@ -87,7 +89,10 @@ toc
 
 disp(['p-values using ' mat2str(N) ' permutations'])
 
-table(p_values,cats)
+delta_p = nanmean(P.B - P.A);
+delta_p = delta_p';
+
+table(cats,n_A',n_B',p_values,delta_p)
 
 for i = 1:length(p_values)
 	if p_values(i) < .05/length(p_values)

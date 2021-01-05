@@ -44,5 +44,53 @@ end
 figlib.pretty('FontSize',16)
 
 
+
+
+
+
+% analysis of variability 
+figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+clear ax
+
+
+for i = 1:2
+	ax(i) = subplot(1,2,i); hold on
+	set(ax(i),'XTick',1:length(modnames),'XTickLabel',modnames,'XTickLabelRotation',45,'XLim',[0 5])
+end
+% compare prob. of normal prep by prep between mods
+
+colors = display.colorscheme(alldata.idx);
+cats = categories(alldata.idx);
+N = 0;
+for i = 1:length(modnames)
+
+	preps = unique(moddata.experiment_idx(moddata.(modnames{i}) > 0));
+	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized);
+
+	preps = preps.slice(preps.(modnames{i}) > 0);
+
+	p = preps.probState;
+
+	x = randn(size(p,1),1)*.1 + i;
+	plot(ax(1),x,p(:,1),'o','MarkerFaceColor',colors.normal,'MarkerEdgeColor',colors.normal)
+
+	for j = 1:size(p,2)
+		y = nanstd(p(:,j))/nanmean(p(:,j));
+		plot(ax(2),i + randn*.1, y,'o','MarkerFaceColor',colors(cats{j}),'MarkerEdgeColor',colors(cats{j}))
+	end
+
+	N = N + size(p,1);
+end
+ylabel(ax(1),'p(normal)')
+ylabel(ax(2),'CV(p)')
+ax(2).YLim(1) = 0;
+disp(N)
+
+figlib.pretty()
+figlib.label('FontSize',28,'XOffset',-.03,'YOffset',-.03)
+
+
+
+
 figlib.saveall('Location',display.saveHere)
 init()

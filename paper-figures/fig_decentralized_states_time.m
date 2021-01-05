@@ -12,7 +12,7 @@ all_preps = unique(decdata.experiment_idx);
 
 % first make line plots for baseline and decentralized
 
-figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+figure('outerposition',[300 300 1200 1300],'PaperUnits','points','PaperSize',[1200 1300]); hold on
 
 
 % show activity before decentralization

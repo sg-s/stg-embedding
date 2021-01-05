@@ -17,7 +17,7 @@ end
 
 % plot variability of firing rates
 E = nanstd(X)./sqrt(sum(~isnan(X)));
-h = plotlib.errorShade(time,nanmean(X),E,'Color',Color,'LineWidth',3);
+h = plotlib.errorShade(gca,time,nanmean(X),E,'Color',Color,'LineWidth',3);
 
 delete(h(2:3));
 

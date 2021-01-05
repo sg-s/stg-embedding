@@ -1,7 +1,7 @@
 % average a vector by some group information
 % and return the mean and standard deviation of each group
 
-function [M, S] = averageBy(X,Group)
+function [M, S] = averageBy(X, Group)
 
 arguments
 	X (:,1) double 

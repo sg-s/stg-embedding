@@ -22,13 +22,69 @@ CV = struct; % stores the CVs of each metric
 fn = fieldnames(basemetrics);
 fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','PD_phase_on','LP_burst_period'});
 sort_mean = NaN;
+across_animal_MS = NaN(length(fn),1);
+within_animal_MS = NaN(length(fn),1);
+p_anova = NaN(length(fn),1);
+
+N = 2:30;
+Nrep = 2;
+p_N = struct;
+
+
 for i = 1:length(fn)
-	[M,S] = analysis.averageBy(basemetrics.(fn{i}),basedata.experiment_idx);
+	disp(fn{i})
+
+	this = basemetrics.(fn{i});
+	groups = basedata.experiment_idx;
+	rm_this = basedata.idx ~= 'normal';
+	this(rm_this) = [];
+	groups(rm_this) = [];
+	[M,S] = analysis.averageBy(this,groups);
 	p.(fn{i}) = M;
 	CV.(fn{i}) = S./M;
 	within_prep(i) = nanmean(CV.(fn{i}));
 	sort_mean(i) = nanmean(M);
+
+	% anova
+	[~,tbl] = anova1(this,groups,'off');
+	across_animal_MS(i) = tbl{2,4};
+	within_animal_MS(i) = tbl{3,4};
+	p_anova(i) = tbl{2,6};
+
+
+	unique_groups = unique(groups);
+
+	% randomly choose N crabs and compute the p-value from the anova
+	p_N.(fn{i}) = zeros(length(N),Nrep);
+	for j = 1:length(N)
+		n = N(j);
+		for k = 1:Nrep
+			g = datasample(unique_groups,n,'Replace',false);
+			use_this = ismember(groups,g);
+			p_N.(fn{i})(j,k) = anova1(this(use_this), groups(use_this),'off');
+		end
+	end
+	
 end
+
+
+% temp diagnostic plots
+% figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+% m = length(fieldnames(p_N));
+% for i = 1:m
+% 	figlib.autoPlot(m,i); hold on
+% 	plot(N,mean(p_N.(fn{i}),2))
+% 	set(gca,'YScale','log')
+% 	ylabel('p')
+% 	xlabel('N')
+% 	title(fn{i},'interpreter','none')
+% 	plotlib.horzline(gca,.01,'k--')
+% end
+% figlib.pretty()
+
+F = across_animal_MS./within_animal_MS;
+
+table(fn,across_animal_MS,within_animal_MS,F)
 
 
 % reorder metrics by within_prep variability
@@ -107,7 +163,7 @@ xlabel(ax.variability,'CV','FontWeight','normal')
 % compare within prep and between-prep variability 
 ax.var_vs_var = subplot(1,4,3); hold on
 ax.excess_var = subplot(1,4,4); hold on
-xlabel('Across animal - within animal variability')
+xlabel({'Across animal - ','within animal variability'})
 clear ph
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
@@ -173,7 +229,12 @@ plotlib.vertline(ax.excess_var,0,'k:');
 % ax.variability.YGrid = 'on';
 % ax.var_vs_var.YGrid = 'on';
 
+
+figlib.tight
+drawnow
+
 figlib.label('XOffset',-.01,'YOffset',-0.04)
+
 
 figlib.saveall('Location',display.saveHere)
 
@@ -182,31 +243,3 @@ figlib.saveall('Location',display.saveHere)
 init()
 
 
-
-
-
-% ax.states = subplot(3,1,1); hold on
-% [h,P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx);
-
-% [~,sort_order]= sort(P(:,1),'descend');
-% delete(h)
-% P = P(sort_order,:);
-% h = bar(P,'stacked','LineStyle','-','BarWidth',1);
-% xlabel('Preparation')
-% ylabel('Fraction of time in state')
-% ax.states.XLim(1) = 1;
-% ax.states.YLim = [0 1];
-
-% % get the colors right
-% cats = categories(basedata.idx);
-% colors = display.colorscheme(cats);
-
-% for i = 1:length(h)
-% 	h(i).FaceColor = colors(cats{i});
-% end
-
-
-% find the duration of data for each prep
-% all_preps = unique(basedata.experiment_idx);
-% T = histcounts(basedata.experiment_idx, all_preps);
-% T = T(sort_order);

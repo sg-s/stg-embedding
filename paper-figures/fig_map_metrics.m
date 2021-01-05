@@ -14,6 +14,7 @@ Labels = {'T_{PD} (s)','LP phase','<f_{PD}> (Hz)','<#spikes/burst_{LP}>'};
 
 figure('outerposition',[300 100 1301 1201],'PaperUnits','points','PaperSize',[1301 1201]); hold on
 clear ax
+labels = {'a','b','c','d'};
 for i = 1:4
 	ax(i) = subplot(2,2,i); hold on
 	plot(R(:,1),R(:,2),'.','Color',[.8 .8 .8],'MarkerSize',24)
@@ -22,7 +23,7 @@ for i = 1:4
 	caxis(Limits(i,:))
 	axis off
 
-
+	axlib.label(ax(i),labels{i},'FontSize',28,'XOffset',-.01)
 end
 
 

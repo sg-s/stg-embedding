@@ -47,7 +47,8 @@ for ci = 1:length(modulators)
 		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',15)
 	end
 
-	title(ax(ci),modulators{ci},'FontWeight','normal')
+	N = length(unique(moddata.experiment_idx(moddata.(modulators{ci})>0)));
+	title(ax(ci),[modulators{ci} ' (N = ' mat2str(N) ')'],'FontWeight','normal')
 
 	
 end
@@ -57,5 +58,5 @@ axlib.move(ax(4:6),'down',.02)
 
 
 
-figlib.saveall('Location',display.saveHere)
+figlib.saveall('Location',display.saveHere,'Format','png')
 init()

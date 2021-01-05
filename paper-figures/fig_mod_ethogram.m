@@ -11,7 +11,7 @@ colors = display.colorscheme(cats);
 
 
 
-figure('outerposition',[300 300 1333 900],'PaperUnits','points','PaperSize',[1333 900]); hold on
+figure('outerposition',[30 30 1111 1233],'PaperUnits','points','PaperSize',[1111 1233]); hold on
 
 
 

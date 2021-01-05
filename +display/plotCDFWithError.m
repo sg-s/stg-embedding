@@ -23,8 +23,7 @@ for i = 1:N
 end
 hx = hx(1:end-1) + mean(diff(hx))/2;
 
-
-[lines,shade] = plotlib.errorShade(hx,hy,std(E,[],2),'Color',Color);
+[lines,shade] = plotlib.errorShade(gca,hx,hy,std(E,[],2),'Color',Color);
 try
 	delete(lines(2:3))
 catch

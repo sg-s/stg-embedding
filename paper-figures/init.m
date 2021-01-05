@@ -74,6 +74,20 @@ end
 
 
 
+% if ~exist('modmetrics','var')
+% 	disp('Computing metrics for modulator data...')
+% 	modmetrics = moddata.ISI2BurstMetrics;
+% 	modmetrics = structlib.scalarify(modmetrics);
+
+
+% 	% censor metrics in non-normal states
+% 	fn = fieldnames(modmetrics);
+% 	for i = 1:length(fn)
+% 		modmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
+% 	end
+
+% end
+
 
 if ~exist('decmetrics','var')
 	disp('Computing metrics for decentralized data...')
