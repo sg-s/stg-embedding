@@ -23,7 +23,7 @@ for i = 1:length(metrics)
 end
 
 
-figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
+figure('outerposition',[300 300 1200 1111],'PaperUnits','points','PaperSize',[1200 1111]); hold on
 
 clear ax
 ax(1).map = subplot(3,4,[1 2 5 6]); hold on
@@ -68,9 +68,9 @@ for i = 1:2
 	title(ch,Labels{i})
 
 	if i == 2
-		ch.Position = [.7 .33 .2 .02];
+		ch.Position = [.7 .4 .2 .02];
 	else
-		ch.Position = [.3 .33 .2 .02];
+		ch.Position = [.3 .4 .2 .02];
 	end
 
 	if Limits(2) > 3
@@ -83,9 +83,17 @@ for i = 1:2
 
 	axes(ax(i).dist)
 
-	display.plotCDFWithError(MetricsDiff.(metrics{i}),[1 0 0],1e3)
 
-	display.plotCDFWithError(MetricsDiffP.(metrics{i}),[0 0 1],1e3)
+	Nbins = 100;
+	BinEdges = logspace(-3,log10(Limits(2)),Nbins);
+
+
+	X = MetricsDiff.(metrics{i});
+	h = display.shadedHistogram(X, BinEdges, 'Color','k');
+
+	X = MetricsDiffP.(metrics{i});
+	h = display.shadedHistogram(X, BinEdges, 'Color','r');
+
 
 	clear V
 	V(:,1) = veclib.shuffle(DT.ConnectivityList(:,1));
@@ -95,18 +103,16 @@ for i = 1:2
 	ShuffledDiff = nanmax(allmetrics.(metrics{i})(V),[],2) - nanmin(allmetrics.(metrics{i})(V),[],2);
 
 
-	
-	display.plotCDFWithError(ShuffledDiff,[0 0 0],1e3)
-	
+	h = display.shadedHistogram(ShuffledDiff, BinEdges, 'Color','g');
+
+
 end
 
 colormap(flipud(gray))
 
 
-set(ax(1).dist,'XScale','log')
-set(ax(2).dist,'XScale','log')
-
-return
+% set(ax(1).dist,'XScale','log')
+% set(ax(2).dist,'XScale','log')
 
 
 figlib.pretty()
@@ -114,7 +120,7 @@ figlib.pretty()
 axlib.move(ax(2).dist,'right',.05)
 axlib.move(ax(2).map,'right',.05)
 
-
+legend('Data','PCA','Shuffled')
 
 figlib.saveall('Location',display.saveHere)
 init()

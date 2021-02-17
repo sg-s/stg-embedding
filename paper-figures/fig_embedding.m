@@ -8,9 +8,9 @@ states = {
 	'e06903495ff4011fc4003ea799ed4026',
 	'bdf3ee7e2c27802014e6444104df8230',
 	'b90284a5753b635a07b9a023496a7912',
-	'345b893c47abb0b7243b4d5fb3f419fd', % LP silent
 	'f6e66cb880f412ceed12d17dd6089e6e', % irregular bursting
-	'8e28b7f2fb33ea1fe21ddfc084750c81' % LP-weak skipped
+	'8e28b7f2fb33ea1fe21ddfc084750c81', % LP-weak skipped
+	'345b893c47abb0b7243b4d5fb3f419fd' % LP silent
 };
 
 
@@ -47,7 +47,7 @@ for i = 1:length(states)
 end
 
 set(ax.states,'YLim',[.5 i+.8],'XLim',[-.1 10])
-
+ax.states.YDir = 'reverse';
 
 
 show_this = find(strcmp(hashes.alldata,states{2}));
@@ -93,13 +93,13 @@ spiketimes = alldata.PD(show_this,:);
 spiketimes = spiketimes - min(spiketimes);
 plot(ax.phases,spiketimes,isis','.','Color',colors.PD)
 set(ax.phases,'YLim',[0 1])
-ylabel(ax.phases,'Phase')
+ylabel(ax.phases,'Spike phase')
 
 
 
 ah = area(ax.prctiles(2),prctile(isis,[0:10:100]));
 ah.FaceColor = colors.PD;
-ylabel(ax.prctiles(2),'Phase')
+ylabel(ax.prctiles(2),'Spike phase')
 set(ax.prctiles(2),'YLim',[0 1])
 
 
@@ -175,22 +175,25 @@ figlib.showImageInAxes(ax.cartoon,imread('circuit.png'))
 
 
 % create annotations
+
+arrow_color = [ 0.0078    0.7490    0.2039];
+
 axes(ax.map)
 clear a
 for i = 1:length(states)
 	idx = find(strcmp(hashes.alldata,states{i}));
 	x = R(idx,1);
 	y = R(idx,2);
-	plot(x,y,'r.','MarkerSize',10);
+	plot(x,y,'.','MarkerSize',10,'Color',[ 0.0078    0.7490    0.2039]);
 	[theta,rho] = cart2pol(x,y);
 	[x2,y2]=pol2cart(theta,rho+5);
 	x = [x; x2];
 	y = [y; y2];
 	
-	plot(x,y,'r');
-	th  =text(x(2),y(2),mat2str(i),'FontSize',14);
+	plot(x,y,'Color',[ 0.0078    0.7490    0.2039]);
+	th = text(x(2),y(2),mat2str(i),'FontSize',18);
 
-	if i == 4 | i == 5
+	if i == 4 | i == 6
 		th.HorizontalAlignment = 'right';
 	end
 end

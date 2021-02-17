@@ -19,6 +19,7 @@ clear ax
 % average things by prep
 p = struct;
 CV = struct; % stores the CVs of each metric
+SD = struct; % stores standard deviation of each metric
 fn = fieldnames(basemetrics);
 fn = setdiff(fn,{'PD_nspikes','LP_nspikes','PD_delay_on','PD_phase_on','LP_burst_period'});
 sort_mean = NaN;
@@ -42,6 +43,7 @@ for i = 1:length(fn)
 	[M,S] = analysis.averageBy(this,groups);
 	p.(fn{i}) = M;
 	CV.(fn{i}) = S./M;
+	SD.(fn{i}) = S;
 	within_prep(i) = nanmean(CV.(fn{i}));
 	sort_mean(i) = nanmean(M);
 
@@ -67,6 +69,13 @@ for i = 1:length(fn)
 	
 end
 
+return
+
+N_sample_reqd = NaN(length(fn),1);
+for i = 1:length(N_sample_reqd)
+	N_sample_reqd(i) = sampsizepwr('t',[mean(CV.(fn{i})) std(CV.(fn{i}))],statlib.cv(p.(fn{i})),.99,[],'Tail','right');
+end
+
 
 % temp diagnostic plots
 % figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
@@ -84,7 +93,7 @@ end
 
 F = across_animal_MS./within_animal_MS;
 
-table(fn,across_animal_MS,within_animal_MS,F)
+table(fn,across_animal_MS,within_animal_MS,F,N_sample_reqd)
 
 
 % reorder metrics by within_prep variability

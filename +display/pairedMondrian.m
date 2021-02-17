@@ -80,19 +80,34 @@ p_values = NaN(length(cats),1);
 n_A = histcounts(alldata.idx(A),cats);
 n_B = histcounts(alldata.idx(B),cats);
 N = 1e5;
+N_samples_required = NaN*p_values;
 tic
 parfor i = 1:length(p_values)
 	%p_values(i) = ranksum(P.A(:,i),P.B(:,i));
 	p_values(i) = statlib.pairedPermutationTest(P.A(:,i),P.B(:,i),N);
+
 end
 toc
+
+
+for i = 1:length(N_samples_required)
+	S = std(P.A(:,i));
+	if S == 0
+		N_samples_required(i) = 1;
+		continue
+	end
+	N_samples_required(i) = sampsizepwr('t',[mean(P.A(:,i)) S],mean(P.B(:,i)),.9);
+end
+
+
+
 
 disp(['p-values using ' mat2str(N) ' permutations'])
 
 delta_p = nanmean(P.B - P.A);
 delta_p = delta_p';
 
-table(cats,n_A',n_B',p_values,delta_p)
+table(cats,n_A',n_B',p_values,delta_p,N_samples_required)
 
 for i = 1:length(p_values)
 	if p_values(i) < .05/length(p_values)

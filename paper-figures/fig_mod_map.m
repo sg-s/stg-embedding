@@ -36,6 +36,8 @@ figlib.pretty('LineWidth',1)
 modulators = {'serotonin','CabTrp1a','RPCH','proctolin','oxotremorine','CCAP'};
 
 
+temp = struct;
+
 for ci = 1:length(modulators)
 
 	% find all pts where the modulator is used
@@ -44,16 +46,44 @@ for ci = 1:length(modulators)
 
 
 	for i = 1:length(cats)
+		if strcmp(cats{i},'normal')
+			x = R(alldata.idx == cats(i) & plot_this,1);
+			y = R(alldata.idx == cats(i) & plot_this,2);
+			prep = alldata.experiment_idx(alldata.idx == cats(i) & plot_this);
+		end
 		plot(ax(ci),R(alldata.idx == cats(i) & plot_this,1),R(alldata.idx == cats(i) & plot_this,2),'.','Color',colors(cats{i}),'MarkerSize',15)
 	end
 
 	N = length(unique(moddata.experiment_idx(moddata.(modulators{ci})>0)));
 	title(ax(ci),[modulators{ci} ' (N = ' mat2str(N) ')'],'FontWeight','normal')
 
+	temp(ci).x = x;
+	temp(ci).y = y;
+	temp(ci).prep = prep;
 	
 end
 
 axlib.move(ax(4:6),'down',.02)
+
+
+return
+
+% are the distributions different?
+p = NaN(6);
+for i = 1:5
+	for j = i+1:6
+
+		% average over preps
+		A = [analysis.averageBy(temp(i).x,temp(i).prep) analysis.averageBy(temp(i).y,temp(i).prep)];
+		B = [analysis.averageBy(temp(j).x,temp(j).prep) analysis.averageBy(temp(j).y,temp(j).prep)];
+
+		[~,p(i,j)]=statlib.kstest_2s_2d(A,B);
+		if p(i,j) < 0.05/6
+			disp(['Difference b/w ' modulators{i} ' and ' modulators{j}])
+		end
+	end
+end
+
 
 
 

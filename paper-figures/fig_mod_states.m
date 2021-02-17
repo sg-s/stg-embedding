@@ -4,18 +4,34 @@ close all
 init()
 
 
-figure('outerposition',[300 300 1500 901],'PaperUnits','points','PaperSize',[1500 901]); hold on
+figure('outerposition',[300 300 1500 1111],'PaperUnits','points','PaperSize',[1500 1111]); hold on
 
 clear ax
 
 modnames = {'RPCH','proctolin','oxotremorine','serotonin'};
 
 
-
 for i = 1:length(modnames)
 	ax(i) = subplot(2,2,i); hold on
-
+	ax(i).Position(4) = .28;
+	
+	if i < 3
+		ax(i).Position(2) = .52;
+	end
 	axlib.label(ax(i),char(96+i),'XOffset',-.04,'FontSize',24);
+end
+
+axl = axes;
+
+axl.Position = [.05 .88 .9 .1];
+cats = categories(alldata.idx);
+L = display.stateLegend(axl,cats,6);
+
+
+for i = 1:length(modnames)
+	
+
+	
 
 	% find all preps where this mod is used
 	preps = unique(moddata.experiment_idx(moddata.(modnames{i}) > 0));
@@ -40,6 +56,9 @@ for i = 1:length(modnames)
 
 
 end
+
+
+
 
 figlib.pretty('FontSize',16)
 
@@ -92,5 +111,5 @@ figlib.label('FontSize',28,'XOffset',-.03,'YOffset',-.03)
 
 
 
-figlib.saveall('Location',display.saveHere)
+figlib.saveall('Location',display.saveHere,'Format','pdf')
 init()
