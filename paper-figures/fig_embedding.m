@@ -46,7 +46,7 @@ for i = 1:length(states)
 	neurolib.raster(ax.states,LP,'deltat',1,'yoffset',i + .8,'Color',colors.LP,'center',false,'RowHeight',.3)
 end
 
-set(ax.states,'YLim',[.5 i+.8],'XLim',[-.1 10])
+set(ax.states,'YLim',[.5 i+.5],'XLim',[-.1 10])
 ax.states.YDir = 'reverse';
 
 
@@ -66,7 +66,7 @@ plot(ax.isis,[10 20],[.001 .001],'k','LineWidth',3)
 ax.isis.XColor = 'w';
 
 
-ah = area(ax.prctiles(1),prctile(isis,[0:10:100]));
+ah = area(ax.prctiles(1),prctile(isis,0:10:100));
 ah.FaceColor = colors.PD;
 ylabel(ax.prctiles(1),'ISI (s)')
 ax.prctiles(1).XColor = 'w';
@@ -80,7 +80,7 @@ plot(ax.isis,spiketimes,isis','.','Color',colors.LP)
 
 
 
-ah = area(ax.prctiles(1),prctile(isis,[0:10:100]));
+ah = area(ax.prctiles(1),prctile(isis,0:10:100));
 ah.XData = ah.XData + 12;
 ah.FaceColor = colors.LP;
 
@@ -97,7 +97,7 @@ ylabel(ax.phases,'Spike phase')
 
 
 
-ah = area(ax.prctiles(2),prctile(isis,[0:10:100]));
+ah = area(ax.prctiles(2),prctile(isis,0:10:100));
 ah.FaceColor = colors.PD;
 ylabel(ax.prctiles(2),'Spike phase')
 set(ax.prctiles(2),'YLim',[0 1])
@@ -110,7 +110,7 @@ spiketimes =  spiketimes + 25;
 plot(ax.phases,spiketimes,isis','.','Color',colors.LP)
 
 
-ah = area(ax.prctiles(2),prctile(isis,[0:10:100]));
+ah = area(ax.prctiles(2),prctile(isis,0:10:100));
 ah.FaceColor = colors.LP;
 ah.XData = ah.XData + 12;
 
@@ -153,7 +153,7 @@ figlib.pretty('PlotLineWidth',1.5)
 ax.map.XLim = [-30 30];
 ax.map.YLim = [-30 30];
 ax.states.XColor = 'w';
-
+axlib.banding('ax',ax.states,'start',-.5)
 ax.prctiles(2).XColor = 'w';
 
 
