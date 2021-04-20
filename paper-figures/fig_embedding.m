@@ -20,8 +20,8 @@ states = {
 figure('outerposition',[300 300 1344 1222],'PaperUnits','points','PaperSize',[1344 1222]); hold on
 
 clear ax
-ax.cartoon = subplot(4,4,1); hold on
-ax.states = subplot(4,4,2:4); hold on
+%ax.cartoon = subplot(4,4,1); hold on
+ax.states = subplot(4,4,1:4); hold on
 ax.isis = subplot(4,4,5); hold on
 ax.phases = subplot(4,4,6); hold on
 ax.map = subplot(2,2,4); hold on
@@ -62,7 +62,10 @@ spiketimes = spiketimes - min(spiketimes);
 plot(ax.isis,spiketimes,isis','.','Color',colors.PD)
 set(ax.isis,'YScale','log','YLim',[.001 1])
 ylabel(ax.isis,'ISI (s)')
-plot(ax.isis,[10 20],[.001 .001],'k','LineWidth',3)
+plot(ax.isis,[15 20],[.001 .001],'k','LineWidth',3)
+th = text(ax.isis,15,.001/2,'5s','FontSize',20);
+
+
 ax.isis.XColor = 'w';
 
 
@@ -161,17 +164,17 @@ ax.dataframe.YMinorGrid = 'on';
 ax.dataframe.XColor = 'w';
 ax.phases.XColor = 'w';
 
-ax.states.Position = [.33 .74 .57 .2];
+ax.states.Position = [.11 .74 .77 .2];
 ax.isis.Position = [.11 .55 .13 .11];
 ax.phases.Position = [.32 .55 .13 .11];
 ax.prctiles(1).Position = [.11 .35 .13 .11];
 ax.prctiles(2).Position = [.32 .35 .13 .11];
 ax.map.Position = [.5 .15 .5 .5];
 ax.dataframe.Position = [.11 .14 .35 .15];
-ax.cartoon.Position = [.06 .75 .18 .18];
+%ax.cartoon.Position = [.06 .75 .18 .18];
 
 
-figlib.showImageInAxes(ax.cartoon,imread('circuit.png'))
+%figlib.showImageInAxes(ax.cartoon,imread('circuit.png'))
 
 
 % create annotations
@@ -180,18 +183,26 @@ arrow_color = [ 0.0078    0.7490    0.2039];
 
 axes(ax.map)
 clear a
+
+annotation_color = [255, 71, 234]/255;
+
 for i = 1:length(states)
 	idx = find(strcmp(hashes.alldata,states{i}));
 	x = R(idx,1);
 	y = R(idx,2);
-	plot(x,y,'.','MarkerSize',10,'Color',[ 0.0078    0.7490    0.2039]);
+	plot(x,y,'.','MarkerSize',20,'Color',annotation_color);
 	[theta,rho] = cart2pol(x,y);
-	[x2,y2]=pol2cart(theta,rho+5);
+	[x2,y2]=pol2cart(theta,rho+5.1);
 	x = [x; x2];
 	y = [y; y2];
 	
-	plot(x,y,'Color',[ 0.0078    0.7490    0.2039]);
-	th = text(x(2),y(2),mat2str(i),'FontSize',18);
+
+	plot(x,y,'Color',[255, 71, 234]/255,'LineWidth',2);
+	th = text(x(2),y(2),mat2str(i),'FontSize',20);
+
+	if i == 5
+		th.VerticalAlignment = 'bottom';
+	end
 
 	if i == 4 | i == 6
 		th.HorizontalAlignment = 'right';
@@ -200,12 +211,15 @@ end
 
 th.VerticalAlignment = 'bottom';
 
-axlib.label(ax.cartoon,'a','FontSize',28,'XOffset',-.01);
-axlib.label(ax.states,'b','FontSize',28,'XOffset',-.01)
-axlib.label(ax.isis,'c','FontSize',28,'XOffset',-.01)
-axlib.label(ax.prctiles(1),'d','FontSize',28,'XOffset',-.01)
-axlib.label(ax.dataframe,'e','FontSize',28,'XOffset',-.01)
-axlib.label(ax.map,'f','FontSize',28,'XOffset',-.01)
+%axlib.label(ax.cartoon,'a','FontSize',28,'XOffset',-.01);
+axlib.label(ax.states,'a','FontSize',28,'XOffset',-.01)
+axlib.label(ax.isis,'b','FontSize',28,'XOffset',-.01)
+axlib.label(ax.prctiles(1),'c','FontSize',28,'XOffset',-.01)
+axlib.label(ax.dataframe,'d','FontSize',28,'XOffset',-.01)
+axlib.label(ax.map,'e','FontSize',28,'XOffset',-.01)
+
+plot(ax.states,[9 10],[6.5 6.5],'k-','LineWidth',3)
+th = text(ax.states,9.4,6.9,'1s','FontSize',20);
 
 figlib.saveall('Location',display.saveHere)
 

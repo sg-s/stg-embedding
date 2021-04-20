@@ -42,9 +42,9 @@ scales = [4.7 .6 273    .5;
 		  4   .6 230.4  .4; 
 		  4.2 .6 180    .6];
 
-temp = display.colorscheme(categorical(NaN));
-colors(3,:) = temp.LP;
-colors(2,:) = temp.PD;
+colorscheme = display.colorscheme(categorical(NaN));
+colors(3,:) = colorscheme.LP;
+colors(2,:) = colorscheme.PD;
 
 for i = 1:length(example_files)
 	C.file_name = example_files{i};
@@ -86,3 +86,16 @@ text(extracellulars(1),a-.1,0,'\it lvn','FontSize',20,'HorizontalAlignment','rig
 text(extracellulars(1),a-.1,-1,'\it pdn','FontSize',20,'HorizontalAlignment','right')
 text(extracellulars(1),a-.1,-2,'\it lpn','FontSize',20,'HorizontalAlignment','right')
 text(extracellulars(1),a-.1,-3,'\it pyn','FontSize',20,'HorizontalAlignment','right')
+
+
+th = text(extracellulars(1),10.1,-1.5,'PD','FontSize',18,'Color',colorscheme.PD);
+ th = text(extracellulars(1),11.1,-1.45,'LP','FontSize',20,'Color',colorscheme.LP);
+ th = text(extracellulars(1),12.06,-2.62,'}','FontSize',18,'Color',colors(4,:),'interpreter','none','Rotation',90);
+th = text(extracellulars(1),12,-2.4,'PY','FontSize',20,'Color',colors(4,:),'interpreter','none');
+axlib.label(extracellulars(1),'a','XOffset',-.15,'FontSize',28,'YOffset',-.02)
+axlib.label(extracellulars(2),'b','XOffset',-.15,'FontSize',28,'YOffset',-.02)
+
+figlib.saveall('Location',display.saveHere)
+
+% clean up workspace
+init()

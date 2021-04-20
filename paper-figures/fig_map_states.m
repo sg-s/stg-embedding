@@ -22,7 +22,7 @@ for i = 1:3
     for j = 1:5
         ax.examples(pidx) = subplot(5,3,pidx); hold on
         
-        set(ax.examples(pidx),'YLim',[-.01 6.01],'XLim',[-.5 10])
+        set(ax.examples(pidx),'YLim',[-.5 5.5],'XLim',[-.5 10])
         pidx = pidx + 1;
     end
 end
@@ -92,16 +92,20 @@ for i = 1:length(ax.examples)
 
     ax.examples(i).YTick = [];
     ax.examples(i).XTick = [];
-    ax.examples(i).Box = 'on';
     axis(ax.examples(i),'on')
     this_color = colors(idx(show_this));
     plotlib.vertline(ax.examples(i),-.45,'Color',this_color,'LineWidth',10);
-    ax.examples(i).Color = [.95 .95 .95];
+    axlib.banding('ax',ax.examples(i),'spacing',2.75,'start',-.25)
 
 end
 
 
 figlib.pretty('LineWidth',1)
+
+for i = 1:length(ax.examples)
+    ax.examples(i).Box = 'off';
+    ax.examples(i).XColor = 'w';
+end
 
 
 axlib.move(ax.examples,'right',.05)
@@ -124,7 +128,13 @@ drawnow()
 h = axlib.label(ax.main,'a','FontSize',36,'XOffset',.01);
 h = axlib.label(ax.examples(1),'b','FontSize',36,'XOffset',-.025,'YOffset',-.01);
 
+plot(ax.examples(10),[9 10],[-.5 -.5],'LineWidth',4,'Color','k')
+th =text(ax.examples(10),9.2,-1.1,'1s');
+th.FontSize = 20;
+
 figlib.saveall('Location',display.saveHere)
+
+
 
 % clean up workspace
 init()
