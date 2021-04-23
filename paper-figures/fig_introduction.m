@@ -52,7 +52,11 @@ for i = 1:length(example_files)
 
 	offset = 0;
 
-	this_time = C.time > 10 & C.time < 20;
+
+	a = 22;
+	z = 32;
+
+	this_time = C.time > a & C.time < z;
 
 	for j = 1:length(nerve_names)
 		nerve = nerve_names{j};
@@ -69,7 +73,7 @@ for i = 1:length(example_files)
 
 	end
 
-	extracellulars(i).XLim = [10 20];
+	extracellulars(i).XLim = [a z];
 
 
 end
@@ -77,10 +81,8 @@ end
 figlib.pretty
 
 
-z = extracellulars(1).XLim(2);
-a = extracellulars(1).XLim(1);
 plot(extracellulars(1),[z-1 z],[-3.5 -3.5],'k','LineWidth',3)
-text(extracellulars(1),19,-3.7,'1s','FontSize',20)
+text(extracellulars(1),a+9,-3.7,'1s','FontSize',20)
 
 text(extracellulars(1),a-.1,0,'\it lvn','FontSize',20,'HorizontalAlignment','right')
 text(extracellulars(1),a-.1,-1,'\it pdn','FontSize',20,'HorizontalAlignment','right')
@@ -88,10 +90,10 @@ text(extracellulars(1),a-.1,-2,'\it lpn','FontSize',20,'HorizontalAlignment','ri
 text(extracellulars(1),a-.1,-3,'\it pyn','FontSize',20,'HorizontalAlignment','right')
 
 
-th = text(extracellulars(1),10.1,-1.5,'PD','FontSize',18,'Color',colorscheme.PD);
- th = text(extracellulars(1),11.1,-1.45,'LP','FontSize',20,'Color',colorscheme.LP);
- th = text(extracellulars(1),12.06,-2.62,'}','FontSize',18,'Color',colors(4,:),'interpreter','none','Rotation',90);
-th = text(extracellulars(1),12,-2.4,'PY','FontSize',20,'Color',colors(4,:),'interpreter','none');
+text(extracellulars(1),a+0.2,-1.5,'PD','FontSize',18,'Color',colorscheme.PD);
+text(extracellulars(1),a+1.2,-1.45,'LP','FontSize',20,'Color',colorscheme.LP);
+text(extracellulars(1),a+2.23,-2.62,'}','FontSize',18,'Color',colors(4,:),'interpreter','none','Rotation',90);
+text(extracellulars(1),a+2,-2.4,'PY','FontSize',20,'Color',colors(4,:),'interpreter','none');
 axlib.label(extracellulars(1),'a','XOffset',-.15,'FontSize',28,'YOffset',-.02)
 axlib.label(extracellulars(2),'b','XOffset',-.15,'FontSize',28,'YOffset',-.02)
 
