@@ -16,6 +16,7 @@ sz = sz/sum(sz);
 
 J = embedding.computeTransitionMatrix(idx, time);
 
+keyboard
 
 % ignore transitions that occur only once or twice
 J(J<2) = 0;
@@ -69,5 +70,4 @@ set(gca,'YLim',[x(1) - xr*.1 x(2) + xr*.1])
 
 
 axis('off')
-
 
