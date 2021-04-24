@@ -5,17 +5,17 @@ close all
 init
 
 states = {
-	'e06903495ff4011fc4003ea799ed4026',
-	'bdf3ee7e2c27802014e6444104df8230',
-	'b90284a5753b635a07b9a023496a7912',
-	'f6e66cb880f412ceed12d17dd6089e6e', % irregular bursting
-	'8e28b7f2fb33ea1fe21ddfc084750c81', % LP-weak skipped
+	'e06903495ff4011fc4003ea799ed4026',...
+	'bdf3ee7e2c27802014e6444104df8230',...
+	'b90284a5753b635a07b9a023496a7912',...
+	'f6e66cb880f412ceed12d17dd6089e6e',... % irregular bursting
+	'8e28b7f2fb33ea1fe21ddfc084750c81',...% LP-weak skipped
 	'345b893c47abb0b7243b4d5fb3f419fd' % LP silent
 };
 
-
-% e8128afb66562e19e39807c665951f36
-
+% offsets to line up PD bursts (approximately)
+% for visual niceness
+offsets = [0 0 .27 .581 0 0];
 
 figure('outerposition',[300 300 1344 1222],'PaperUnits','points','PaperSize',[1344 1222]); hold on
 
@@ -42,13 +42,15 @@ for i = 1:length(states)
 	PD = PD - a;
 	LP = LP - a;
 
-	neurolib.raster(ax.states,PD,'deltat',1,'yoffset',i+.5,'Color',colors.PD,'center',false,'RowHeight',.3)
-	neurolib.raster(ax.states,LP,'deltat',1,'yoffset',i + .8,'Color',colors.LP,'center',false,'RowHeight',.3)
+	neurolib.raster(ax.states,PD-offsets(i),'deltat',1,'yoffset',i+.5,'Color',colors.PD,'center',false,'RowHeight',.3,'fill_fraction',1)
+	neurolib.raster(ax.states,LP-offsets(i),'deltat',1,'yoffset',i + .8,'Color',colors.LP,'center',false,'RowHeight',.3,'fill_fraction',1)
+
+	text(ax.states,-.3,i,mat2str(i),'FontSize',24)
 end
 
-set(ax.states,'YLim',[.5 i+.5],'XLim',[-.1 10])
+set(ax.states,'YLim',[.6 i+.6],'XLim',[-.1 10])
 ax.states.YDir = 'reverse';
-
+ax.states.YColor = 'w';
 
 show_this = find(strcmp(hashes.alldata,states{2}));
 
@@ -69,8 +71,9 @@ th = text(ax.isis,15,.001/2,'5s','FontSize',20);
 ax.isis.XColor = 'w';
 
 
-ah = area(ax.prctiles(1),prctile(isis,0:10:100));
+ah = bar(ax.prctiles(1),prctile(isis,0:10:100));
 ah.FaceColor = colors.PD;
+ah.LineStyle = 'none';
 ylabel(ax.prctiles(1),'ISI (s)')
 ax.prctiles(1).XColor = 'w';
 
@@ -83,10 +86,10 @@ plot(ax.isis,spiketimes,isis','.','Color',colors.LP)
 
 
 
-ah = area(ax.prctiles(1),prctile(isis,0:10:100));
+ah = bar(ax.prctiles(1),prctile(isis,0:10:100));
 ah.XData = ah.XData + 12;
 ah.FaceColor = colors.LP;
-
+ah.LineStyle = 'none';
 
 
 
@@ -100,8 +103,9 @@ ylabel(ax.phases,'Spike phase')
 
 
 
-ah = area(ax.prctiles(2),prctile(isis,0:10:100));
+ah = bar(ax.prctiles(2),prctile(isis,0:10:100));
 ah.FaceColor = colors.PD;
+ah.LineStyle = 'none';
 ylabel(ax.prctiles(2),'Spike phase')
 set(ax.prctiles(2),'YLim',[0 1])
 
@@ -113,8 +117,9 @@ spiketimes =  spiketimes + 25;
 plot(ax.phases,spiketimes,isis','.','Color',colors.LP)
 
 
-ah = area(ax.prctiles(2),prctile(isis,0:10:100));
+ah = bar(ax.prctiles(2),prctile(isis,0:10:100));
 ah.FaceColor = colors.LP;
+ah.LineStyle = 'none';
 ah.XData = ah.XData + 12;
 
 
@@ -156,7 +161,7 @@ figlib.pretty('PlotLineWidth',1.5)
 ax.map.XLim = [-30 30];
 ax.map.YLim = [-30 30];
 ax.states.XColor = 'w';
-axlib.banding('ax',ax.states,'start',-.5)
+axlib.banding('ax',ax.states,'start',-.4)
 ax.prctiles(2).XColor = 'w';
 
 
@@ -164,13 +169,13 @@ ax.dataframe.YMinorGrid = 'on';
 ax.dataframe.XColor = 'w';
 ax.phases.XColor = 'w';
 
-ax.states.Position = [.11 .74 .77 .2];
-ax.isis.Position = [.11 .55 .13 .11];
-ax.phases.Position = [.32 .55 .13 .11];
-ax.prctiles(1).Position = [.11 .35 .13 .11];
-ax.prctiles(2).Position = [.32 .35 .13 .11];
-ax.map.Position = [.5 .15 .5 .5];
-ax.dataframe.Position = [.11 .14 .35 .15];
+ax.states.Position = [.11 .67 .85 .28];
+ax.isis.Position = [.11 .49 .13 .11];
+ax.phases.Position = [.32 .49 .13 .11];
+ax.prctiles(1).Position = [.11 .29 .13 .11];
+ax.prctiles(2).Position = [.32 .29 .13 .11];
+ax.map.Position = [.5 .09 .5 .5];
+ax.dataframe.Position = [.11 .09 .35 .15];
 %ax.cartoon.Position = [.06 .75 .18 .18];
 
 
@@ -212,14 +217,19 @@ end
 th.VerticalAlignment = 'bottom';
 
 %axlib.label(ax.cartoon,'a','FontSize',28,'XOffset',-.01);
-axlib.label(ax.states,'a','FontSize',28,'XOffset',-.01)
+axlib.label(ax.states,'a','FontSize',28,'XOffset',-.025)
 axlib.label(ax.isis,'b','FontSize',28,'XOffset',-.01)
 axlib.label(ax.prctiles(1),'c','FontSize',28,'XOffset',-.01)
-axlib.label(ax.dataframe,'d','FontSize',28,'XOffset',-.01)
+axlib.label(ax.dataframe,'d','FontSize',28,'XOffset',-.015)
 axlib.label(ax.map,'e','FontSize',28,'XOffset',-.01)
 
 plot(ax.states,[9 10],[6.5 6.5],'k-','LineWidth',3)
 th = text(ax.states,9.4,6.9,'1s','FontSize',20);
+
+ax.states.TickLength = [0 0];
+
+
+th = text(ax.prctiles(1),1,-.1,'deciles','FontSize',18);
 
 figlib.saveall('Location',display.saveHere)
 
