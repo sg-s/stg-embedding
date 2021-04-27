@@ -1,8 +1,8 @@
 % makes a mondrian plot (a treemap)
 % from a list of states 
 
-function p = mondrian(states, cats);
-
+function p = mondrian(states, cats)
+	
 if iscategorical(states)
 	h = histcounts(states);
 	cats = categories(states);

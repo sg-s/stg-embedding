@@ -15,8 +15,6 @@ end
 assert(length(OnlyWhen) == length(data.mask),'OnlyWhen has an incongruent length')
 assert(~any(isundefined(data.idx)),'States not defined!')
 
-all_states = categories(data.idx);
-
 
 all_preps = unique(data.experiment_idx);
 
