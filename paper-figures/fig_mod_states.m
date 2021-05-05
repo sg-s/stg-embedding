@@ -11,7 +11,7 @@ clear ax
 modnames = {'RPCH','proctolin','oxotremorine','serotonin'};
 
 
-for i = 1:length(modnames)
+for i = length(modnames):-1:1
 	ax(i) = subplot(2,2,i); hold on
 	ax(i).Position(4) = .28;
 	
@@ -38,10 +38,6 @@ for i = 1:length(modnames)
 	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized);
 
 
-	if length(preps.mask) == 0
-		continue
-	end
-
 	% only use the last 5 minutes before mod on
 	% to ignore transient effects of decentralization
 	LastFiveMinutes = @(data)  ((1:length(data.mask)) - find(data.(modnames{i}) > 0,1,'first') + 15 ) > 0;
@@ -52,7 +48,7 @@ for i = 1:length(modnames)
 	%preps = preps.slice(preps.PD_channel ~= 'PD' | preps.LP_channel ~= 'LP');
 
 
-	display.pairedMondrian(ax(i),preps, preps.(modnames{i}) == 0, preps.(modnames{i}) > 0, 'decentralized', ['+' modnames{i}]);
+	display.pairedMondrian(ax(i),preps, preps.(modnames{i}) == 0, preps.(modnames{i}) >= 1e-6, 'decentralized', ['+' modnames{i}]);
 
 
 end
@@ -63,6 +59,7 @@ end
 figlib.pretty('FontSize',16)
 
 
+return
 
 
 

@@ -1,5 +1,8 @@
 % init script
-
+% This script reads in all data and makes it usable
+% and is meant to be run before you make any figure
+% It should be smart enough to only recompute things 
+% as needed
 
 % get the data and filter
 if ~exist('alldata','var')
@@ -7,7 +10,6 @@ if ~exist('alldata','var')
 	data = sourcedata.getAllData();
 	alldata = filter(data,sourcedata.DataFilter.AllUsable);
 	alldata = alldata.combine();
-
 	alldata = correctTimeOffsets(alldata);
 end
 
@@ -17,6 +19,16 @@ if ~exist('hashes','var') | any(isundefined(alldata.idx))
 	[alldata.idx, hashes.alldata] = alldata.getLabelsFromCache;
 
 end
+
+
+
+% get the embedding 
+if ~exist('R','var')
+	VectorizedData = alldata.spikes2percentiles;
+
+	R = embedding.tsne_data(alldata, PD_LP, LP_PD, VectorizedData);
+end
+
 
 if ~exist('basedata','var')
 	disp('Filtering data for baseline and other conditions...')
@@ -30,22 +42,6 @@ if ~exist('basedata','var')
 
 end
 
-
-
-
-
-
-% get the embedding for the basedata
-if ~exist('R','var')
-	VectorizedData = alldata.spikes2percentiles;
-
-	R = embedding.tsne_data(alldata, PD_LP, LP_PD, VectorizedData);
-
-	% u = umap;
-	% u.n_neighbors = 50;          % 50
-	% u.negative_sample_rate = 20;  % 20
-	% R = u.fit(VectorizedData);
-end
 
 
 if ~exist('allmetrics','var')
@@ -72,21 +68,6 @@ if ~exist('basemetrics','var')
 
 end
 
-
-
-% if ~exist('modmetrics','var')
-% 	disp('Computing metrics for modulator data...')
-% 	modmetrics = moddata.ISI2BurstMetrics;
-% 	modmetrics = structlib.scalarify(modmetrics);
-
-
-% 	% censor metrics in non-normal states
-% 	fn = fieldnames(modmetrics);
-% 	for i = 1:length(fn)
-% 		modmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
-% 	end
-
-% end
 
 
 if ~exist('decmetrics','var')

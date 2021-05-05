@@ -74,7 +74,7 @@ end
 
 
 % normally [0:10:100];
-Percentiles =  [0:10:100];
+Percentiles =  0:10:100;
 P_ISIs = [prctile(data.PD_PD,Percentiles,2) prctile(data.LP_LP,Percentiles,2)];
 
 P_ISIs(isnan(P_ISIs)) = 20;
@@ -84,7 +84,6 @@ P_ISIs = normalize(P_ISIs);
 P_ISIs(:,length(Percentiles):length(Percentiles):end) = P_ISIs(:,length(Percentiles):length(Percentiles):end)*10;
 
 
-Percentiles =  [0:10:100];
 P_Phases = [prctile(PD_LP,Percentiles,2) prctile(LP_PD,Percentiles,2)];
 P_Phases(isnan(P_Phases)) = 1;
 P_Phases = normalize(P_Phases);

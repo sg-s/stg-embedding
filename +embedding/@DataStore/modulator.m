@@ -6,7 +6,9 @@
 function [TF, ModulatorUsed] = modulator(self)
 
 
-assert(length(self)==1,'This method only works for scalar DataStores')
+arguments
+	self (1,1) embedding.DataStore
+end
 
 TF = false(length(self.mask),1);
 

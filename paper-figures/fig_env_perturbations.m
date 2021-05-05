@@ -104,7 +104,8 @@ axes(ax.silentmaps.high_temp)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 P = J(:,silent_idx);
 P(silent_idx) = 0;
-display.mondrian((P),cats)
+sum(P)
+display.mondrian(P,cats)
 view([90 -90])
 
 axes(ax.treemaps.low_ph)
@@ -119,6 +120,7 @@ axes(ax.silentmaps.low_ph)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 P = J(:,silent_idx);
 P(silent_idx) = 0;
+sum(P)
 display.mondrian(P,cats);
 view([90 -90])
 
@@ -144,6 +146,7 @@ axes(ax.silentmaps.high_k)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 P = J(:,silent_idx);
 P(silent_idx) = 0;
+sum(P)
 display.mondrian((P),cats);
 view([90 -90])
 
@@ -164,13 +167,15 @@ axlib.label(ax.silentmaps.low_ph,'d','FontSize',24,'XOffset',-.0,'YOffset',.00)
 
 a = annotation('arrow',[.5175 .2566],[.04 .07]);
 a.Position = [0.5175 0.2566 0.0400 0.0700];
+a.LineWidth = 2;
 
 a = annotation('arrow',[.5175 .2566],[.04 .07]);
 a.Position = [.6803 .256 .04 .2];
+a.LineWidth = 2;
 
 a = annotation('arrow',[.5175 .2566],[.04 .07]);
 a.Position = [0.8431 0.2560 0.0250 0.1450];
-
+a.LineWidth = 2;
 
 figlib.saveall('Location',display.saveHere)
 

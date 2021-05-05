@@ -9,7 +9,10 @@
 
 function data = correctTimeOffsets(data)
 
-assert(length(data)==1,'Only works for scalar DataStores')
+arguments
+	data (1,1) embedding.DataStore
+end
+
 
 all_preps = unique(data.experiment_idx);
 
@@ -18,7 +21,7 @@ for i = 1:length(all_preps)
 
 
 	% first, go over every file and make sure every file starts from zero
-	% we are not guaranteed this because it is possible that some intitial
+	% we are not guaranteed this because it is possible that some initial
 	% segment of that file is ignored, so time_offsets for that file would
 	% start from non-zero value
 

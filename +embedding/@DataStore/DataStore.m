@@ -99,10 +99,14 @@ methods
 
 
 
-	function DS = DataStore(data)
+	function DS = DataStore(data, skip_checks)
 
 		if nargin == 0
 			return
+		end
+
+		if nargin < 2
+			skip_checks = false;
 		end
 
 		assert(isstruct(data),'DataStore should be constructed using a struct')
@@ -124,6 +128,10 @@ methods
 			DS.(fn{i}) = data.(fn{i});
 		end
 
+
+		if skip_checks
+			return
+		end
 
 		% make sure spikes are sorted
 		DS.PD = sort(DS.PD,2);

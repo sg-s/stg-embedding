@@ -35,11 +35,32 @@ case sourcedata.DataFilter.AllUsable
 case sourcedata.DataFilter.Neuromodulator
 
 
+	% The Neuromodulator filter works as follows:
+	% 
+	% Step 1: Prep-level filter
+	% Entire preps are purged if:
+	% - preps are not decentralized 
+	% - preps do not have modulator
+	% - preps do not have controls
+	% 
+
+	% Step 2: Individual data points
+	% - with more than one simultaneous neuromod
+	% - subsequent modulator applications
+
+
 	assert(min(data.mask) == 1,'Expected all data to be mask-free, but this not the case. First filter with the "AllUsable" filter');
 	assert(length(data)==1,'Expected a scalar DataStore. Use "combine" first')
 
-
+	unique_exps = unique(data.experiment_idx);
 	modulators = sourcedata.modulators;
+
+
+	% this OK vector will be true for data that we should retain
+	ok = data.mask*0 + 1;
+
+
+
 
 
 	% remove data where more than 1 neuromodulator is used
@@ -48,91 +69,48 @@ case sourcedata.DataFilter.Neuromodulator
 	for modulator = List(modulators)
 		N_mod = N_mod + double(data.(modulator)>0);
 	end
+	ok(N_mod>1) = false;
 
-	if any(N_mod>1)
-		data = data.purge(N_mod>1);
-	end
 
 
 	% remove data where no modulator is used
-	unique_exps = unique(data.experiment_idx);
-	rm_this = true(length(unique_exps),1);
-
-	for i = 1:length(unique_exps)
-		for modulator = List(modulators)
-			if any(data.(modulator)(data.experiment_idx == unique_exps(i)))
-				rm_this(i) = false;
-				break
-			end
-		end
-	end
-	bad_preps = unique_exps(rm_this);
-	data = data.purge(ismember(data.experiment_idx,bad_preps));
+	no_mod = splitapply(@(x) max(x) == 0, data.modulator, findgroups(data.experiment_idx));
+	bad_preps = unique_exps(no_mod);
+	ok(ismember(data.experiment_idx,bad_preps)) = false;
 
 
 
-	% OK now we have a list of preps where modulator was used at some point in time
-	unique_exps = unique(data.experiment_idx);
-	bad_preps = true(length(unique_exps),1);
+	% prep should be decentralized at some point with no modulator
+	check1 = splitapply(@any, ~data.modulator & data.decentralized, findgroups(data.experiment_idx));
 
-	for i = 1:length(unique_exps)
-
-		thisdata = data.slice(data.experiment_idx == unique_exps(i));
+	% prep should be not-decentralized with no modulator 
+	check2 = splitapply(@any, ~data.modulator & ~data.decentralized, findgroups(data.experiment_idx));
 
 
-		% prep should be decentralized at some point with no modulator
-		if ~any(~thisdata.modulator & thisdata.decentralized)
-			continue
-		end
+	% prep should be decentralized and have modulator on it
+	check3 = splitapply(@any, data.modulator & data.decentralized, findgroups(data.experiment_idx));
+	
 
-		% prep should be not-decentralized with no modulator 
-		if ~any(~thisdata.modulator & ~thisdata.decentralized)
-			continue
-		end
+	bad_preps = unique_exps(~(check1 & check2 & check3));
+	ok(ismember(data.experiment_idx,bad_preps)) = false;
 
-		% prep should be decentralized and have modulator on it
-		if ~any(thisdata.modulator & thisdata.decentralized)
-			continue
-		end
 
-		bad_preps(i) = false;
+	% remove 2nd application of modulator
 
-	end
+	after_first_app = splitapply(@(x) {analysis.trueAfterFirstPulse(x)}, data.modulator, findgroups(data.experiment_idx));
+	after_first_app = vertcat(after_first_app{:});
+	ok(after_first_app) = false;
 
-	data = data.purge(ismember(data.experiment_idx,unique_exps(bad_preps)));
+
+	% remove high temperature data for haddad experiments
+	% the reason we don't blanket remove all high temp
+	% data is because a lot of the rosenbaum data seems to be at weird temperatures probably due to errors in measurement
+	ok(data.experimenter == 'haddad' & data.temperature > 15) = false;
+	ok(data.experimenter == 'haddad' & data.temperature < 11) = false;
 
 
 
-	% remove preps where the baseline is really weird ( defined as spending more than 20% of its time in non-normal states just before decentralization). This should allow for some transient behaviour which might emerge from the stress of early prep. handling
-	% unique_exps = unique(data.experiment_idx);
-	% p_normal = zeros(length(unique_exps),1);
-	% for i = 1:length(unique_exps)
-	% 	temp = data.idx(data.experiment_idx == unique_exps(i) & data.decentralized == false);
-	% 	if length(temp) > 30
-	% 		temp = temp(end-29:end);
-	% 	end
-	% 	p_normal(i) = mean(temp == 'normal' | temp == 'LP-weak-skipped' | temp == 'aberrant-spikes');
-	% end
-
-	% data = data.purge(ismember(data.experiment_idx,unique_exps(p_normal<.5)));
-
-
-
-	% finally, we remove all data where the non-maximum value of the modulator was used. 
-	unique_exps = unique(data.experiment_idx);
-	rm_this = false(length(data.mask),1);
-	for i = 1:length(unique_exps)
-		for modulator = List(modulators)
-			this_exp = find(data.experiment_idx == unique_exps(i));
-			this_mod_values = data.(modulator)(this_exp);
-			rm_these = this_exp(this_mod_values > 0 & this_mod_values < max(this_mod_values));
-			rm_this(rm_these) = true;
-		end
-	end
-
-	data = data.purge(rm_this);
-
-
+	data = data.slice(ok);
 
 
 

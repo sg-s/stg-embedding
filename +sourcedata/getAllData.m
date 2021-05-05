@@ -7,7 +7,7 @@ arguments
     UseCache (1,1) logical = true
 end
 
-if exist('../cache/alldata.mat','file') & UseCache
+if exist('../cache/alldata.mat','file') && UseCache
     load('../cache/alldata.mat')
     return
 end
@@ -40,6 +40,8 @@ for i = 1:length(all_exps)
     % end
 
 	this_exp = all_exps(i).name;
+
+    disp(this_exp)
 
     % get the consolidated data from crabsort
     % this is internally cached by crabsort so
@@ -85,7 +87,19 @@ for i = 1:length(all_exps)
         try
     	   data = embedding.DataStore(data);
         catch
+
+
             % something went wrong, give up
+            % this is the right thing to do because
+            % this experiment has a field that is not
+            % in the data structure. So we have no idea
+            % what's going on in this experiment, so we 
+            % cannot with any reasonable certainty know
+            % what to make of this data. 
+            % For example, some data has a 
+            % "PD_hyperpolarized" field, which obviously
+            % is a invasive perturbation that we don't
+            % want to ignore
             disp(['Something went wrong with: ' all_exps(i).name])
             continue
         end

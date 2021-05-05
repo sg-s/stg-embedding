@@ -4,9 +4,6 @@ assert(length(alldata)==1,'Expected a scalar DataStore')
 
 N = length(alldata.mask);
 
-PD = alldata.PD;
-LP = alldata.LP;
-
 
 p.PD_burst_period = NaN(1,1);
 
