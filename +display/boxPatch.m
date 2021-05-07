@@ -8,5 +8,5 @@ arguments
 end
 
 ph.EdgeColor = [0 0 0];
-ph.LineWidth = 2;
+ph.LineWidth = 2.5;
 uistack(ph,'top');

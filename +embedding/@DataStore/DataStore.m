@@ -6,7 +6,7 @@
 % The goal is to create DataStores from data, and then never touch
 % them or modify them
 
-classdef DataStore
+classdef DataStore < Hashable
 
 
 

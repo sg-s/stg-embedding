@@ -38,17 +38,17 @@ for i = 1:length(modnames)
 	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized);
 
 
-	% only use the last 5 minutes before mod on
-	% to ignore transient effects of decentralization
-	LastFiveMinutes = @(data)  ((1:length(data.mask)) - find(data.(modnames{i}) > 0,1,'first') + 15 ) > 0;
 
-	T = analysis.forEachPrep(preps,LastFiveMinutes);
+	% only use the first half of the decentralized data 
+	% without modulator because we want to make sure we 
+	% don't want to accidentally include data where 
+	% neuromod is added (but isn't labeled as such because we want to ignore transients)
+	T = analysis.forEachPrep(preps,@analysis.falseForSecondHalfDecentralized);
 	preps = preps.slice(T);
 
-	%preps = preps.slice(preps.PD_channel ~= 'PD' | preps.LP_channel ~= 'LP');
 
 
-	display.pairedMondrian(ax(i),preps, preps.(modnames{i}) == 0, preps.(modnames{i}) >= 1e-6, 'decentralized', ['+' modnames{i}]);
+	display.pairedMondrian(ax(i),preps, preps.(modnames{i}) == 0, preps.(modnames{i}) >= 5e-7, 'decentralized', ['+' modnames{i}]);
 
 
 end

@@ -20,5 +20,8 @@ for i = 1:length(p)
     p(i).EdgeColor = [1 1 1];
 end
 
-set(gca,'XLim',[0 1],'YLim',[0 1])
+
+padding = .03;
 axis off
+view([90 -90])
+set(gca,'XLim',[0-padding 1+padding],'YLim',[0-padding 1+padding])

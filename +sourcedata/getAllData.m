@@ -1,14 +1,14 @@
 % searches all the data and returns all data
 % in a vector of embedding.DataStore objects
 
-function alldata = getAllData(UseCache)
+function [alldata,datahashes] = getAllData(UseCache)
 
 arguments
     UseCache (1,1) logical = true
 end
 
 if exist('../cache/alldata.mat','file') && UseCache
-    load('../cache/alldata.mat')
+    load('../cache/alldata.mat','datahashes','alldata')
     return
 end
 
@@ -145,4 +145,11 @@ end
 alldata(rm_this) = [];
 
 
-save('../cache/alldata.mat','alldata')
+
+% hash it
+datahashes = cell(length(alldata),1);
+for i = 1:length(alldata)
+    datahashes{i} = alldata(i).hash;
+end
+
+save('../cache/alldata.mat','alldata','datahashes','-nocompression')

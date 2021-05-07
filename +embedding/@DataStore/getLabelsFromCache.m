@@ -3,7 +3,9 @@
 
 function [idx, raw_data_hashes] = getLabelsFromCache(alldata)
 
-assert(length(alldata) == 1,'Expected a scalar DataStore')
+arguments
+	alldata (1,1) embedding.DataStore
+end
 
 DataSize = length(alldata.mask);
 raw_spike_data = [alldata.LP, alldata.PD];

@@ -5,17 +5,29 @@
 % as needed
 
 % get the data and filter
+
 if ~exist('alldata','var')
 	disp('Reading in all data...')
-	data = sourcedata.getAllData();
-	alldata = filter(data,sourcedata.DataFilter.AllUsable);
-	alldata = alldata.combine();
-	alldata = correctTimeOffsets(alldata);
+	[data, datahashes] = sourcedata.getAllData();
+
+
+	hash = hashlib.md5hash([datahashes{:}]);
+	filename = fullfile('..','cache','cleandata.mat');
+
+	if filelib.cacheOK(filename,hash)
+		disp('Loading from cache...')
+		load(filename,'alldata');
+	else
+		data = filter(data,sourcedata.DataFilter.AllUsable);
+		alldata = data.combine();
+		alldata = correctTimeOffsets(alldata);
+		save(filename,'alldata','hash','-nocompression');
+	end
 end
 
 
 % get the labels and hashes
-if ~exist('hashes','var') | any(isundefined(alldata.idx))
+if ~exist('hashes','var') || any(isundefined(alldata.idx))
 	[alldata.idx, hashes.alldata] = alldata.getLabelsFromCache;
 
 end

@@ -105,8 +105,7 @@ case sourcedata.DataFilter.Neuromodulator
 	% remove high temperature data for haddad experiments
 	% the reason we don't blanket remove all high temp
 	% data is because a lot of the rosenbaum data seems to be at weird temperatures probably due to errors in measurement
-	ok(data.experimenter == 'haddad' & data.temperature > 15) = false;
-	ok(data.experimenter == 'haddad' & data.temperature < 11) = false;
+	ok(data.temperature > 20) = false;
 
 
 
