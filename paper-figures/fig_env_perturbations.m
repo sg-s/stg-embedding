@@ -46,11 +46,14 @@ P = normalize(P);
 display.plotBackgroundLabels(ax.map,alldata, R);
 
 % show where the different perturbations are likely to be
-Colors = [1 0 0; 0 0 0; .1 .9 .1];
-for i = 1:size(conditions,2)
+Markers = {'o','d','^'};
+Colors = [0 0 0; .5 .5 .5; 1 1 1];
+MarkerEdgeColor = [0 0 0; .5 .5 .5; 0 0 0];
+
+for i = size(conditions,2):-1:1
 	this = P(:,i) > 1; % 3 sigma
-	plot(ax.map,R(this,1),R(this,2),'.','Color',Colors(i,:));
-	lh(i) = plot(ax.map,NaN,NaN,'.','Color',Colors(i,:),'MarkerSize',24);
+	plot(ax.map,R(this,1),R(this,2),Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerEdgeColor',MarkerEdgeColor(i,:),'MarkerSize',5);
+	lh(i) = plot(ax.map,NaN,NaN,Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerSize',20,'MarkerEdgeColor',MarkerEdgeColor(i,:));
 end
 legend(lh,{'pH > 9.5','T > 25C','2.5x[K^+]'})
 
@@ -104,9 +107,13 @@ axes(ax.silentmaps.high_temp)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 P = J(:,silent_idx);
 P(silent_idx) = 0;
-sum(P)
 display.mondrian(P,cats)
 view([90 -90])
+
+th = title(['(' mat2str(sum(P)) ' transitions)']);
+th.Position = [-.15 .5];
+th.FontWeight = 'normal';
+
 
 axes(ax.treemaps.low_ph)
 this = alldata.slice(alldata.pH < 6.5);
@@ -120,11 +127,12 @@ axes(ax.silentmaps.low_ph)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 P = J(:,silent_idx);
 P(silent_idx) = 0;
-sum(P)
 display.mondrian(P,cats);
 view([90 -90])
 
-
+th = title(['(' mat2str(sum(P)) ' transitions)']);
+th.Position = [-.15 .5];
+th.FontWeight = 'normal';
 
 axes(ax.treemaps.high_ph)
 this = alldata.slice(alldata.pH > 9.5);
@@ -146,9 +154,13 @@ axes(ax.silentmaps.high_k)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 P = J(:,silent_idx);
 P(silent_idx) = 0;
-sum(P)
 display.mondrian((P),cats);
 view([90 -90])
+th = title(['(' mat2str(sum(P)) ' transitions)']);
+th.Position = [-.15 .5];
+th.FontWeight = 'normal';
+
+
 
 display.stateLegend(ax.legend,cats,2)
 
