@@ -22,32 +22,31 @@ L = display.stateLegend(ax(n_mod),cats,3);
 
 
 delete(ax(2:n_mod-1))
-L.Position(1) = .55;
+L.Position = [.38 .75 .45 .2];
 
 
 % show decentralized only from preps with these mods
-preps = unique(moddata.experiment_idx(moddata.RPCH > 0 | moddata.oxotremorine > 0 | moddata.proctolin > 0 | moddata.serotonin > 0));
-preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized & moddata.modulator == 0);
+decentralized = unique(moddata.experiment_idx(moddata.RPCH > 0 | moddata.oxotremorine > 0 | moddata.proctolin > 0 | moddata.serotonin > 0));
+decentralized = moddata.slice(ismember(moddata.experiment_idx,decentralized) & moddata.decentralized & moddata.modulator == 0);
 
 
 
 FirstHalf = @(temp) (1:length(temp.mask)) - length(temp.mask)/2 > 0;
-T = analysis.forEachPrep(preps,FirstHalf);
-preps = preps.slice(T);
+T = analysis.forEachPrep(decentralized,FirstHalf);
+decentralized = decentralized.slice(T);
 
 
 % compute probabilities of states in both conditions
-P = preps.probState();
+decP = decentralized.probState();
 
 
 axes(ax(1))
-view([90 -90])
-ax(1).XLim = [0 1];
-ax(1).YLim = [0 1];
-axis(ax(1),'off')
 
+p = display.mondrian(nanmean(decP),cats);
+n_crabs = length(unique(decentralized.experiment_idx));
+T = length(decentralized.idx)*20/3600;
+title(ax(1),{'decentralized',['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hours) ' ]},'FontWeight','normal')
 
-p = display.mondrian(nanmean(P),cats);
 
 for i = 1:length(modnames)
 	
@@ -56,8 +55,6 @@ for i = 1:length(modnames)
 	% find all preps where this mod is used
 	preps = unique(moddata.experiment_idx(moddata.(M) > 0));
 	preps = moddata.slice(ismember(moddata.experiment_idx,preps) & moddata.decentralized & moddata.(M)>=5e-7);
-
-
 
 
 
@@ -74,11 +71,22 @@ for i = 1:length(modnames)
 	T = length(preps.idx)*20/3600;
 	title(ax(i+n_mod),{['+' M],['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hours) ' ]},'FontWeight','normal')
 
+	delta_normal = 100*((mean(P(:,1)) - mean(decP(:,1)))/mean(decP(:,1)));
+	txt = [mat2str(round(delta_normal)) '%'];
+	if delta_normal > 0
+		txt = ['+' txt];
+	end
+	y = p(1).Vertices(2,2)/2;
+	x = p(1).Vertices(3,1)/2;
+	th = text(ax(n_mod+i),x,y,txt);
+	th.HorizontalAlignment = 'center';
+	th.VerticalAlignment = 'middle';
+	th.Color = 'w';
+	
+
+
 	N.(M) = analysis.computeTransitionMatrix(preps.idx, preps.time_offset);
 	J.(M) = N.(M)/length(preps.idx);
-
-
-
 
 	axes(ax(i+n_mod*2))
 
@@ -117,3 +125,11 @@ end
 
 figlib.pretty('FontSize',16)
 
+axlib.label(ax(1),'a','FontSize',24,'XOffset',-.01)
+axlib.label(ax(n_mod+1),'b','FontSize',24,'XOffset',-.01)
+axlib.label(ax(2*n_mod+1),'c','FontSize',24,'XOffset',-.01)
+
+return
+
+figlib.saveall('Location',display.saveHere,'Format','pdf')
+init()

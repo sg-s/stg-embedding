@@ -39,8 +39,8 @@ conditions = [alldata.pH>9.5 ...
 
 
 % this takes a while, so let's memoize it
-f = memoize(@analysis.findRelativeAbundanceInMap);
-P = normalize(f(R,conditions));
+P = cacheFcn(@analysis.findRelativeAbundanceInMap, R, conditions);
+P = normalize(P);
 
 
 display.plotBackgroundLabels(ax.map,alldata, R);

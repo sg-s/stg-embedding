@@ -31,3 +31,6 @@ display.showRawData('ax',ax(8),'t_start',431,'experiment_idx','876_129','filenam
 
 figlib.label('YOffset',-.03)
 figlib.pretty
+
+figlib.saveall('Location',display.saveHere,'Format','png')
+init()

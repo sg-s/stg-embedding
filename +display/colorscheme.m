@@ -19,32 +19,37 @@ for i = 1:length(cats)
 end
 
 colors('normal') = color.aqua('blue');
-colors('LP-weak-skipped') = color.aqua('brown');
-colors('PD-weak-skipped') = color.aqua('green');
-colors('sparse-irregular') = color.aqua('indigo');
-colors('LP-silent-PD-bursting') = color.aqua('orange');
-colors('LP-silent') = color.aqua('pink');
+
+
+% nearly normal
+colors('aberrant-spikes') = color.aqua('teal');
+colors('irregular-bursting') = color.aqua('brown');
 colors('irregular') = color.aqua('gray');
-colors('slow-weak-bursting') = color.aqua('lime');
-
-colors('silent') = color.aqua('teal');
-
-colors('aberrant-spikes') = [1.0000    0.8276         0];
-colors('irregular-bursting') = [0 144 81]/255;
 
 
+% LP fucked
+colors('LP-weak-skipped') = color.aqua('pink'); 
+colors('LP-silent-PD-bursting') = [1.0000    0.1034    0.7241];
+colors('LP-silent') = color.aqua('orange');
+
+% PD fucked
+colors('PD-weak-skipped') = color.aqua('green');
+colors('PD-silent') = color.aqua('lime');
+colors('PD-silent-LP-bursting') = [0 144 81]/255;
+
+colors('sparse-irregular') = color.aqua('indigo');
+
+
+
+colors('silent') = [ 0 0 0 ];
+
+
+%  [1.0000    0.8276   0];
+% [0 144 81]/255;
+% color.aqua('lime');
 
 
 
 
 colors('LP') = color.aqua('red');
 colors('PD') = color.aqua('indigo');
-
-%  'purple'
-% 	C = [175 82 222]/255;
-% case 'red'
-% 	C = [255 59 48]/255;
-% case 'teal'
-% 	C = [90 200 250]/255;
-% case 'yellow'
-% 	C = [255 204 0]/255;
