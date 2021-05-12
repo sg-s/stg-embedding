@@ -47,6 +47,7 @@ n_crabs = length(unique(decentralized.experiment_idx));
 T = length(decentralized.idx)*20/3600;
 title(ax(1),{'decentralized',['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hours) ' ]},'FontWeight','normal')
 
+ConditionalProb = struct;
 
 for i = 1:length(modnames)
 	
@@ -91,7 +92,7 @@ for i = 1:length(modnames)
 	axes(ax(i+n_mod*2))
 
 
-	if i == 4
+	if strcmp(M,'serotonin')
 		this = J.(M)(1,:);
 		n = N.(M)(1,:);
 	else
@@ -100,6 +101,9 @@ for i = 1:length(modnames)
 	end
 	this(1) = 0;
 	n(1) = 0;
+
+	ConditionalProb.(M) = n;
+
 	p = display.mondrian(this,cats);
 	th = title(['(' mat2str(sum(n)) ' transitions)']);
 	th.Position = [-.15 .5];

@@ -193,36 +193,6 @@ methods
 
 
 
-	function out = horzcat(varargin)
-
-		for i = 1:length(varargin)
-			assert(isa(varargin{i},'embedding.DataStore'),'Cannot concat embedding.DataStore with other data types')
-		end
-
-
-		allprops = {};
-		for i = 1:length(varargin)
-			allprops = unique([allprops; properties(varargin{i})]);
-		end
-
-		for i = 1:length(varargin)
-			for j = 1:length(allprops)
-				if isprop(varargin{i},allprops{j})
-					continue
-				end
-
-				varargin{i}.addprop(allprops{j});
-				keyboard
-
-			end
-
-		end
-
-		keyboard
-
-	end
-
-
 
 
 end % methods
