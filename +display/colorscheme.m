@@ -28,8 +28,8 @@ colors('irregular') = color.aqua('gray');
 
 
 % LP fucked
-colors('LP-weak-skipped') = color.aqua('pink'); 
-colors('LP-silent-PD-bursting') = [1.0000    0.1034    0.7241];
+colors('LP-weak-skipped') = [255 150 138]/255;
+colors('LP-silent-PD-bursting') = color.aqua('pink'); 
 colors('LP-silent') = color.aqua('orange');
 
 % PD fucked

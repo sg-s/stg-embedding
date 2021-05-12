@@ -8,7 +8,7 @@ figure('outerposition',[300 300 1111 1111],'PaperUnits','points','PaperSize',[11
 
 
 
-modnames = {'RPCH','CCAP','proctolin','oxotremorine','serotonin'};
+modnames = {'RPCH','proctolin','oxotremorine','serotonin'};
 
 
 n_mod = length(modnames);
@@ -49,6 +49,8 @@ title(ax(1),{'decentralized',['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hou
 
 ConditionalProb = struct;
 
+Table = table(round(mean(decP)',2),'VariableNames',{'decentralized'},'RowNames',cats);
+
 for i = 1:length(modnames)
 	
 	M = modnames{i};
@@ -71,6 +73,21 @@ for i = 1:length(modnames)
 	n_crabs = length(unique(preps.experiment_idx));
 	T = length(preps.idx)*20/3600;
 	title(ax(i+n_mod),{['+' M],['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hours) ' ]},'FontWeight','normal')
+
+
+	% compare to decentralized in the same preps with no mod
+	dec = moddata.slice(ismember(moddata.experiment_idx,unique(preps.experiment_idx)) & moddata.modulator == 0);
+
+	T = analysis.forEachPrep(dec,FirstHalf);
+	dec = dec.slice(T);
+
+	% add to table
+	Table = [Table table(round(mean(P)',2),'VariableNames',{M},'RowNames',cats)];
+
+	decP = dec.probState();
+
+	p_value = statlib.pairedPermutationTest(P(:,1),decP(:,1),1e3)
+
 
 	delta_normal = 100*((mean(P(:,1)) - mean(decP(:,1)))/mean(decP(:,1)));
 	txt = [mat2str(round(delta_normal)) '%'];
@@ -133,7 +150,7 @@ axlib.label(ax(1),'a','FontSize',24,'XOffset',-.01)
 axlib.label(ax(n_mod+1),'b','FontSize',24,'XOffset',-.01)
 axlib.label(ax(2*n_mod+1),'c','FontSize',24,'XOffset',-.01)
 
-return
 
 figlib.saveall('Location',display.saveHere,'Format','pdf')
+
 init()

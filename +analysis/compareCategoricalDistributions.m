@@ -27,14 +27,14 @@ E = N*P0;
 % compute chi-squared
 chi2 = ((B-E).^2)./E;
 chi2(isnan(chi2)) = 0;
-
+chi2(isinf(chi2)) = 0;
 
 x = linspace(0,100,1e3);
 y = chi2cdf(x,length(A)-1);
 
 critical_value = x(find(y>(1-Alpha),1,'first'));
 
-if sum(chi2) <= critical_value
+if critical_value <= sum(chi2)
 	H0rejected = false;
 else
 	H0rejected = true;

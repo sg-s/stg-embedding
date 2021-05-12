@@ -17,10 +17,12 @@ PD_color = color.aqua('indigo');
 
 figure('outerposition',[300 300 2000 999],'PaperUnits','points','PaperSize',[2000 999]); hold on
 
+
+n_rows = length(cats)/2;
 pidx = 1;
 for i = 1:3
-    for j = 1:5
-        ax.examples(pidx) = subplot(5,3,pidx); hold on
+    for j = 1:n_rows
+        ax.examples(pidx) = subplot(n_rows,3,pidx); hold on
         
         set(ax.examples(pidx),'YLim',[-.5 5.5],'XLim',[-.5 10])
         pidx = pidx + 1;
@@ -51,15 +53,16 @@ show_these_states.('LP-silent-PD-bursting') = {'a4aeb01d81c31f51f46b9e424b02c447
 show_these_states.('PD-silent') = {'8c2382765f32dde0d2afe95008893959','4e8f00b1e593425abc635051b56036d5'};
 show_these_states.('silent') = {'b45625f4f424657001b0b42d3cebd833','b45625f4f424657001b0b42d3cebd833'};
 show_these_states.('sparse-irregular') = {'4ce353693ce6a5a03e9ba25a622f5de2','0db8049d9bc4cd818a54dc2c56bf6cd0'};
+show_these_states.('LP-silent') = {'5ae27186d2271445a77c555b96917225', '1f8e7f07142a9cb590fe161f60bd1057'
+};
+show_these_states.('PD-silent-LP-bursting') = {'fb74e847b4e8971c1d3228556a61f8b6', '764dcce923afddf54688aa13489373cd'
+};
 
-
-
-fn = show_these_states.keys;
 
 for i = 1:length(ax.examples)
     axes(ax.examples(i))
 
-    show_these = show_these_states.(fn{i});
+    show_these = show_these_states.(cats{i});
 
     Y = 0;
 
@@ -67,9 +70,6 @@ for i = 1:length(ax.examples)
 
         show_this = find(strcmp(hashes.alldata,show_these{j}));
 
-        if isempty(show_this)
-            disp(fn{i})
-        end
 
         show_this = show_this(1);
         
@@ -86,7 +86,7 @@ for i = 1:length(ax.examples)
 
     end
 
-    title([char(idx(show_this)) ' (n=' mat2str(sum(idx==fn{i})) ')'],'FontWeight','normal')
+    title([char(idx(show_this)) ' (n=' mat2str(sum(idx==cats{i})) ')'],'FontWeight','normal')
 
     
 
@@ -125,11 +125,11 @@ th.Color = LP_color;
 
 drawnow()
 
-h = axlib.label(ax.main,'a','FontSize',36,'XOffset',.01);
+axlib.label(ax.main,'a','FontSize',36,'XOffset',.01);
 h = axlib.label(ax.examples(1),'b','FontSize',36,'XOffset',-.025,'YOffset',-.01);
 
-plot(ax.examples(10),[9 10],[-.5 -.5],'LineWidth',4,'Color','k')
-th =text(ax.examples(10),9.2,-1.1,'1s');
+plot(ax.examples(end),[9 10],[-.5 -.5],'LineWidth',4,'Color','k')
+th =text(ax.examples(end),9.2,-1.1,'1s');
 th.FontSize = 20;
 
 figlib.saveall('Location',display.saveHere)
