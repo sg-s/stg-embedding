@@ -48,12 +48,12 @@ display.plotBackgroundLabels(ax.map,alldata, R);
 % show where the different perturbations are likely to be
 Markers = {'o','d','^'};
 Colors = [0 0 0; .5 .5 .5; 1 1 1];
-MarkerEdgeColor = [0 0 0; .5 .5 .5; 0 0 0];
+MarkerEdgeColor = [0 0 0; .5 .5 .5; 1 0 0 ];
 
 for i = size(conditions,2):-1:1
 	this = P(:,i) > 1; % 3 sigma
 	plot(ax.map,R(this,1),R(this,2),Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerEdgeColor',MarkerEdgeColor(i,:),'MarkerSize',5);
-	lh(i) = plot(ax.map,NaN,NaN,Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerSize',20,'MarkerEdgeColor',MarkerEdgeColor(i,:));
+	lh(i) = plot(ax.map,NaN,NaN,Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerSize',15,'MarkerEdgeColor',MarkerEdgeColor(i,:));
 end
 legend(lh,{'pH > 9.5','T > 25C','2.5x[K^+]'})
 
@@ -104,7 +104,9 @@ title(['T > 25' char(176)  'C'],'FontWeight','normal','FontSize',20)
 
 
 axes(ax.silentmaps.high_temp)
+
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
+allJ = J;
 P = J(:,silent_idx);
 P(silent_idx) = 0;
 display.mondrian(P,cats)
@@ -125,6 +127,7 @@ display.boxPatch(ph(11));
 
 axes(ax.silentmaps.low_ph)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
+allJ = allJ  + J;
 P = J(:,silent_idx);
 P(silent_idx) = 0;
 display.mondrian(P,cats);
@@ -152,6 +155,7 @@ display.boxPatch(ph(11))
 
 axes(ax.silentmaps.high_k)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
+allJ = allJ  + J;
 P = J(:,silent_idx);
 P(silent_idx) = 0;
 display.mondrian((P),cats);
@@ -159,8 +163,6 @@ view([90 -90])
 th = title(['(' mat2str(sum(P)) ' transitions)']);
 th.Position = [-.15 .5];
 th.FontWeight = 'normal';
-
-
 
 display.stateLegend(ax.legend,cats,2)
 
