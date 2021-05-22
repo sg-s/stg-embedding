@@ -46,7 +46,7 @@ for ci = 1:length(modulators)
 
 
 	for i = 1:length(cats)
-		if strcmp(cats{i},'normal')
+		if strcmp(cats{i},'regular')
 			x = R(alldata.idx == cats(i) & plot_this,1);
 			y = R(alldata.idx == cats(i) & plot_this,2);
 			prep = alldata.experiment_idx(alldata.idx == cats(i) & plot_this);
@@ -55,7 +55,7 @@ for ci = 1:length(modulators)
 	end
 
 	N = length(unique(moddata.experiment_idx(moddata.(modulators{ci})>0)));
-	title(ax(ci),[modulators{ci} ' (N = ' mat2str(N) ')'],'FontWeight','normal')
+	title(ax(ci),[modulators{ci} ' (N = ' mat2str(N) ')'],'FontWeight','regular')
 
 	temp(ci).x = x;
 	temp(ci).y = y;

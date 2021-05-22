@@ -5,8 +5,7 @@ init
 close all
 
 
-LP_color = color.aqua('red');
-PD_color = color.aqua('indigo');
+colors = display.colorscheme(alldata.idx);
 
 time_since_decentralization = analysis.timeSinceDecentralization(decdata);
 all_preps = unique(decdata.experiment_idx);
@@ -29,7 +28,7 @@ fn = fieldnames(decmetrics);
 for i = 1:length(fn)
 
 	this = decmetrics.(fn{i});
-	this(decdata.idx ~= 'normal') = NaN;
+	this(decdata.idx ~= 'regular') = NaN;
 
 	temp = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, this, time);
 	baseline_averaged_metrics.(fn{i}) = nanmean(temp(:,time<0),2);
@@ -90,9 +89,9 @@ L = {};
 MX = -1;
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
-		C = PD_color;
+		C = colors.PD;
 	else
-		C = LP_color;
+		C = colors.LP;
 	end
 	X = decentralized_averaged_metrics.(fn{i}) - baseline_averaged_metrics.(fn{i});
 	plotlib.raincloud(X,'YOffset',2*i,'Height',.5,'Color',C);
@@ -136,9 +135,9 @@ ax(4) = subplot(2,3,4); hold on
 MX = -1;
 for i = 1:length(fn)
 	if any(strfind(fn{i},'PD'))
-		C = PD_color;
+		C = colors.PD;
 	else
-		C = LP_color;
+		C = colors.LP;
 	end
 	X = decentralized_cv_metrics.(fn{i}) - baseline_cv_metrics.(fn{i});
 	plotlib.raincloud(X,'YOffset',2*i,'Height',.5,'Color',C);
@@ -160,7 +159,7 @@ for i = 1:length(fn)
 	end
 	MX = max([MX; max(X)]);
 end
-set(ax(4),'YTick',[2:2:2*length(fn)],'YTickLabel',L)
+set(ax(4),'YTick',2:2:2*length(fn),'YTickLabel',L)
 ax(4).YLim = [0 2*i+2];
 h = plotlib.vertline(ax(4),0,'k--');
 uistack(h,'bottom');
@@ -170,9 +169,9 @@ xlabel('Change in CV')
 
 
 ax(2) = subplot(2,3,2); hold on
-display.plotMetricsVsTime(time,(PDf),PD_color)
-display.plotMetricsVsTime(time,(LPf),LP_color)
-set(gca,'YLim',[0 10])
+display.plotMetricsVsTime(time,(PDf),colors.PD)
+display.plotMetricsVsTime(time,(LPf),colors.LP)
+set(gca,'YLim',[0 11])
 
 
 
@@ -180,7 +179,7 @@ set(gca,'YLim',[0 10])
 
 
 ax(5) = subplot(2,3,5); hold on
-display.plotMetricsVsTime(time,PD_T_norm,PD_color)
+display.plotMetricsVsTime(time,PD_T_norm,colors.PD)
 set(gca,'YLim',[0.9 2.5])
 plot([min(time) max(time)],[1 1],':','Color',[.5 .5 .5])
 
@@ -194,27 +193,26 @@ size(time)
 
 
 ax(3) = subplot(2,3,3); hold on
-display.plotMetricsVsTime(time,LP_on,LP_color)
-display.plotMetricsVsTime(time,LP_off,LP_color)
+display.plotMetricsVsTime(time,LP_on,colors.LP)
+display.plotMetricsVsTime(time,LP_off,colors.LP)
 set(gca,'YLim',[0 1])
 
 
 ax(6) = subplot(2,3,6); hold on
-display.plotMetricsVsTime(time,PD_dc,PD_color)
-display.plotMetricsVsTime(time,LP_dc,LP_color)
+display.plotMetricsVsTime(time,PD_dc,colors.PD)
+display.plotMetricsVsTime(time,LP_dc,colors.LP)
 set(gca,'YLim',[0 .4])
 
 
-ax(2).XAxisLocation = 'top';
+
 ax(3).YAxisLocation = 'right';
-ax(3).XAxisLocation = 'top';
 ax(6).YAxisLocation = 'right';
 
-h = xlabel(ax(5),'Time since decentralized (s)');
+h = xlabel(ax(5),'Time since decentralization (s)');
 h.Position = [2500 .65];
 
-h = xlabel(ax(2),'Time since decentralized (s)');
-h.Position = [2500 11.1];
+h = xlabel(ax(2),'Time since decentralization (s)');
+h.Position = [2500 -1.5];
 
 ylabel(ax(3),'Phase')
 ylabel(ax(6),'Duty cycle')
@@ -226,9 +224,17 @@ figlib.pretty()
 
 ax(1).YTickLabel = L;
 
-figlib.label('FontSize',30,'XOffset',-.02,'YOffset',-.02,'ColumnFirst',true)
+figlib.label('FontSize',30,'XOffset',-.02,'YOffset',-.0,'ColumnFirst',true)
 
-figlib.saveall('Location',display.saveHere)
+
+text(ax(2),1e3,1,'LP','FontSize',20,'Color',colors.LP);
+text(ax(2),1e3,6,'PD','FontSize',20,'Color',colors.PD);
+
+text(ax(3),-500,.37,'LP on','FontSize',20,'Color',colors.LP);
+text(ax(3),-500,.74,'LP off','FontSize',20,'Color',colors.LP);
+
+
+figlib.saveall('Location',display.saveHere,'Format','pdf')
 
 % this init clears all the junk this script
 init()

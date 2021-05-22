@@ -55,7 +55,7 @@ for i = size(conditions,2):-1:1
 	plot(ax.map,R(this,1),R(this,2),Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerEdgeColor',MarkerEdgeColor(i,:),'MarkerSize',5);
 	lh(i) = plot(ax.map,NaN,NaN,Markers{i},'MarkerFaceColor',Colors(i,:),'MarkerSize',15,'MarkerEdgeColor',MarkerEdgeColor(i,:));
 end
-legend(lh,{'pH > 9.5','T > 25C','2.5x[K^+]'})
+legend(lh,{'pH > 9.5','T > 25C','2.5\times[K^+]'})
 
 % compute mean distance traveled as pH is varied
 
@@ -89,6 +89,9 @@ ax.ph_dist.YLim(1) = 0;
 
 axes(ax.treemaps.control)
 this = decdata.slice(~decdata.decentralized);
+%this = alldata.slice(alldata.decentralized == false & alldata.Potassium == 1 & alldata.pH == 7 & alldata.temperature < 15 & alldata.temperature > 10 & alldata.baseline == 1);
+
+
 P = this.probState;
 display.mondrian(mean(P),cats);
 view([90 -90])
@@ -99,8 +102,11 @@ this = alldata.slice(alldata.temperature > 25 & ~alldata.decentralized & alldata
 P = this.probState;
 ph = display.mondrian(mean(P),cats);
 view([90 -90])
-display.boxPatch(ph(11));
+
+display.boxPatch(ph(silent_idx));
 title(['T > 25' char(176)  'C'],'FontWeight','normal','FontSize',20)
+
+
 
 
 axes(ax.silentmaps.high_temp)
@@ -123,7 +129,7 @@ P = this.probState;
 ph = display.mondrian(mean(P),cats);
 view([90 -90])
 title('pH < 6.5','FontWeight','normal','FontSize',20)
-display.boxPatch(ph(11));
+display.boxPatch(ph(silent_idx));
 
 axes(ax.silentmaps.low_ph)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
@@ -151,7 +157,7 @@ P = this.probState;
 ph = display.mondrian(mean(P),cats);
 view([90 -90])
 title('2.5x [K^+]_o','FontWeight','normal','FontSize',20)
-display.boxPatch(ph(11))
+display.boxPatch(ph(silent_idx))
 
 axes(ax.silentmaps.high_k)
 J = analysis.computeTransitionMatrix(this.idx,this.time_offset);

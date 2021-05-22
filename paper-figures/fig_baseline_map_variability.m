@@ -11,7 +11,7 @@ init()
 in_base = false(length(R),1);
 in_base(base) = true;
 
-[clustering_prob, rand_prob,N, unique_preps]=analysis.clustering(alldata, R, 'experiment_idx', in_base & alldata.idx == 'normal');
+[clustering_prob, rand_prob,N, unique_preps]=analysis.clustering(alldata, R, 'experiment_idx', in_base & alldata.idx == 'regular');
 
 
 figure('outerposition',[300 300 1300 801],'PaperUnits','points','PaperSize',[1300 801]); hold on
@@ -30,7 +30,7 @@ ax.cdf = subplot(2,2,4); hold on
 
 colors = display.colorscheme(alldata.idx);
 
-display.plotSortedCDF(clustering_prob,'Color',colors.normal,'LineWidth',3)
+display.plotSortedCDF(clustering_prob,'Color',colors.regular,'LineWidth',3)
 display.plotSortedCDF(rand_prob,'k','LineWidth',3)
 
 
@@ -50,23 +50,23 @@ figlib.pretty()
 
 % show widely scatter prep
 [~,idx]=min(temp);
-this = alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'normal';
-plot(ax.map,R(this,1),R(this,2),'^','MarkerSize',8,'MarkerFaceColor',colors.normal,'MarkerEdgeColor','k')
+this = alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'regular';
+plot(ax.map,R(this,1),R(this,2),'^','MarkerSize',8,'MarkerFaceColor',colors.regular,'MarkerEdgeColor','k')
 
 
 
 
-prep = alldata.slice(alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'normal');
+prep = alldata.slice(alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'regular');
 prep.snakePlot(ax.varied);
 
 
 
 % show clustered prep
 [~,idx]=max(temp);
-this = alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'normal';
-plot(ax.map,R(this,1),R(this,2),'o','MarkerSize',10,'MarkerFace',colors.normal,'MarkerEdgeColor','w')
+this = alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'regular';
+plot(ax.map,R(this,1),R(this,2),'o','MarkerSize',10,'MarkerFace',colors.regular,'MarkerEdgeColor','w')
 
-prep = alldata.slice(alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'normal');
+prep = alldata.slice(alldata.experiment_idx == unique_preps(idx) & alldata.idx == 'regular');
 prep.snakePlot(ax.nice);
 
 

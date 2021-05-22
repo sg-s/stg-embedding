@@ -16,7 +16,7 @@ C(1,:)=  [];
 C(5,:)=  [0 0 0];
 for i = 1:length(experimenters)
 
-	this = alldata.experimenter == experimenters{i} & alldata.idx == 'normal';
+	this = alldata.experimenter == experimenters{i} & alldata.idx == 'regular';
 	plot(R(this,1),R(this,2),'.','Color',C(i,:))
 
 end

@@ -73,7 +73,7 @@ for i = 1:2
 	ax(i) = subplot(1,2,i); hold on
 	set(ax(i),'XTick',1:length(modnames),'XTickLabel',modnames,'XTickLabelRotation',45,'XLim',[0 5])
 end
-% compare prob. of normal prep by prep between mods
+% compare prob. of regular prep by prep between mods
 
 colors = display.colorscheme(alldata.idx);
 cats = categories(alldata.idx);
@@ -88,7 +88,7 @@ for i = 1:length(modnames)
 	p = preps.probState;
 
 	x = randn(size(p,1),1)*.1 + i;
-	plot(ax(1),x,p(:,1),'o','MarkerFaceColor',colors.normal,'MarkerEdgeColor',colors.normal)
+	plot(ax(1),x,p(:,1),'o','MarkerFaceColor',colors.regular,'MarkerEdgeColor',colors.regular)
 
 	for j = 1:size(p,2)
 		y = nanstd(p(:,j))/nanmean(p(:,j));
@@ -97,7 +97,7 @@ for i = 1:length(modnames)
 
 	N = N + size(p,1);
 end
-ylabel(ax(1),'p(normal)')
+ylabel(ax(1),'p(regular)')
 ylabel(ax(2),'CV(p)')
 ax(2).YLim(1) = 0;
 disp(N)

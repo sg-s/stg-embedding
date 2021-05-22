@@ -132,9 +132,9 @@ before = struct;
 after = struct;
 
 for i = 1:length(unique_preps)
-	Rc(i,:) = mean(R(alldata.decentralized == false & alldata.idx == 'normal' & alldata.experiment_idx == unique_preps(i),:));
+	Rc(i,:) = mean(R(alldata.decentralized == false & alldata.idx == 'regular' & alldata.experiment_idx == unique_preps(i),:));
 
-	Rd(i,:) = mean(R(alldata.decentralized == true & alldata.idx == 'normal' & alldata.experiment_idx == unique_preps(i),:));
+	Rd(i,:) = mean(R(alldata.decentralized == true & alldata.idx == 'regular' & alldata.experiment_idx == unique_preps(i),:));
 
 
 end

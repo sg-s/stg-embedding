@@ -205,7 +205,7 @@ case sourcedata.DataFilter.Decentralized
 	data = purge(data,rm_this);
 
 
-	% remove preps where the baseline is really weird ( defined as spending more than 20% of its time in non-normal states just before decentralization). This should allow for some transient behaviour which might emerge from the stress of early prep. handling
+	% remove preps where the baseline is really weird ( defined as spending more than 20% of its time in non-regular states just before decentralization). This should allow for some transient behaviour which might emerge from the stress of early prep. handling
 	unique_exps = unique(data.experiment_idx);
 	p_normal = zeros(length(unique_exps),1);
 	for i = 1:length(unique_exps)
@@ -213,7 +213,7 @@ case sourcedata.DataFilter.Decentralized
 		if length(temp) > 30
 			temp = temp(end-29:end);
 		end
-		p_normal(i) = mean(temp == 'normal');
+		p_normal(i) = mean(temp == 'regular');
 	end
 
 	data = data.purge(ismember(data.experiment_idx,unique_exps(p_normal<.8)));

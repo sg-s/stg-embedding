@@ -72,10 +72,10 @@ if ~exist('basemetrics','var')
 	basemetrics = structlib.scalarify(basemetrics);
 
 
-	% censor metrics in non-normal states
+	% censor metrics in non-regular states
 	fn = fieldnames(basemetrics);
 	for i = 1:length(fn)
-		basemetrics.(fn{i})(basedata.idx ~= 'normal') = NaN;
+		basemetrics.(fn{i})(basedata.idx ~= 'regular') = NaN;
 	end
 
 end
@@ -88,10 +88,10 @@ if ~exist('decmetrics','var')
 	decmetrics = structlib.scalarify(decmetrics);
 
 
-	% censor metrics in non-normal states
+	% censor metrics in non-regular states
 	fn = fieldnames(decmetrics);
 	for i = 1:length(fn)
-		decmetrics.(fn{i})(decdata.idx ~= 'normal') = NaN;
+		decmetrics.(fn{i})(decdata.idx ~= 'regular') = NaN;
 	end
 
 end

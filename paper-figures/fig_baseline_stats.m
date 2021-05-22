@@ -37,7 +37,7 @@ for i = 1:length(fn)
 
 	this = basemetrics.(fn{i});
 	groups = basedata.experiment_idx;
-	rm_this = basedata.idx ~= 'normal';
+	rm_this = basedata.idx ~= 'regular';
 	this(rm_this) = [];
 	groups(rm_this) = [];
 	[M,S] = analysis.averageBy(this,groups);

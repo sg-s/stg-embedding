@@ -33,7 +33,7 @@ for j = 1:length(cats)
 
     isolated_pts = ~isnan(y) & isnan(y1) & isnan(y2);
 
-    plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',5,'Color',colors(cats{j}),'LineStyle','none')
+    plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',15,'Color',colors(cats{j}),'LineStyle','none')
 
 
 end

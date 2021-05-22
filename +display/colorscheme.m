@@ -18,7 +18,7 @@ for i = 1:length(cats)
     colors.(cats(i)) = C(i,:);
 end
 
-colors('normal') = color.aqua('blue');
+colors('regular') = color.aqua('blue');
 
 
 % nearly normal
@@ -39,15 +39,7 @@ colors('PD-silent-LP-bursting') = [0 144 81]/255;
 
 colors('sparse-irregular') = color.aqua('indigo');
 
-
-
 colors('silent') = [ 0 0 0 ];
-
-
-%  [1.0000    0.8276   0];
-% [0 144 81]/255;
-% color.aqua('lime');
-
 
 
 

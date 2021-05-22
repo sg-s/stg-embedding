@@ -6,7 +6,7 @@ close all
 init()
 
 
-show_these_states = categorical({'normal','irregular-bursting','LP-weak-skipped','irregular','PD-silent','aberrant-spikes','LP-silent-PD-bursting','LP-silent','silent'});
+show_these_states = categorical({'regular','irregular-bursting','LP-weak-skipped','irregular','PD-silent','aberrant-spikes','LP-silent-PD-bursting','LP-silent','silent'});
 
 
 

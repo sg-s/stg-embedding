@@ -43,7 +43,7 @@ axis square
 
 
 show_these_states = dictionary;
-show_these_states.normal = {'50360b4df7c9d467950f9e5f15d35fb3','9efa9bfe8dd8b760407f5026fadbb228'};
+show_these_states.regular = {'50360b4df7c9d467950f9e5f15d35fb3','9efa9bfe8dd8b760407f5026fadbb228'};
 show_these_states.('aberrant-spikes') = {'ef8a52bcb903ca14196247516343a814','5280b059a4b7e1c07c2b4cf551ae5444'};
 show_these_states.irregular = {'6ac42ae912fa39a72934180f2dfb6f2a','7e31784000fc3d342c0613b4f85021f2'};
 show_these_states.('irregular-bursting') = {'9d4e73c58fd4041d5ae1121e9d9f72b9','39f4b6d8681795e877d858e1c6d758d9'};
@@ -58,6 +58,10 @@ show_these_states.('LP-silent') = {'5ae27186d2271445a77c555b96917225', '1f8e7f07
 show_these_states.('PD-silent-LP-bursting') = {'fb74e847b4e8971c1d3228556a61f8b6', '764dcce923afddf54688aa13489373cd'
 };
 
+
+% sort cats by likelihood
+[~,sidx] = sort(histcounts(alldata.idx),'descend');
+cats = cats(sidx);
 
 for i = 1:length(ax.examples)
     axes(ax.examples(i))

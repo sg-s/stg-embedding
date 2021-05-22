@@ -35,7 +35,7 @@ temp.LP_channel(temp.LP_channel ~= 'LP') = 'LP-extra';
 temp.LP_channel(temp.LP_channel == 'LP') = 'LP-intra';
 
 
-[means, group_idx] = temp.probStateGroupedBy('normal', 'LP_channel');
+[means, group_idx] = temp.probStateGroupedBy('regular', 'LP_channel');
 
 C = [extra_color; intra_color];
 
@@ -64,7 +64,7 @@ temp = basedata;
 temp.PD_channel(temp.PD_channel ~= 'PD') = 'PD-extra';
 temp.PD_channel(temp.PD_channel == 'PD') = 'PD-intra';
 
-[means, group_idx] = temp.probStateGroupedBy('normal', 'PD_channel');
+[means, group_idx] = temp.probStateGroupedBy('regular', 'PD_channel');
 groups = unique(group_idx);
 clear lines shade
 for i = 1:length(groups)
@@ -76,7 +76,7 @@ for i = 1:length(shade)
 end
 
 legend(lines,cellfun(@char,{groups},'UniformOutput',false),'Location','northwest')
-xlabel('p(normal)')
+xlabel('p(regular)')
 set(gca,'XLim',[0 1],'YLim',[0 1])
 
 [~,p]=kstest2(means(group_idx=='PD-extra'),means(group_idx~='PD-extra'));

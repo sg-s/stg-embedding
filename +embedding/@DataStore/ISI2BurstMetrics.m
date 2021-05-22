@@ -6,25 +6,15 @@ N = length(alldata.mask);
 
 
 p.PD_burst_period = NaN(1,1);
-
 p.PD_duty_cycle = NaN(1,1);
-
-
 p.LP_burst_period = NaN(1,1);
-
 p.LP_duty_cycle = NaN(1,1);
-
-
 p.LP_delay_on = NaN(1,1);
-
-
 p.LP_delay_off = NaN(1,1);
 p.LP_phase_off = NaN(1,1);
 p.LP_phase_on = NaN(1,1);
-
 p.PD_nspikes = NaN(1,1);
 p.LP_nspikes = NaN(1,1);
-
 p.LP_durations = NaN(1,1);
 p.PD_durations = NaN(1,1);
 
@@ -45,17 +35,11 @@ for i = 1:N
 	[PD_burst_starts, PD_burst_stops] = embedding.findBurstStartsStopsUsingISIs(PD);
 	[LP_burst_starts, LP_burst_stops] = embedding.findBurstStartsStopsUsingISIs(LP);
 
-
-	% [PD_burst_starts, PD_burst_stops] = embedding.findNominalBurstStartsStops(PD,LP);
-	% [LP_burst_starts, LP_burst_stops] = embedding.findNominalBurstStartsStops(LP,PD);
-
-
 	PD_burst_periods = diff(PD_burst_starts);
 	LP_burst_periods = diff(LP_burst_starts);
 
 	PD_n_spikes = NaN;
 	LP_n_spikes = NaN;
-
 
 
 	LP_delays = PD_burst_starts*NaN;
@@ -131,11 +115,8 @@ for i = 1:N
 	p(i).LP_duty_cycle = nanmean(LP_dc);
 
 	p(i).LP_delay_on = nanmean(LP_delays);
-
 	p(i).PD_delay_on = nanmean(PD_delays);
-
 	p(i).LP_phase_on = nanmean(LP_phases);
-
 	p(i).PD_phase_on = nanmean(PD_phases);
 
 	PD_burst_starts(isnan(PD_burst_starts)) = [];
@@ -155,12 +136,8 @@ for i = 1:N
 	p(i).PD_nspikes = nanmean(PD_n_spikes);
 
 	p(i).LP_delay_off = nanmean(LP_off_delays);
-
 	p(i).LP_phase_off = nanmean(LP_phases_off);
-
 	p(i).LP_durations = nanmean(LP_durations);
-
-
 	p(i).PD_durations = nanmean(PD_durations);
 
 

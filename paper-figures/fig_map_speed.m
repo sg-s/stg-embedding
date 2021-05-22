@@ -36,12 +36,11 @@ rm_this = isnan(DD) | isinf(DD);
 DD(rm_this) = [];
 idx(rm_this) = [];
 
-% anova1(DD(~rm_this),idx(~rm_this))
 
-% simple permuatation test between normal and everything else
+% simple permuatation test between regular and everything else
 p = NaN(length(unique_cats),1);
 for i = 1:length(unique_cats)
-	[p(i),obs_dif,eff_size]=statlib.permutationTest(DD(idx=='normal'),DD(idx==unique_cats(i)),1e4);
+	[p(i),obs_dif,eff_size]=statlib.permutationTest(DD(idx=='regular'),DD(idx==unique_cats(i)),1e4);
 end
 
 

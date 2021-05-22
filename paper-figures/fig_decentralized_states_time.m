@@ -117,27 +117,27 @@ for i = 1:length(h)
 end
 
 % also plot the switching rate
-switching_rate(end) = switching_rate(end-1);
-switching_rate = switching_rate/max(switching_rate);
-switching_rate = switching_rate*.2;
+% switching_rate(end) = switching_rate(end-1);
+% switching_rate = switching_rate/max(switching_rate);
+% switching_rate = switching_rate*.2;
 
-YOffset = 1.03;
-switching_rate = switching_rate + YOffset;
+% YOffset = 1.03;
+% switching_rate = switching_rate + YOffset;
 
-p = polyshape([time/60 max(time)/60 time(1)/60], [switching_rate YOffset YOffset]);
-h = plot(p);
+% p = polyshape([time/60 max(time)/60 time(1)/60], [switching_rate YOffset YOffset]);
+% h = plot(p);
 
-h.LineStyle = 'none';
-h.FaceColor = 'k';
+% h.LineStyle = 'none';
+% h.FaceColor = 'k';
 
 axis(ax(2),'on')
-ax(2).YColor = 'w';
+ax(2).YColor = 'k';
 
-ax(2).XLim = [min(time)/60 max(time/60)];
-ax(2).YLim = [-.01 1.2];
+ax(2).XLim = [min(time)/60 - .5 max(time/60)];
+ax(2).YLim = [-.01 1.01];
 
 xlabel(ax(2),'Time since decentralization (min)')
-
+ylabel(ax(2),'Probability')
 
 plot(ax(2),[0 0],[0 1],'w--');
 
@@ -150,7 +150,7 @@ ax(2).Position = [.1 .1 .8 .35];
 
 figlib.pretty()
 
-figlib.label('FontSize',30,'XOffset',-.01,'YOffset',-.05)
+figlib.label('FontSize',30,'XOffset',-.03,'YOffset',-.01)
 
 % cleanup
 figlib.saveall('Location',display.saveHere)

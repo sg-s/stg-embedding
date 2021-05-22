@@ -25,7 +25,7 @@ display.mondrian(decdata.idx(time_since_decentralization < 0 & time_since_decent
 
 
 
-before_states = {'normal','PD-weak-skipped','LP-weak-skipped'};
+before_states = {'regular','PD-weak-skipped','LP-weak-skipped'};
 
 for j = 1:length(before_states)
 	% find preps that were mostly in this state before decentralization

@@ -40,15 +40,15 @@ for i = 1:length(ExpDates)
 	end
 
 
-	this_T = basemetrics.PD_burst_period(basedata.experiment_idx == ExpDates(i).exp & basedata.idx == 'normal');
+	this_T = basemetrics.PD_burst_period(basedata.experiment_idx == ExpDates(i).exp & basedata.idx == 'regular');
 	ExpDates(i).PD_mean = nanmean(this_T);
 	ExpDates(i).PD_std = nanstd(this_T);
 
 
-	this_PD_dc = basemetrics.PD_duty_cycle(basedata.experiment_idx == ExpDates(i).exp & basedata.idx == 'normal');
+	this_PD_dc = basemetrics.PD_duty_cycle(basedata.experiment_idx == ExpDates(i).exp & basedata.idx == 'regular');
 	ExpDates(i).PD_dc = nanmean(this_PD_dc);
 
-	ExpDates(i).p_normal = mean(basedata.idx(basedata.experiment_idx == ExpDates(i).exp) == 'normal');
+	ExpDates(i).p_normal = mean(basedata.idx(basedata.experiment_idx == ExpDates(i).exp) == 'regular');
 
 
 	% compute decentralized metrics
@@ -61,7 +61,7 @@ for i = 1:length(ExpDates)
 
 
 
-	ExpDates(i).p_normal_dec = mean(decdata.idx(dec) == 'normal'); 
+	ExpDates(i).p_normal_dec = mean(decdata.idx(dec) == 'regular'); 
 
 	T_before = nanmean(decmetrics.PD_burst_period(not_dec));
 	T_after = nanmean(decmetrics.PD_burst_period(dec));
@@ -107,7 +107,7 @@ xlabel('Sea Surface Temp. (C)')
 
 subplot(2,3,6); hold on
 display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal]);
-ylabel('<p(normal)>')
+ylabel('<p(regular)>')
 xlabel('Sea Surface Temp. (C)')
 
 
@@ -125,27 +125,27 @@ figlib.label('XOffset',-.001,'FontSize',28,'YOffset',.01)
 figure('outerposition',[300 300 1701 600],'PaperUnits','points','PaperSize',[1701 600]); hold on
 
 subplot(1,3,1); hold on
-display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal_dec]);
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.p_normal_dec],'MarkerSize',20);
 
-ylabel('<p(normal)> (decentralized)')
+ylabel('<p(regular)> (decentralized)')
 xlabel('Sea Surface Temp. (C)')
 
 subplot(1,3,2); hold on
-display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.T_change]);
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.T_change],'MarkerSize',20);
 ylabel('\DeltaT_{PD} (s)')
 xlabel('Sea Surface Temp. (C)')
 
 subplot(1,3,3); hold on
-display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_f_change]);
+display.scatterWithCorrelation([ExpDates.Temperature],[ExpDates.PD_f_change],'MarkerSize',20);
 
 ylabel('\Deltaf_{PD} (Hz)')
 xlabel('Sea Surface Temp. (C)')
 
-figlib.pretty('LineWidth',1)
+figlib.pretty('LineWidth',1.5,'FontSize',28)
 figlib.label('XOffset',-.001,'FontSize',28,'YOffset',.01)
 
 
 % cleanup
-figlib.saveall('Location',display.saveHere)
+figlib.saveall('Location',display.saveHere,'Format','pdf')
 
 init()
