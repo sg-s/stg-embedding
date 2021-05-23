@@ -32,7 +32,7 @@ for i = 1:length(fn)
 
 	temp = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, this, time);
 	baseline_averaged_metrics.(fn{i}) = nanmean(temp(:,time<0),2);
-	decentralized_averaged_metrics.(fn{i}) = nanmean(temp(:,time>0),2);
+	decentralized_averaged_metrics.(fn{i}) = nanmean(temp(:,time>0 & time < 1e3),2);
 
 	baseline_cv_metrics.(fn{i}) = nanstd(temp(:,time<0),[],2)./nanmean(temp(:,time<0),2);
 	decentralized_cv_metrics.(fn{i}) = nanstd(temp(:,time>0),[],2)./nanmean(temp(:,time>0),2);
@@ -64,6 +64,9 @@ LP_off = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentraliza
 % there's a weird outlier, let's nuke it
 LP_on(LP_on>1) = NaN;
 LP_off(LP_off>1) = NaN;
+decentralized_averaged_metrics.LP_phase_on(decentralized_averaged_metrics.LP_phase_on>1) = NaN;
+decentralized_averaged_metrics.LP_phase_off(decentralized_averaged_metrics.LP_phase_off>1) = NaN;
+
 
 PD_T = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, decmetrics.PD_burst_period, time);
 LP_T = analysis.prepTimeMatrix(decdata.experiment_idx, time_since_decentralization, decmetrics.LP_burst_period, time);
