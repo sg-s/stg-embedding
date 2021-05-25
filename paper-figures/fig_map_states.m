@@ -34,13 +34,7 @@ axis off
 ax.examples = ax.examples(isvalid(ax.examples));
 
 
-plot(ax.main,R(:,1),R(:,2),'.','Color',[.9 .9 .9],'MarkerSize',30)
-for i = length(cats):-1:1
-    plot(ax.main,R(idx==cats{i},1),R(idx==cats{i},2),'.','Color',colors(cats{i}),'MarkerSize',10)
-    
-end
-axis square
-
+display.plotEmbedding(ax.main,R,idx);
 
 show_these_states = dictionary;
 show_these_states.regular = {'50360b4df7c9d467950f9e5f15d35fb3','9efa9bfe8dd8b760407f5026fadbb228'};

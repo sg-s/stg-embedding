@@ -208,9 +208,6 @@ set(gca,'YLim',[0 .4])
 
 
 
-ax(3).YAxisLocation = 'right';
-ax(6).YAxisLocation = 'right';
-
 h = xlabel(ax(5),'Time since decentralization (s)');
 h.Position = [2500 .65];
 
