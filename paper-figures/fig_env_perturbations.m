@@ -47,8 +47,8 @@ display.plotBackgroundLabels(ax.map,alldata, R);
 
 % show where the different perturbations are likely to be
 Markers = {'o','d','^'};
-Colors = [0 0 0; .5 .5 .5; 1 1 1];
-MarkerEdgeColor = [0 0 0; .5 .5 .5; 1 0 0 ];
+Colors = [0 0 0; .7 .7 .7; 1 1 1];
+MarkerEdgeColor = [0 0 0; .7 .7 .7; 1 0 0 ];
 
 for i = size(conditions,2):-1:1
 	this = P(:,i) > 1; % 3 sigma
@@ -60,29 +60,83 @@ legend(lh,{'pH > 9.5','T > 25C','2.5\times[K^+]'})
 % compute mean distance traveled as pH is varied
 
 pH = alldata.pH;
-pH(pH == 7) = NaN;
-pH_space = 5.5:.5:10.5;
-G = discretize(pH,pH_space);
+
+pH_preps = unique(alldata.experiment_idx(alldata.pH ~=7 ));
 
 Distance = @(RR) (sqrt(sum((RR(2:end,:) - RR(1:end-1,:)).^2,2)));
 
-mean_dist = splitapply(@(x) mean(Distance(x)),R,G);
-std_dist = splitapply(@(x) std(Distance(x))/sqrt(length(x)),R,G);
-errorbar(ax.ph_dist,pH_space(2:end),mean_dist,std_dist,'k','LineWidth',1.5)
+BinStarts = 5.5:.01:10.5;
+X = repmat(BinStarts,length(pH_preps),1);
+
+for i = 1:length(pH_preps)
+	this = alldata.experiment_idx == pH_preps(i);
+	this_pH = alldata.pH(this);
+	d = [Distance(R(this,:)); NaN];
+	BinSize = 1;
+	X(i,:)=binapply(this_pH,d,@nanmean,'BinSize',BinSize,'BinStarts',BinStarts);
+end
+
+M = nanmean(X);
+S = nanstd(X);
+
+[lh,sh] = plotlib.errorShade(ax.ph_dist,BinStarts,M,S,'Color',[.5 .5 .5]);
+sh.LineWidth = 2;
+lh.Color = 'k';
+
+ax.ph_dist.XLim = [5.5 10.2];
+
+
+
+
+
+% G = discretize(pH,pH_space);
+% mean_dist = splitapply(@(x) mean(Distance(x)),R,G);
+% std_dist = splitapply(@(x) std(Distance(x))/sqrt(length(x)),R,G);
+% errorbar(ax.ph_dist,pH_space(2:end),mean_dist,std_dist,'k','LineWidth',1.5)
+
 xlabel(ax.ph_dist,'pH')
 yh = ylabel(ax.ph_dist,'Mean distance travelled in map (a.u.)');
 yh.Position = [5 -1 -1];
+plotlib.vertline(ax.ph_dist,7.8,'k--')
 
-temp_space = 7:2:35;
 temperature = alldata.temperature;
-temperature(temperature < 7) = NaN;
+temperature(temperature < 3) = NaN;
 temperature(alldata.Potassium ~= 1) = NaN;
 temperature(alldata.decentralized) = NaN;
 
-G = discretize(temperature,temp_space);
-mean_dist = splitapply(@(x) mean(Distance(x)),R,G);
-std_dist = splitapply(@(x) std(Distance(x))/sqrt(length(x)),R,G);
-errorbar(ax.temp_dist,temp_space(2:end),mean_dist,std_dist,'k','LineWidth',1.5)
+
+
+temp_preps = unique(alldata.experiment_idx(alldata.pH == 7 & alldata.Potassium == 1));
+
+
+BinStarts = 5:.2:35;
+X = repmat(BinStarts,length(temp_preps),1);
+
+for i = 1:length(temp_preps)
+	this = alldata.experiment_idx == temp_preps(i);
+	this_pH = temperature(this);
+	d = [Distance(R(this,:)); NaN];
+	BinSize = 1;
+	X(i,:)=binapply(this_pH,d,@nanmean,'BinSize',BinSize,'BinStarts',BinStarts);
+end
+
+M = nanmean(X);
+S = nanstd(X);
+
+[lh,sh] = plotlib.errorShade(ax.temp_dist,BinStarts,M,S,'Color',[.5 .5 .5]);
+sh.LineWidth = 4;
+lh.Color = 'k';
+ax.temp_dist.XLim = [5 32];
+plotlib.vertline(ax.temp_dist,11,'k--')
+
+% G = discretize(temperature,temp_space);
+% mean_dist = splitapply(@(x) mean(Distance(x)),R,G);
+% std_dist = splitapply(@(x) std(Distance(x))/sqrt(length(x)),R,G);
+
+
+
+
+% errorbar(ax.temp_dist,temp_space(2:end),mean_dist,std_dist,'k','LineWidth',1.5)
 xlabel(ax.temp_dist,display.tempLabel)
 ax.temp_dist.YLim(1) = 0;
 ax.ph_dist.YLim(1) = 0;
