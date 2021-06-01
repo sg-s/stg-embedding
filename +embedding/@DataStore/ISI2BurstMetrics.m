@@ -1,30 +1,33 @@
-function burst_metrics = ISI2BurstMetrics(alldata)
+function p = ISI2BurstMetrics(alldata)
 
 assert(length(alldata)==1,'Expected a scalar DataStore')
 
 N = length(alldata.mask);
 
 
-p.PD_burst_period = NaN(1,1);
-p.PD_duty_cycle = NaN(1,1);
-p.LP_burst_period = NaN(1,1);
-p.LP_duty_cycle = NaN(1,1);
-p.LP_delay_on = NaN(1,1);
-p.LP_delay_off = NaN(1,1);
-p.LP_phase_off = NaN(1,1);
-p.LP_phase_on = NaN(1,1);
-p.PD_nspikes = NaN(1,1);
-p.LP_nspikes = NaN(1,1);
-p.LP_durations = NaN(1,1);
-p.PD_durations = NaN(1,1);
+PD_burst_period = NaN(N,1);
+PD_duty_cycle = NaN(N,1);
+LP_burst_period = NaN(N,1);
+LP_duty_cycle = NaN(N,1);
+LP_delay_on = NaN(N,1);
+LP_delay_off = NaN(N,1);
+LP_phase_off = NaN(N,1);
+LP_phase_on = NaN(N,1);
+PD_nspikes = NaN(N,1);
+LP_nspikes = NaN(N,1);
+LP_durations = NaN(N,1);
+PD_durations = NaN(N,1);
+PD_burst_period_std = NaN(N,1);
+LP_burst_period_std = NaN(N,1);
 
 
-p = repmat(p,N,1);
 
+aPD = alldata.PD;
+aLP = alldata.LP;
 
-for i = 1:N
-	PD = alldata.PD(i,:);
-	LP = alldata.LP(i,:);
+parfor i = 1:N
+	PD = aPD(i,:);
+	LP = aLP(i,:);
 
 	offset = nanmin([PD(:); LP(:)]);
 
@@ -108,16 +111,19 @@ for i = 1:N
 
 
 
-	p(i).PD_burst_period = nanmean(PD_burst_periods);
-	p(i).LP_burst_period = nanmean(LP_burst_periods);
+	PD_burst_period(i) = nanmean(PD_burst_periods);
+	LP_burst_period(i) = nanmean(LP_burst_periods);
 
-	p(i).PD_duty_cycle = nanmean(PD_dc);
-	p(i).LP_duty_cycle = nanmean(LP_dc);
+	PD_burst_period_std(i) = nanstd(PD_burst_periods);
+	LP_burst_period_std(i) = nanstd(LP_burst_periods);
 
-	p(i).LP_delay_on = nanmean(LP_delays);
-	p(i).PD_delay_on = nanmean(PD_delays);
-	p(i).LP_phase_on = nanmean(LP_phases);
-	p(i).PD_phase_on = nanmean(PD_phases);
+	PD_duty_cycle(i) = nanmean(PD_dc);
+	LP_duty_cycle(i) = nanmean(LP_dc);
+
+	LP_delay_on(i) = nanmean(LP_delays);
+	PD_delay_on(i) = nanmean(PD_delays);
+	LP_phase_on(i) = nanmean(LP_phases);
+	PD_phase_on(i) = nanmean(PD_phases);
 
 	PD_burst_starts(isnan(PD_burst_starts)) = [];
 	LP_burst_starts(isnan(LP_burst_starts)) = [];
@@ -132,16 +138,30 @@ for i = 1:N
 
 	end
 
-	p(i).LP_nspikes = nanmean(LP_n_spikes);
-	p(i).PD_nspikes = nanmean(PD_n_spikes);
+	LP_nspikes(i) = nanmean(LP_n_spikes);
+	PD_nspikes(i) = nanmean(PD_n_spikes);
 
-	p(i).LP_delay_off = nanmean(LP_off_delays);
-	p(i).LP_phase_off = nanmean(LP_phases_off);
-	p(i).LP_durations = nanmean(LP_durations);
-	p(i).PD_durations = nanmean(PD_durations);
+	LP_delay_off(i) = nanmean(LP_off_delays);
+	LP_phase_off(i) = nanmean(LP_phases_off);
+	LP_durations(i) = nanmean(LP_durations);
+	PD_durations(i) = nanmean(PD_durations);
 
 
 end
 
-burst_metrics = p;
+p.PD_burst_period = PD_burst_period;
+p.PD_duty_cycle = PD_duty_cycle;
+p.LP_burst_period = LP_burst_period;
+p.LP_duty_cycle = LP_duty_cycle;
+p.LP_delay_on = LP_delay_on;
+p.LP_delay_off = LP_delay_off;
+p.LP_phase_off = LP_phase_off;
+p.LP_phase_on = LP_phase_on;
+p.PD_nspikes = PD_nspikes;
+p.LP_nspikes = LP_nspikes;
+p.LP_durations = LP_durations;
+p.PD_durations = PD_durations;
+p.PD_burst_period_std = PD_burst_period_std;
+p.LP_burst_period_std = LP_burst_period_std;
+
 

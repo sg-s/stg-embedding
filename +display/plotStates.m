@@ -1,7 +1,7 @@
 % plots states in a line, useful for making neural ethogram
 % plots
 
-function plotStates(ax, states, time, YOffset)
+function [lines, points] = plotStates(ax, states, time, YOffset)
 
 arguments
     ax (1,1) matlab.graphics.axis.Axes
@@ -14,7 +14,10 @@ end
 cats = categories(states);
 colors = display.colorscheme(cats);
 
-for j = 1:length(cats)
+
+
+
+for j = length(cats):-1:1
 
     y = time*0 + YOffset;
     y(states ~= cats{j}) = NaN;
@@ -25,7 +28,7 @@ for j = 1:length(cats)
 
     % this effectively plots lines of continuous blocks
     
-    plot(ax,time(:),y(:),'Color',colors(cats{j}),'LineWidth',2)
+    lines(j) = plot(ax,time(:),y(:),'Color',colors(cats{j}),'LineWidth',2);
 
     % now what about single pts? 
     y1 = circshift(y,1);
@@ -33,7 +36,18 @@ for j = 1:length(cats)
 
     isolated_pts = ~isnan(y) & isnan(y1) & isnan(y2);
 
-    plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',15,'Color',colors(cats{j}),'LineStyle','none')
+    if any(isolated_pts)
+        points(j) = plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',15,'Color',colors(cats{j}),'LineStyle','none');
+    end
 
 
 end
+
+C = display.colorscheme(idx);
+cats = categories(idx);
+CC = zeros(length(cats),3);
+
+for i = 1:length(cats)
+    CC(i,:) = C.(cats{i});
+end
+

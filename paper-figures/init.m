@@ -59,41 +59,36 @@ end
 if ~exist('allmetrics','var')
 	disp('Computing metrics for all data...')
 	allmetrics = alldata.ISI2BurstMetrics;
-	allmetrics = structlib.scalarify(allmetrics);
-
-
 end
 
 
 
 if ~exist('basemetrics','var')
 	disp('Computing metrics for baseline data...')
-	basemetrics = basedata.ISI2BurstMetrics;
-	basemetrics = structlib.scalarify(basemetrics);
-
+	basemetrics = allmetrics;
+	this = ismember(hashes.alldata,hashes.basedata);
 
 	% censor metrics in non-regular states
 	fn = fieldnames(basemetrics);
 	for i = 1:length(fn)
+		basemetrics.(fn{i}) = basemetrics.(fn{i})(this);
 		basemetrics.(fn{i})(basedata.idx ~= 'regular') = NaN;
 	end
-
 end
 
 
 
 if ~exist('decmetrics','var')
-	disp('Computing metrics for decentralized data...')
-	decmetrics = decdata.ISI2BurstMetrics;
-	decmetrics = structlib.scalarify(decmetrics);
-
+	disp('Computing metrics for baseline data...')
+	decmetrics = allmetrics;
+	this = ismember(hashes.alldata,hashes.basedata);
 
 	% censor metrics in non-regular states
 	fn = fieldnames(decmetrics);
 	for i = 1:length(fn)
-		decmetrics.(fn{i})(decdata.idx ~= 'regular') = NaN;
+		decmetrics.(fn{i}) = decmetrics.(fn{i})(this);
+		decmetrics.(fn{i})(basedata.idx ~= 'regular') = NaN;
 	end
-
 end
 
 
