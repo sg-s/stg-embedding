@@ -17,10 +17,12 @@ PD_nspikes = NaN(N,1);
 LP_nspikes = NaN(N,1);
 LP_durations = NaN(N,1);
 PD_durations = NaN(N,1);
+
 PD_burst_period_std = NaN(N,1);
 LP_burst_period_std = NaN(N,1);
 
-
+LP_duty_cycle_std = NaN(N,1);
+PD_duty_cycle_std = NaN(N,1);
 
 aPD = alldata.PD;
 aLP = alldata.LP;
@@ -120,6 +122,9 @@ parfor i = 1:N
 	PD_duty_cycle(i) = nanmean(PD_dc);
 	LP_duty_cycle(i) = nanmean(LP_dc);
 
+	PD_duty_cycle_std(i) = nanstd(PD_dc);
+	LP_duty_cycle_std(i) = nanstd(LP_dc);
+
 	LP_delay_on(i) = nanmean(LP_delays);
 	PD_delay_on(i) = nanmean(PD_delays);
 	LP_phase_on(i) = nanmean(LP_phases);
@@ -163,5 +168,7 @@ p.LP_durations = LP_durations;
 p.PD_durations = PD_durations;
 p.PD_burst_period_std = PD_burst_period_std;
 p.LP_burst_period_std = LP_burst_period_std;
+p.PD_duty_cycle_std = PD_duty_cycle_std;
+p.LP_duty_cycle_std = LP_duty_cycle_std;
 
 
