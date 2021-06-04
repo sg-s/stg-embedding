@@ -109,16 +109,6 @@ delta_p = delta_p';
 
 table(cats,n_A',n_B',p_values,delta_p,N_samples_required)
 
-for i = 1:length(p_values)
-	if p_values(i) < .05/length(p_values)
-		p2(i).EdgeColor = 'k';
-		p(i).EdgeColor = 'k';
-		p2(i).LineWidth = 3;
-		p(i).LineWidth = 3;
-		uistack(p(i),'top')
-		uistack(p2(i),'top')
-	end
-end
 
 
 %  plot fold change 
@@ -136,12 +126,12 @@ E  = E./sqrt(length(unique(alldata.experiment_idx)));
 axes(ax(3))
 for i = 1:length(cats)
 	
-	h = bar(i,fold_change(sidx(i)),'BaseValue',0);
-	h.FaceColor = colors(cats{sidx(i)});
-	h.EdgeColor = colors(cats{sidx(i)});
-	er = errorbar(i,fold_change(sidx(i)),E(sidx(i)),E(sidx(i)));    
-	er.Color = colors(cats{sidx(i)});
-	er.LineStyle = 'none';  
+	plotlib.barWithErrorStar(i,fold_change(sidx(i)), E(sidx(i)),false,'Color',colors(cats{sidx(i)}));
+	if p_values(sidx(i)) > .05/length(p_values)
+		th = text(i,-.1,'n.s.','FontSize',15);
+		th.Rotation = 90;
+		th.HorizontalAlignment = 'right';
+	end
 end
 ax(3).YScale = 'linear';
 ax(3).YLim = [-1.5 1.5];

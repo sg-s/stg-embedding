@@ -9,27 +9,40 @@ cats = categories(alldata.idx);
 colors = display.colorscheme(alldata.idx);
 
 
-
+things_to_measure = {'PD_burst_period','LP_burst_period'};
+t_before = 10;
+T = (0:-1:-t_before+1)*20;
 
 dec_hashes = hashes.decdata(decdata.decentralized);
 is_decentralized = ismember(hashes.alldata,dec_hashes) & alldata.decentralized;
 
-figure('outerposition',[300 300 1800 901],'PaperUnits','points','PaperSize',[1800 901]); hold on
+figure('outerposition',[300 300 1800 1300],'PaperUnits','points','PaperSize',[1800 1300]); hold on
+
 clear ax
+ax.map = subplot(2,2,1); hold on
+ax.distances = subplot(4,4,3); hold on
+ax.legend = subplot(4,4,4); hold on;
+ax.mondrian = subplot(4,2,4); hold on;
+ax.J = subplot(2,3,4); hold on
+ax.PD_burst_period = subplot(2,3,5); hold on
+ax.LP_burst_period = subplot(2,3,6); hold on
+
 
 % show baseline occupancy
-ax(1) = subplot(1,2,1); hold on
-display.plotBackgroundLabels(ax(1),alldata, R)
+
+display.plotBackgroundLabels(ax.map,alldata, R)
 
 for i = 1:length(cats)
-	plot(R(alldata.idx == cats(i) & is_decentralized,1),R(alldata.idx == cats(i) & is_decentralized,2),'.','Color',colors(cats{i}),'MarkerSize',5)
+	plot(ax.map,R(alldata.idx == cats(i) & is_decentralized,1),R(alldata.idx == cats(i) & is_decentralized,2),'.','Color',colors(cats{i}),'MarkerSize',5)
 end
 
-axis(ax(1),'off')
-ax(1).XLim = [-31 31];
-ax(1).YLim = [-31 31];
-axis square
+axis(ax.map,'off')
+ax.map.XLim = [-31 31];
+ax.map.YLim = [-31 31];
+axis(ax.map,'square') 
+axis(ax.distances,'square')
 
+figlib.pretty('FontSize',15)
 
 
 
@@ -57,42 +70,92 @@ end
 
 
 
-ax(2) = subplot(2,4,3); hold on
+
 
 c = lines;
 
-scatter(S_before,S_after,24,'MarkerFaceColor',c(4,:),'MarkerEdgeColor',c(4,:),'MarkerFaceAlpha',.5)
-plotlib.drawDiag(ax(2),'k--');
-ax(2).XLim = [0 12];
-ax(2).YLim = [0 12];
-xlabel('Mean distance before decentralization (a.u.)')
-ylabel('Mean distance after decentralization (a.u.)')
+scatter(ax.distances,S_before,S_after,24,'MarkerFaceColor',c(4,:),'MarkerEdgeColor',c(4,:),'MarkerFaceAlpha',.5)
+plotlib.drawDiag(ax.distances,'k--');
+ax.distances.XLim = [0 12];
+ax.distances.YLim = [0 12];
+xlabel(ax.distances,{'Mean distance before',' decentralization (a.u.)'})
+ylabel(ax.distances,{'Mean distance after','decentralization (a.u.)'})
 
-
+axes(ax.distances)
 [~,handles] = statlib.pairedPermutationTest(S_before,S_after,1e4,true);
 
 
-subplot(2,4,4); hold on
-display.stateLegend(gca,cats);
+display.stateLegend(ax.legend,cats);
 
 
-ax(4) = subplot(2,2,4); hold on	
-ax_mon = display.pairedMondrian(ax(4),decdata,~decdata.decentralized, decdata.decentralized,'baseline','decentralized');
+
+ax_mon = display.pairedMondrian(ax.mondrian,decdata,~decdata.decentralized, decdata.decentralized,'baseline','decentralized');
+
+only_when = decdata.decentralized;
+J = analysis.computeTransitionMatrix(decdata.idx(only_when),decdata.time_offset(only_when));
+display.plotTransitionMatrix(J,cats,'ax',ax.J,'ShowScale',true);
 
 
-figlib.pretty('FontSize',15)
-figlib.tight
+
+
+
+[CV, CV0] = analysis.measureRegularCVBeforeTransitions(decdata,decmetrics,decdata.decentralized,'things_to_measure',things_to_measure,'t_before',t_before);
+
+th = display.plotVariabilityBeforeTransition(CV,CV0,ax,T);
+th(1).Position(2) = .03;
+th(2).Position(2) = .03;
+ax.PD_burst_period.YLim = [0 .04];
+ax.LP_burst_period.YLim = [0 .04];
+ax.PD_burst_period.XLim = [-200 10];
+ax.LP_burst_period.XLim = [-200 10];
+
+
+ax_mon(1).Position = [0.45 0.37 0.1 0.2];
+ax_mon(2).Position = [0.56 0.37 0.1 0.2];
+ax_mon(3).Position = [0.72 0.37 0.2 0.2];
+
+
+ax.map.Position = [.04 .51 .4 .45];
+ax.distances.Position = [0.45 0.71 0.2 0.25];
+ax.legend.Position = [0.75 0.77 0.16 0.16];
+ax.mondrian.Position = [0.57 0.55 0.33 0.16];
+ax.PD_burst_period.Position = [0.45 0.11 0.21 0.18];
+ax.LP_burst_period.Position = [0.71 0.11 0.21 0.18];
+ax.J.Position = [.1 .11 .27 .37];
+
+ax_mon(1).FontSize = 15;
+ax_mon(2).FontSize = 15;
+ax_mon(3).FontSize = 15;
+
+ax_mon(3).LineWidth = 1.5;
+
+ylabel(ax.PD_burst_period,'CV(T)')
+h = xlabel(ax.PD_burst_period,'Time before transition (s)');
+h.Position = [40 -.007];
+
+ax_mon(3).Position(1) = ax.LP_burst_period.Position(1);
+
+
 drawnow
 % ax(2).Position = [.6 .62 .33 .35];
 
 
-h = axlib.label(ax(1),'a','FontSize',28,'XOffset',0.01,'YOffset',-.03);
-h = axlib.label(ax(2),'b','FontSize',28,'XOffset',-.04,'YOffset',-.04);
-h = axlib.label(ax(4),'c','FontSize',28,'XOffset',-.08,'YOffset',-.02);
-h = axlib.label(ax_mon(3),'d','FontSize',28,'XOffset',-.02,'YOffset',-.02);
+h1 = axlib.label(ax.map,'a','FontSize',28,'XOffset',0.04,'YOffset',-.03);
+h2 = axlib.label(ax.J,'e','FontSize',28,'XOffset',-.02);
+h2.Position(1) = h1.Position(1);
+
+h1 = axlib.label(ax.distances,'b','FontSize',28,'XOffset',-.02,'YOffset',-.04);
+h2 = axlib.label(ax_mon(1),'c','FontSize',28,'XOffset',-.08,'YOffset',-.02);
+h2.Position(1) = h1.Position(1);
+
+axlib.label(ax_mon(3),'d','FontSize',28,'XOffset',-.02,'YOffset',-.02);
+
+h2 = axlib.label(ax.PD_burst_period,'f','FontSize',28);
+h2.Position(1) = h1.Position(1);
+ax.J.Position = [.1 .11 .27 .37];
 
 
-
+return
 
 
 

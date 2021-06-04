@@ -44,5 +44,6 @@ figlib.pretty
 
 figlib.saveall('Location',display.saveHere)
 
+
 % clean up workspace
 init()

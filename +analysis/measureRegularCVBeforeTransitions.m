@@ -26,8 +26,7 @@ end
 
 for i = 1:N
 	this = data.experiment_idx == unique_preps(i) & only_when;
-	idx = data.idx(this);
-	r = idx == 'regular';
+
 
 	this_CV = struct;
 	for j = 1:length(things_to_measure)
@@ -36,9 +35,23 @@ for i = 1:N
 	end
 
 
-	% find transitions from normal
-	transitions = [(diff(r) == -1); 0];
-	time = veclib.timeToNextEvent(transitions);
+
+	idx = data.idx(this);
+	r = idx == 'regular';
+	time_offset = data.time_offset(this);
+
+
+	% we need to handle each time segment independently,
+	% because there are no guarantees on what time_offset
+	% looks like. 
+	labels = veclib.labelSegments([20; diff(time_offset)] ~= 20);
+	time = NaN*labels;
+
+	for j = 1:labels(end)
+		rr = r(labels == j);
+		transitions = [(diff(rr) == -1); 0];
+		time(labels==j) = veclib.timeToNextEvent(transitions);
+	end
 
 	
 
