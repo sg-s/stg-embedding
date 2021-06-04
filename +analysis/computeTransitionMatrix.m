@@ -1,6 +1,6 @@
 % given an (ordered) list of states, measure transition matrix
 % and return that 
-function J = computeTransitionMatrix(idx, time, options)
+function [J, J_raw] = computeTransitionMatrix(idx, time, options)
 
 arguments
 	idx (:,1) categorical
@@ -32,6 +32,11 @@ end
 
 
 J = J - J.*eye(N);
+
+J_raw = J;
+
+% report # of transitions
+disp(['There are ' mat2str(sum(J(:))) ' transitions here'])
 
 % normalize
 for i = 1:N

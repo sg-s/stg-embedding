@@ -233,5 +233,7 @@ th = text(ax.prctiles(1),1,-.1,'deciles','FontSize',18);
 
 figlib.saveall('Location',display.saveHere)
 
+display.trimImage([mfilename '_1.png']);
+
 % clean up workspace
 init()

@@ -132,7 +132,7 @@ th.FontSize = 20;
 
 figlib.saveall('Location',display.saveHere)
 
-
+display.trimImage([mfilename '_1.png']);
 
 % clean up workspace
 init()

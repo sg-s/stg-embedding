@@ -85,7 +85,7 @@ axes(ax.distances)
 [~,handles] = statlib.pairedPermutationTest(S_before,S_after,1e4,true);
 
 
-display.stateLegend(ax.legend,cats);
+lh = display.stateLegend(ax.legend,cats);
 
 
 
@@ -100,6 +100,8 @@ display.plotTransitionMatrix(J,cats,'ax',ax.J,'ShowScale',true);
 
 
 [CV, CV0] = analysis.measureRegularCVBeforeTransitions(decdata,decmetrics,decdata.decentralized,'things_to_measure',things_to_measure,'t_before',t_before);
+
+
 
 th = display.plotVariabilityBeforeTransition(CV,CV0,ax,T);
 th(1).Position(2) = .03;
@@ -153,6 +155,17 @@ axlib.label(ax_mon(3),'d','FontSize',28,'XOffset',-.02,'YOffset',-.02);
 h2 = axlib.label(ax.PD_burst_period,'f','FontSize',28);
 h2.Position(1) = h1.Position(1);
 ax.J.Position = [.1 .11 .27 .37];
+
+
+lh.Position = [.71 .72 .2 .23];
+
+figlib.saveall('Location',display.saveHere)
+
+display.trimImage([mfilename '_1.png']);
+
+init
+
+
 
 
 return

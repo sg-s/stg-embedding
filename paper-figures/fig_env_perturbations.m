@@ -165,7 +165,7 @@ title(['T > 25' char(176)  'C'],'FontWeight','normal','FontSize',20)
 
 axes(ax.silentmaps.high_temp)
 
-J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
+[~, J] = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 allJ = J;
 P = J(:,silent_idx);
 P(silent_idx) = 0;
@@ -186,7 +186,7 @@ title('pH < 6.5','FontWeight','normal','FontSize',20)
 display.boxPatch(ph(silent_idx));
 
 axes(ax.silentmaps.low_ph)
-J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
+[~, J] = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 allJ = allJ  + J;
 P = J(:,silent_idx);
 P(silent_idx) = 0;
@@ -214,7 +214,7 @@ title('2.5x [K^+]_o','FontWeight','normal','FontSize',20)
 display.boxPatch(ph(silent_idx))
 
 axes(ax.silentmaps.high_k)
-J = analysis.computeTransitionMatrix(this.idx,this.time_offset);
+[~, J] = analysis.computeTransitionMatrix(this.idx,this.time_offset);
 allJ = allJ  + J;
 P = J(:,silent_idx);
 P(silent_idx) = 0;
@@ -252,6 +252,8 @@ a.Position = [0.8431 0.2560 0.0250 0.1450];
 a.LineWidth = 2;
 
 figlib.saveall('Location',display.saveHere)
+
+display.trimImage([mfilename '_1.png']);
 
 % clean up workspace
 init()

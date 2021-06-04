@@ -24,6 +24,9 @@ for i = 1:length(things_to_measure)
 end
 
 
+n_points = 0;
+
+
 for i = 1:N
 	this = data.experiment_idx == unique_preps(i) & only_when;
 
@@ -59,10 +62,19 @@ for i = 1:N
 		thing = things_to_measure{k};
 
 		for j = 1:t_before
-			CV.(thing)(i,j) = nanmean(this_CV.(thing)(time == j-1 & idx == 'regular'));
+			temp = this_CV.(thing)(time == j-1 & idx == 'regular');
+			if k == 1
+				n_points = n_points + sum(~isnan(temp));
+			end
+			CV.(thing)(i,j) = nanmean(temp);
 		end
 		CV0.(thing)(i) = nanmean(this_CV.(thing)(time > t_before & idx == 'regular'));
 	end
 
 
 end
+
+
+% report n_points and n_animals
+disp(['n_points = ' mat2str(n_points)]);
+disp(['n_animals = ' mat2str(sum(~isnan(CV.(thing)(:,1))))])
