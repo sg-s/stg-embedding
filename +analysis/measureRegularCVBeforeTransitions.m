@@ -1,3 +1,9 @@
+%% 
+% This function measured the variability in some metric
+% in regular states before a transition to some other state
+% metrics are only measured in only_when
+
+
 function [CV, CV0] = measureRegularCVBeforeTransitions(data, metrics, only_when,options)
 
 arguments

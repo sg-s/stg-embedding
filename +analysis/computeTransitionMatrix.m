@@ -1,11 +1,10 @@
 % given an (ordered) list of states, measure transition matrix
 % and return that 
-function [J, J_raw] = computeTransitionMatrix(idx, time, options)
+function [J, J_raw] = computeTransitionMatrix(idx, time)
 
 arguments
 	idx (:,1) categorical
 	time (:,1) double
-	options.N_shuffle = 1e3
 end
 
 validation.categoricalTime(idx,time);
