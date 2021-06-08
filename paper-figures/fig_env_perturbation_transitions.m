@@ -7,7 +7,7 @@
 close all
 init
 
-figure('outerposition',[300 300 1777 1201],'PaperUnits','points','PaperSize',[1777 1201]); hold on
+figure('outerposition',[300 300 1777 1303],'PaperUnits','points','PaperSize',[1777 1303]); hold on
 for i = 1:12
 	ax(i) = subplot(3,4,i); hold on;
 end
@@ -54,13 +54,14 @@ end
 
 for i = 5:12
 	ax(i).Position(4) = .2;
+	ax(i).Position(2) = .07;
 end
 for i = 5:8
-	ax(i).Position(2) = .38;
+	ax(i).Position(2) = .34;
 end
 for i = 1:4
 	ax(i).Position(4) = .3;
-	ax(i).Position(2) = .65;
+	ax(i).Position(2) = .61;
 end
 
 for i = 1:4
@@ -79,8 +80,17 @@ for i = 1:4
 	ax(i).Units = 'normalized';
 end
 
-h = axlib.label(ax(1),'a','FontSize',28,'XOffset',-.03,'YOffset',-.01);
-h = axlib.label(ax(5),'b','FontSize',28,'XOffset',-.03,'YOffset',-.01);
+axlib.label(ax(1),'a','FontSize',28,'XOffset',-.03,'YOffset',-.01);
+axlib.label(ax(5),'b','FontSize',28,'XOffset',-.03,'YOffset',-.01);
+
+
+% add a legend
+lax = axes;
+lax.Position = [.1 .9 .8 .09];
+lax = display.stateLegend(lax, cats, 6);
+lax.Box = 'off';
+
+
 
 figlib.saveall('Location',display.saveHere)
 

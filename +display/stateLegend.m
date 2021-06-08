@@ -15,7 +15,7 @@ cats = categories(cats);
 
 hold(ax,'on')
 clear lh
-for i = 1:length(cats)
+for i = length(cats):-1:1
 	lh(i) = plot(ax,NaN,NaN,'.','MarkerSize',64,'Color',colors(cats{i}));
 end
 
