@@ -5,22 +5,50 @@
 close all
 init
 
-figure('outerposition',[300 300 1200 1201],'PaperUnits','points','PaperSize',[1200 1201]); hold on
+figure('outerposition',[300 300 1350 1555],'PaperUnits','points','PaperSize',[1350 1555]); hold on
 figlib.pretty
 cats = categories(moddata.idx);
+
 
 
 modulators = ["RPCH","proctolin","oxotremorine","serotonin"];
 
 
 for i = 1:length(modulators)
-	subplot(2,2,i); hold on
+	ax(i) = subplot(2,2,i); hold on
 	only_when = moddata.(modulators(i)) >=5e-7;
 	J = analysis.computeTransitionMatrix(moddata.idx(only_when),moddata.time_offset(only_when));
-	display.plotTransitionMatrix(J,cats);
+
+	disp(['N=' mat2str(length(unique(moddata.experiment_idx(only_when))))])
+
+	if i < length(modulators)
+		ShowScale = false;
+	else
+		ShowScale = true;
+	end
+	display.plotTransitionMatrix(J,cats,'ShowScale',ShowScale);
 	axis off
-	axis square
-	title(modulators(i),'FontSize',24,'FontWeight','normal')
-	set(gca,'XLim',[0 12.5],'YLim',[0 12.5])
+	th = title(modulators(i),'FontSize',24,'FontWeight','normal');
+	 th.Position(1) = 6.5;
+	set(gca,'XLim',[0 14.5],'YLim',[0 12.5])
 end
 
+for i = 1:4
+	ax(i).Position(4) = .3;
+end
+for i = 1:2
+	ax(i).Position(2) = .5;
+end
+
+lax = axes;
+lax.Position = [.1 .85 .8 .12];
+lax = display.stateLegend(lax,cats,4);
+lax.FontSize = 16;
+lax.Box = 'off';
+
+figlib.saveall('Location',display.saveHere)
+
+display.trimImage([mfilename '_1.png']);
+
+% clean up workspace
+init()

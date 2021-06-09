@@ -1,6 +1,6 @@
 % given an (ordered) list of states, measure transition matrix
 % and return that 
-function [J, J_raw] = computeTransitionMatrix(idx, time)
+function [J, J_raw, marginal_counts] = computeTransitionMatrix(idx, time)
 
 arguments
 	idx (:,1) categorical
@@ -20,13 +20,15 @@ breakpts = (diff(time)) ~= 20;
 N = length(cats);
 J = zeros(N);
 
+marginal_counts = zeros(N,1);
+
 for i = 1:length(idx)-1
 	if breakpts(i)
 		continue
 	end
 
 	J(idx_int(i),idx_int(i+1)) = J(idx_int(i),idx_int(i+1)) +1;
-
+	marginal_counts(idx_int(i)) = marginal_counts(idx_int(i)) + 1;
 end
 
 

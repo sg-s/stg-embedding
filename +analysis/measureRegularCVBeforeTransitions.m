@@ -83,4 +83,4 @@ end
 
 % report n_points and n_animals
 disp(['n_points = ' mat2str(n_points)]);
-disp(['n_animals = ' mat2str(sum(~isnan(CV.(thing)(:,1))))])
+disp(['n_animals = ' mat2str(N)])

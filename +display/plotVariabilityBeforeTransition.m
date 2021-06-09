@@ -46,7 +46,7 @@ for j = 1:length(things_to_measure)
 	% does variability increase with time before transition? 
 	[rho,p] = statlib.correlation(time,nanmean(CV.(thing)),'Type','spearman');
 
-	th(j) = text(ax.(thing),-190,.1,['\rho=' mat2str(rho,2) ', p=' mat2str(p,2)]);
+	th(j) = text(ax.(thing),-190,.1,['\rho=' mat2str(rho,2) ', \itp=' mat2str(p,2)]);
 	th(j).FontSize = 20;
 	ax.(thing).XTick = sort(time(1:2:end));
 end

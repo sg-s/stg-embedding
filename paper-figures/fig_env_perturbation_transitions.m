@@ -21,7 +21,9 @@ condition_names = ["T > 25C", "pH > 9.5", "pH < 6.5", "2.5\times[K^+]"];
 for i = 1:length(conditions)
 	subplot(3,4,i); hold on
 	only_when = conditions{i};
-	J = analysis.computeTransitionMatrix(alldata.idx(only_when),alldata.time_offset(only_when));
+	[J, ~, marginal_counts] = analysis.computeTransitionMatrix(alldata.idx(only_when),alldata.time_offset(only_when));
+
+
 	if i == length(conditions)
 		lh = display.plotTransitionMatrix(J,cats,'ScaleFcn',@(x) 20*x + 7,'MarkerSize',15,'ShowScale',true);
 	else
@@ -89,7 +91,7 @@ lax = axes;
 lax.Position = [.1 .9 .8 .09];
 lax = display.stateLegend(lax, cats, 6);
 lax.Box = 'off';
-
+lax.FontSize = 20;
 
 
 figlib.saveall('Location',display.saveHere)
