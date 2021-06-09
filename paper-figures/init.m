@@ -63,15 +63,23 @@ end
 
 
 
+
+% There is a reason the following code is so 
+% inefficiently written. You may naively think
+% that there is no reason to recompute these metrics,
+% since basedata etc are proper subsets of alldata
+% However, it is very hard to actually figure out 
+% how to segment alldata 
+% You cant use ismember on the hashes because 
+% mulitple data points resolve to the same hash (because
+% of silent states)
 if ~exist('basemetrics','var')
 	disp('Computing metrics for baseline data...')
-	basemetrics = allmetrics;
-	this = ismember(hashes.alldata,hashes.basedata);
+	basemetrics = basedata.ISI2BurstMetrics;
 
 	% censor metrics in non-regular states
 	fn = fieldnames(basemetrics);
 	for i = 1:length(fn)
-		basemetrics.(fn{i}) = basemetrics.(fn{i})(this);
 		basemetrics.(fn{i})(basedata.idx ~= 'regular') = NaN;
 	end
 end
@@ -80,14 +88,12 @@ end
 
 if ~exist('decmetrics','var')
 	disp('Computing metrics for baseline data...')
-	decmetrics = allmetrics;
-	this = ismember(hashes.alldata,hashes.basedata);
+	decmetrics = decdata.ISI2BurstMetrics;
 
 	% censor metrics in non-regular states
 	fn = fieldnames(decmetrics);
 	for i = 1:length(fn)
-		decmetrics.(fn{i}) = decmetrics.(fn{i})(this);
-		decmetrics.(fn{i})(basedata.idx ~= 'regular') = NaN;
+		decmetrics.(fn{i})(decdata.idx ~= 'regular') = NaN;
 	end
 end
 
