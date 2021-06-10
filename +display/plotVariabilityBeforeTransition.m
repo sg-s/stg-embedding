@@ -41,7 +41,7 @@ for j = 1:length(things_to_measure)
 		Color = colors.LP;
 	end
 
-	plotlib.barWithErrorStar(time,nanmean(CV.(thing)),nanstd(CV.(thing)),p<.05/length(p),'Color',Color,'offset',.2,'ax',ax.(thing));
+	plotlib.barWithErrorStar(time,nanmean(CV.(thing)),nanstd(CV.(thing)),0*time,'Color',Color,'offset',.2,'ax',ax.(thing));
 
 	% does variability increase with time before transition? 
 	[rho,p] = statlib.correlation(time,nanmean(CV.(thing)),'Type','spearman');

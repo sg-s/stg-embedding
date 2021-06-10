@@ -145,6 +145,6 @@ ax(3).YGrid = 'on';
 axlib.move(ax(1:2),'left',.02)
 
 
-title(ax(2),{B_label,['(' num2str(sum(B)*20/3600,3) ' hours)' ]},'FontWeight','normal')
+title(ax(2),{B_label,['(n = ' mat2str(sum(B)) ')']},'FontWeight','normal')
 
-title(ax(1),{A_label,['(' mat2str(size(P.B,1)) ' crabs, ' mat2str(sum(A)*20/3600,2) ' hours) ' ]},'FontWeight','normal')
+title(ax(1),{A_label,['(n = ' mat2str(sum(A)) ', N = ' mat2str(size(P.A,1)) ')']},'FontWeight','normal')

@@ -99,15 +99,15 @@ display.plotTransitionMatrix(J,cats,'ax',ax.J,'ShowScale',true);
 
 
 
-[CV, CV0] = analysis.measureRegularCVBeforeTransitions(decdata,decmetrics,decdata.decentralized,'things_to_measure',things_to_measure,'t_before',t_before);
+[CV, CV0] = analysis.measureRegularCVBeforeOrAfterTransitions(decdata,decmetrics,decdata.decentralized,'things_to_measure',things_to_measure,'T',t_before);
 
 
 
 th = display.plotVariabilityBeforeTransition(CV,CV0,ax,T);
-th(1).Position(2) = .03;
-th(2).Position(2) = .03;
-ax.PD_burst_period.YLim = [0 .04];
-ax.LP_burst_period.YLim = [0 .04];
+th(1).Position(2) = .06;
+th(2).Position(2) = .06;
+ax.PD_burst_period.YLim = [0 .08];
+ax.LP_burst_period.YLim = [0 .08];
 ax.PD_burst_period.XLim = [-200 10];
 ax.LP_burst_period.XLim = [-200 10];
 

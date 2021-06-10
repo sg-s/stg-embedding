@@ -45,7 +45,7 @@ axes(ax(1))
 p = display.mondrian(nanmean(decP),cats);
 n_crabs = length(unique(decentralized.experiment_idx));
 T = length(decentralized.idx)*20/3600;
-title(ax(1),{'decentralized',['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hours) ' ]},'FontWeight','normal')
+title(ax(1),{'decentralized',['(n = ' mat2str(length(decentralized.idx)) ', N = ' mat2str(n_crabs) ') ' ]},'FontWeight','normal')
 
 ConditionalProb = struct;
 
@@ -71,8 +71,7 @@ for i = 1:length(modnames)
 	p = display.mondrian(nanmean(P),cats);
 	display.boxPatch(p(regular_idx));
 	n_crabs = length(unique(preps.experiment_idx));
-	T = length(preps.idx)*20/3600;
-	title(ax(i+n_mod),{['+' M],['(' mat2str(n_crabs) ' crabs, ' mat2str(T,2) ' hours) ' ]},'FontWeight','normal')
+	title(ax(i+n_mod),{['+' M],['(n = ' mat2str(length(preps.idx)) ', N = ' mat2str(n_crabs) ') ' ]},'FontWeight','normal')
 
 
 	% compare to decentralized in the same preps with no mod
@@ -103,8 +102,7 @@ for i = 1:length(modnames)
 	
 
 
-	N.(M) = analysis.computeTransitionMatrix(preps.idx, preps.time_offset);
-	J.(M) = N.(M)/length(preps.idx);
+	[J.(M),N.(M)] = analysis.computeTransitionMatrix(preps.idx, preps.time_offset);
 
 	axes(ax(i+n_mod*2))
 
@@ -152,5 +150,7 @@ axlib.label(ax(2*n_mod+1),'c','FontSize',24,'XOffset',-.01)
 
 
 figlib.saveall('Location',display.saveHere,'Format','pdf')
+
+display.trimImage([mfilename '_1.pdf']);
 
 init()

@@ -43,7 +43,7 @@ T = (0:-1:-t_before+1)*20;
 for i = 1:length(conditions)
 	only_when = conditions{i};
 
-	[CV, CV0] = analysis.measureRegularCVBeforeTransitions(alldata,allmetrics,only_when,'things_to_measure',things_to_measure,'t_before',t_before);
+	[CV, CV0] = analysis.measureRegularCVBeforeOrAfterTransitions(alldata,allmetrics,only_when,'things_to_measure',things_to_measure,'T',t_before);
 
 	plot_here = struct;
 	plot_here.PD_burst_period = subplot(3,4,4+i); hold on

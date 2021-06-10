@@ -43,7 +43,7 @@ xlabel(ax(3,2),'Time before transition (s)')
 for i = 1:length(conditions)
 	only_when = conditions{i};
 
-	[CV, CV0] = analysis.measureRegularCVBeforeTransitions(alldata,allmetrics,only_when,'things_to_measure',things_to_measure,'t_before',t_before);
+	[CV, CV0] = analysis.measureRegularCVBeforeOrAfterTransitions(alldata,allmetrics,only_when,'things_to_measure',things_to_measure,'T',t_before);
 
 	plot_here = struct;
 	for j = 1:length(things_to_measure)
