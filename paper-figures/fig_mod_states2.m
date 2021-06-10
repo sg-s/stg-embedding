@@ -4,7 +4,7 @@ close all
 init()
 
 
-figure('outerposition',[300 300 1111 1111],'PaperUnits','points','PaperSize',[1111 1111]); hold on
+figure('outerposition',[300 300 1000 1222],'PaperUnits','points','PaperSize',[1000 1222]); hold on
 
 cats = categories(alldata.idx);
 regular_idx = find(strcmp(cats,'regular'));
@@ -13,7 +13,7 @@ modnames = {'RPCH','proctolin','oxotremorine','serotonin'};
 
 n_mod = length(modnames);
 for i = n_mod*3:-1:1
-	ax(i) = subplot(3,n_mod,i); hold on
+	ax(i) = subplot(4,n_mod,i); hold on
 end
 
 
@@ -22,7 +22,7 @@ L = display.stateLegend(ax(n_mod),cats,3);
 
 
 delete(ax(2:n_mod-1))
-L.Position = [.38 .75 .45 .2];
+L.Position = [.38 .79 .45 .15];
 
 
 % show decentralized only from preps with these mods
@@ -124,15 +124,42 @@ for i = 1:length(modnames)
 	th.Position = [-.15 .5];
 	th.FontWeight = 'normal';
 
+
+	if ~strcmp(M,'serotonin')
+		continue
+	end
+
+	% now show how variability changes over time in serotonin
+	% so we can compare it to similar plots for decentralized
+	% and environmental perturbations
+
+	t_before = 10;
+	T = (0:-1:-t_before+1)*20;
+
+	only_when = alldata.serotonin >= 5e-7 & alldata.decentralized;
+
+	things_to_measure = {'PD_burst_period','LP_burst_period'};	
+	[CV, CV0] = analysis.measureRegularCVBeforeOrAfterTransitions(alldata,allmetrics,only_when,'things_to_measure',things_to_measure,'T',t_before);
+	sax.PD_burst_period = subplot(4,3,11); hold on
+	sax.PD_burst_period.YLim(2) = .125;
+	sax.LP_burst_period = subplot(4,3,12); hold on
+	sax.LP_burst_period.YLim(2) = .125;
+	th = display.plotVariabilityBeforeTransition(CV,CV0,sax,T);
+	ylabel(sax.PD_burst_period,'CV(T)')
+	h = xlabel(sax.PD_burst_period,'Time before transition (s)');
+	h.Position = [60 -.02];
+
 end
 
 
-arrow_length = .08;
+figlib.pretty('FontSize',16)
+
+arrow_length = .07;
 for i = 1:n_mod
 	a = annotation('arrow',[.5175 .2566],[.04 .07]);
 	x = ax(i+n_mod*2).Position(1) + ax(i+8).Position(3)/2;
 	y = ax(i+n_mod*2).Position(2) + ax(i+8).Position(4);
-	a.Position = [x y 0 arrow_length];
+	a.Position = [x y-.005 0 arrow_length];
 	a.LineWidth = 2;
 	if i == n_mod
 		a.Position(2) = y + arrow_length;
@@ -142,11 +169,13 @@ end
 
 
 
-figlib.pretty('FontSize',16)
+
+
 
 axlib.label(ax(1),'a','FontSize',24,'XOffset',-.01)
 axlib.label(ax(n_mod+1),'b','FontSize',24,'XOffset',-.01)
 axlib.label(ax(2*n_mod+1),'c','FontSize',24,'XOffset',-.01)
+axlib.label(sax.PD_burst_period,'d','FontSize',24,'XOffset',-.01,'YOffset',-.01)
 
 
 figlib.saveall('Location',display.saveHere,'Format','pdf')
