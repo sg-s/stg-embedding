@@ -8,6 +8,9 @@ init()
 extra_color = [.1 .1 .1];
 intra_color = [.9 0 0];
 
+cats = categories(alldata.idx);
+reg_idx = find(strcmp(cats,'regular'));
+
 DataSize = length(basedata.mask);
 
 
@@ -24,7 +27,8 @@ figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[120
 p = basedata.probState();
 
 ax.prob_normal = subplot(3,3,1); hold on
-display.plotCDFWithError(p(:,1));
+display.plotCDFWithError(p(:,reg_idx));
+set(gca,'XLim',[0 1])
 
 
 % does recording type correlate with normal behavior? 
@@ -117,10 +121,11 @@ for i = 1:size(ShowThese,2)
 	P = mean(P);
 
 	display.mondrian(P,cats);
-	text(.2,.5,[mat2str(P(1)*100,2) '%'],'Color','w','FontSize',24)
+	text(.2,.5,[mat2str(P(reg_idx)*100,2) '%'],'Color','w','FontSize',24)
 	title(labels{i},'FontWeight','normal')
-end
 
+	view([0 -90])
+end
 
 
 
@@ -279,6 +284,8 @@ figlib.label('XOffset',-.01,'FontSize',24,'ColumnFirst',true,'YOffset',-.01)
 
 % cleanup
 figlib.saveall('Location',display.saveHere)
+
+display.trimImage([mfilename '_1.png']);
 
 
 % this init clears all the junnk this script creates

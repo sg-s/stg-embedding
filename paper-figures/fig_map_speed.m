@@ -102,4 +102,7 @@ figlib.label('FontSize',32,'XOffset',-.01)
 
 
 figlib.saveall('Location',display.saveHere)
+
+display.trimImage([mfilename '_1.png']);
+
 init()

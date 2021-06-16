@@ -7,7 +7,7 @@ close all
 
 cats = categories(alldata.idx);
 colors = display.colorscheme(alldata.idx);
-
+Alpha = .05;
 
 things_to_measure = {'PD_burst_period','LP_burst_period'};
 t_before = 10;
@@ -74,7 +74,7 @@ end
 
 c = lines;
 
-scatter(ax.distances,S_before,S_after,24,'MarkerFaceColor',c(4,:),'MarkerEdgeColor',c(4,:),'MarkerFaceAlpha',.5)
+scatter(ax.distances,S_before,S_after,24,'MarkerFaceColor','k','MarkerEdgeColor','k','MarkerFaceAlpha',.5)
 plotlib.drawDiag(ax.distances,'k--');
 ax.distances.XLim = [0 12];
 ax.distances.YLim = [0 12];
@@ -84,6 +84,8 @@ ylabel(ax.distances,{'Mean distance after','decentralization (a.u.)'})
 axes(ax.distances)
 [~,handles] = statlib.pairedPermutationTest(S_before,S_after,1e4,true);
 
+handles.line.Color = 'k';
+
 
 lh = display.stateLegend(ax.legend,cats);
 
@@ -92,8 +94,17 @@ lh = display.stateLegend(ax.legend,cats);
 ax_mon = display.pairedMondrian(ax.mondrian,decdata,~decdata.decentralized, decdata.decentralized,'baseline','decentralized');
 
 only_when = decdata.decentralized;
-J = analysis.computeTransitionMatrix(decdata.idx(only_when),decdata.time_offset(only_when));
-display.plotTransitionMatrix(J,cats,'ax',ax.J,'ShowScale',true);
+[J, ~, marginal_counts, J0]  = analysis.computeTransitionMatrix(decdata.idx(only_when),decdata.time_offset(only_when));
+
+% now bootstrap the J
+foo = @analysis.computeTransitionMatrix;
+JB = analysis.boostrapExperiments(foo,{decdata.idx(only_when),decdata.time_offset(only_when)},decdata.experiment_idx(only_when),1e3);
+
+frac_below = mean(JB >= J0,3) < Alpha;
+frac_above = mean(JB <= J0,3) < Alpha;
+
+
+display.plotTransitionMatrix(J,cats,frac_below, frac_above,'ax',ax.J,'ShowScale',true);
 
 
 
@@ -133,7 +144,8 @@ ax_mon(3).LineWidth = 1.5;
 
 ylabel(ax.PD_burst_period,'CV(T)')
 h = xlabel(ax.PD_burst_period,'Time before transition (s)');
-h.Position = [40 -.007];
+h.Position = [40 -.01];
+h.FontSize = 20;
 
 ax_mon(3).Position(1) = ax.LP_burst_period.Position(1);
 

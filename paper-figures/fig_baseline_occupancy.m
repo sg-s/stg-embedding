@@ -42,7 +42,7 @@ axlib.label(gca,'b','FontSize',28,'XOffset',-.01)
 % show state distribution by prep
 subplot(2,2,4); hold on
 [h, P] = display.plotStateDistributionByPrep(basedata.idx, basedata.experiment_idx);
-[~,idx]=sort(P(:,1),'descend');
+[~,idx]=sort(P(:,find(strcmp(cats,'regular'))),'descend');
 P = P(idx,:);
 delete(h)
 h = bar(P,'stacked','LineStyle','none','BarWidth',1);
@@ -64,6 +64,8 @@ figlib.pretty()
 
 
 figlib.saveall('Location',display.saveHere)
+
+display.trimImage([mfilename '_1.png']);
 
 % clean up workspace
 init()

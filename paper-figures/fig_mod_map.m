@@ -11,9 +11,9 @@ init()
 cats = categories(alldata.idx);
 colors = display.colorscheme(cats);
 
-figure('outerposition',[300 108 1900 1301],'PaperUnits','points','PaperSize',[1900 1301]); hold on
+figure('outerposition',[30 10 1002 1801],'PaperUnits','points','PaperSize',[1002 1801]); hold on
 clf;
-ax = axlib.tight_subplot(2,3);
+ax = axlib.tight_subplot(3,2);
 
 for i = 1:6
 	ax(i).XLim = [min(R(:))-5 max(R(:))+5];
@@ -55,7 +55,7 @@ for ci = 1:length(modulators)
 	end
 
 	N = length(unique(moddata.experiment_idx(moddata.(modulators{ci})>0)));
-	title(ax(ci),[modulators{ci} ' (N = ' mat2str(N) ')'],'FontWeight','regular')
+	title(ax(ci),[modulators{ci} ' (N = ' mat2str(N) ')'],'FontWeight','normal')
 
 	temp(ci).x = x;
 	temp(ci).y = y;
@@ -64,9 +64,6 @@ for ci = 1:length(modulators)
 end
 
 axlib.move(ax(4:6),'down',.02)
-
-
-return
 
 % are the distributions different?
 p = NaN(6);
@@ -89,4 +86,7 @@ end
 
 
 figlib.saveall('Location',display.saveHere,'Format','png')
+display.trimImage([mfilename '_1.png']);
+
+
 init()

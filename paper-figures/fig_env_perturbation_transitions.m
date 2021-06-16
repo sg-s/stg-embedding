@@ -18,21 +18,34 @@ cats = categories(alldata.idx);
 conditions = {alldata.temperature >= 25 & (alldata.decentralized == false),alldata.pH > 9.5, alldata.pH < 6.5, alldata.Potassium > 1};
 condition_names = ["T > 25C", "pH > 9.5", "pH < 6.5", "2.5\times[K^+]"];
 
+
+% signficance level
+Alpha = .05;
+
 for i = 1:length(conditions)
 	subplot(3,4,i); hold on
 	only_when = conditions{i};
-	[J, ~, marginal_counts] = analysis.computeTransitionMatrix(alldata.idx(only_when),alldata.time_offset(only_when));
+
+	idx = alldata.idx(only_when);
+	time = alldata.time_offset(only_when);
+	exp_idx = alldata.experiment_idx(only_when);
+
+	[J, ~, marginal_counts, J0] = analysis.computeTransitionMatrix(idx,time);
+
+	% now bootstrap J to get an estimate of how it varies
+	foo = @analysis.computeTransitionMatrix;
+	JB = analysis.boostrapExperiments(foo,{idx,time},exp_idx,1e3);
 
 
-	if i == length(conditions)
-		lh = display.plotTransitionMatrix(J,cats,'ScaleFcn',@(x) 20*x + 7,'MarkerSize',15,'ShowScale',true);
-	else
-		display.plotTransitionMatrix(J,cats,'ScaleFcn',@(x) 20*x + 7,'MarkerSize',15);
-	end
+
+	frac_below = mean(JB >= J0,3) < Alpha;
+	frac_above = mean(JB <= J0,3) < Alpha;
+	
+
+	ShowScale = i == length(conditions);
+	display.plotTransitionMatrix(J,cats,frac_below, frac_above,'ScaleFcn',@(x) 20*x + 7,'MarkerSize',15,'ShowScale',ShowScale);
 	title(condition_names(i),'FontSize',24,'FontWeight','normal')
 end
-
-
 
 things_to_measure = {'PD_burst_period','LP_burst_period'};
 t_before = 10;
@@ -92,7 +105,6 @@ lax.Position = [.1 .9 .8 .09];
 lax = display.stateLegend(lax, cats, 6);
 lax.Box = 'off';
 lax.FontSize = 20;
-
 
 figlib.saveall('Location',display.saveHere)
 

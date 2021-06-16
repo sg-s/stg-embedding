@@ -87,8 +87,6 @@ ax.ph_dist.XLim = [5.5 10.2];
 
 
 
-
-
 % G = discretize(pH,pH_space);
 % mean_dist = splitapply(@(x) mean(Distance(x)),R,G);
 % std_dist = splitapply(@(x) std(Distance(x))/sqrt(length(x)),R,G);

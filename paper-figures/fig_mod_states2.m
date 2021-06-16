@@ -99,6 +99,7 @@ for i = 1:length(modnames)
 	th.HorizontalAlignment = 'center';
 	th.VerticalAlignment = 'middle';
 	th.Color = 'w';
+	th.FontWeight =  'bold';
 	
 
 

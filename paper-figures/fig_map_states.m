@@ -98,7 +98,7 @@ for i = 1:length(ax.examples)
 end
 
 
-figlib.pretty('LineWidth',1)
+figlib.pretty('LineWidth',1,'FontSize',22)
 
 for i = 1:length(ax.examples)
     ax.examples(i).Box = 'off';
@@ -113,13 +113,15 @@ ax.main.Position = [.06 .1 .4 .8];
 ax.examples(1).YTick = [.5 1.5 3.5 4.5];
 ax.examples(1).YTickLabel = '';
 
-th = text(ax.examples(1),-1.5, .5, 'PD');
-th.FontSize = 16;
+th = text(ax.examples(1),-1.5, .4, 'PD');
+th.FontSize = 20;
 th.Color = PD_color;
 
-th = text(ax.examples(1),-1.5, 1.5, 'LP');
-th.FontSize = 16;
+th = text(ax.examples(1),-1.5, 1.7, 'LP');
+th.FontSize = 20;
 th.Color = LP_color;
+
+ax.examples(1).TickLength = [0 0];
 
 drawnow()
 
@@ -127,8 +129,8 @@ axlib.label(ax.main,'a','FontSize',36,'XOffset',.01);
 h = axlib.label(ax.examples(1),'b','FontSize',36,'XOffset',-.025,'YOffset',-.01);
 
 plot(ax.examples(end),[9 10],[-.5 -.5],'LineWidth',4,'Color','k')
-th =text(ax.examples(end),9.2,-1.1,'1s');
-th.FontSize = 20;
+th = text(ax.examples(end),9.2,-1.5,'1s');
+th.FontSize = 22;
 
 figlib.saveall('Location',display.saveHere)
 
