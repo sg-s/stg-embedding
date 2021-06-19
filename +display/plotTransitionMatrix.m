@@ -14,6 +14,7 @@ arguments
 	options.FontSize = 20
 	options.ScaleFcn = @(x) 30*x + 10
 	options.MarkerSize = 20
+	options.ZeroMarkerSize = 10
 	options.PlotOrder = {'regular','PD-weak-skipped','LP-weak-skipped','aberrant-spikes','irregular-bursting','irregular','PD-silent-LP-bursting','LP-silent-PD-bursting','PD-silent','LP-silent','sparse-irregular','silent'};
 end
 
@@ -58,7 +59,7 @@ for i = 1:N
 		jj = find(strcmp(options.PlotOrder,cats{j}));
 		if J(i,j) == 0
 			if IsSignificantlySmaller(i,j)
-				plot(options.ax,jj,ii,'*','MarkerSize',8,'MarkerFaceColor','k','MarkerEdgeColor','k');
+				plot(options.ax,jj,ii,'d','MarkerSize',options.ZeroMarkerSize,'MarkerFaceColor','w','MarkerEdgeColor','k','LineWidth',3);
 			end
 			continue
 		end
@@ -91,6 +92,7 @@ lh = [];
 
 options.ax.XLim = [0 length(J) + 2.5];
 options.ax.YLim = [0 length(J) + .5];
+axis(options.ax,'equal')
 
 if ~options.ShowScale
 	return

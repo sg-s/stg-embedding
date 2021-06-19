@@ -19,9 +19,6 @@ conditions = {alldata.temperature >= 25 & (alldata.decentralized == false),allda
 condition_names = ["T > 25C", "pH > 9.5", "pH < 6.5", "2.5\times[K^+]"];
 
 
-% signficance level
-Alpha = .05;
-
 for i = 1:length(conditions)
 	subplot(3,4,i); hold on
 	only_when = conditions{i};
@@ -30,20 +27,11 @@ for i = 1:length(conditions)
 	time = alldata.time_offset(only_when);
 	exp_idx = alldata.experiment_idx(only_when);
 
-	[J, ~, marginal_counts, J0] = analysis.computeTransitionMatrix(idx,time);
+	[J, ~, marginal_counts, p_below, p_above] = analysis.computeTransitionMatrix(idx,time);
 
-	% now bootstrap J to get an estimate of how it varies
-	foo = @analysis.computeTransitionMatrix;
-	JB = analysis.boostrapExperiments(foo,{idx,time},exp_idx,1e3);
-
-
-
-	frac_below = mean(JB >= J0,3) < Alpha;
-	frac_above = mean(JB <= J0,3) < Alpha;
-	
 
 	ShowScale = i == length(conditions);
-	display.plotTransitionMatrix(J,cats,frac_below, frac_above,'ScaleFcn',@(x) 20*x + 7,'MarkerSize',15,'ShowScale',ShowScale);
+	display.plotTransitionMatrix(J,cats,p_below, p_above,'ScaleFcn',@(x) 20*x + 7,'MarkerSize',15,'ShowScale',ShowScale);
 	title(condition_names(i),'FontSize',24,'FontWeight','normal')
 end
 
@@ -76,24 +64,17 @@ for i = 5:8
 end
 for i = 1:4
 	ax(i).Position(4) = .3;
-	ax(i).Position(2) = .61;
+	ax(i).Position(2) = .55;
+	ax(i).Position(3) = .2;
 end
 
-for i = 1:4
-	ax(i).Units = 'pixels';
-	ax(i).Position(4) = 300;
-	ax(i).Position(3) = (ax(i).XLim(2)/ax(i).YLim(2))*ax(i).Position(4);
-end
 
 h = xlabel(ax(12),'Time before transition (s)');
 h.Position = [-550 -.03];
 
-h = ylabel(ax(9),'CV(T)');
-h.Position = [-260 .17];
+ylabel(ax(9),'CV (T_{LP})');
+ylabel(ax(5),'CV (T_{PD})');
 
-for i = 1:4
-	ax(i).Units = 'normalized';
-end
 
 axlib.label(ax(1),'a','FontSize',28,'XOffset',-.03,'YOffset',-.01);
 axlib.label(ax(5),'b','FontSize',28,'XOffset',-.03,'YOffset',-.01);
@@ -102,7 +83,7 @@ axlib.label(ax(5),'b','FontSize',28,'XOffset',-.03,'YOffset',-.01);
 % add a legend
 lax = axes;
 lax.Position = [.1 .9 .8 .09];
-lax = display.stateLegend(lax, cats, 6);
+lax = display.stateLegend(lax, cats, 'NumColumns',6,'Marker','>');
 lax.Box = 'off';
 lax.FontSize = 20;
 

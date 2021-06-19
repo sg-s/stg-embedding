@@ -94,17 +94,17 @@ lh = display.stateLegend(ax.legend,cats);
 ax_mon = display.pairedMondrian(ax.mondrian,decdata,~decdata.decentralized, decdata.decentralized,'baseline','decentralized');
 
 only_when = decdata.decentralized;
-[J, ~, marginal_counts, J0]  = analysis.computeTransitionMatrix(decdata.idx(only_when),decdata.time_offset(only_when));
+[J, ~, marginal_counts, p_below, p_above]  = analysis.computeTransitionMatrix(decdata.idx(only_when),decdata.time_offset(only_when));
 
-% now bootstrap the J
-foo = @analysis.computeTransitionMatrix;
-JB = analysis.boostrapExperiments(foo,{decdata.idx(only_when),decdata.time_offset(only_when)},decdata.experiment_idx(only_when),1e3);
+% % now bootstrap the J
+% foo = @analysis.computeTransitionMatrix;
+% JB = analysis.boostrapExperiments(foo,{decdata.idx(only_when),decdata.time_offset(only_when)},decdata.experiment_idx(only_when),1e3);
 
-frac_below = mean(JB >= J0,3) < Alpha;
-frac_above = mean(JB <= J0,3) < Alpha;
+% frac_below = mean(JB >= J0,3) < Alpha;
+% frac_above = mean(JB <= J0,3) < Alpha;
 
 
-display.plotTransitionMatrix(J,cats,frac_below, frac_above,'ax',ax.J,'ShowScale',true);
+display.plotTransitionMatrix(J,cats,p_below, p_above,'ax',ax.J,'ShowScale',true);
 
 
 
@@ -166,10 +166,13 @@ axlib.label(ax_mon(3),'d','FontSize',28,'XOffset',-.02,'YOffset',-.02);
 
 h2 = axlib.label(ax.PD_burst_period,'f','FontSize',28);
 h2.Position(1) = h1.Position(1);
-ax.J.Position = [.1 .11 .27 .37];
+ax.J.Position = [.1 .05 .3 .47];
 
 
 lh.Position = [.71 .72 .2 .23];
+
+
+
 
 figlib.saveall('Location',display.saveHere)
 

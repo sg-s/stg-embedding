@@ -126,29 +126,7 @@ for i = 1:length(modnames)
 	th.FontWeight = 'normal';
 
 
-	if ~strcmp(M,'serotonin')
-		continue
-	end
 
-	% now show how variability changes over time in serotonin
-	% so we can compare it to similar plots for decentralized
-	% and environmental perturbations
-
-	t_before = 10;
-	T = (0:-1:-t_before+1)*20;
-
-	only_when = alldata.serotonin >= 5e-7 & alldata.decentralized;
-
-	things_to_measure = {'PD_burst_period','LP_burst_period'};	
-	[CV, CV0] = analysis.measureRegularCVBeforeOrAfterTransitions(alldata,allmetrics,only_when,'things_to_measure',things_to_measure,'T',t_before);
-	sax.PD_burst_period = subplot(4,3,11); hold on
-	sax.PD_burst_period.YLim(2) = .125;
-	sax.LP_burst_period = subplot(4,3,12); hold on
-	sax.LP_burst_period.YLim(2) = .125;
-	th = display.plotVariabilityBeforeTransition(CV,CV0,sax,T);
-	ylabel(sax.PD_burst_period,'CV(T)')
-	h = xlabel(sax.PD_burst_period,'Time before transition (s)');
-	h.Position = [60 -.02];
 
 end
 
@@ -176,8 +154,6 @@ end
 axlib.label(ax(1),'a','FontSize',24,'XOffset',-.01)
 axlib.label(ax(n_mod+1),'b','FontSize',24,'XOffset',-.01)
 axlib.label(ax(2*n_mod+1),'c','FontSize',24,'XOffset',-.01)
-axlib.label(sax.PD_burst_period,'d','FontSize',24,'XOffset',-.01,'YOffset',-.01)
-
 
 figlib.saveall('Location',display.saveHere,'Format','pdf')
 

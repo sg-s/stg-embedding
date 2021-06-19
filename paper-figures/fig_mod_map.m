@@ -13,9 +13,9 @@ colors = display.colorscheme(cats);
 
 figure('outerposition',[30 10 1002 1801],'PaperUnits','points','PaperSize',[1002 1801]); hold on
 clf;
-ax = axlib.tight_subplot(3,2);
+ax = axlib.tight_subplot(2,2);
 
-for i = 1:6
+for i = 1:length(ax)
 	ax(i).XLim = [min(R(:))-5 max(R(:))+5];
 	ax(i).YLim = [min(R(:))-5 max(R(:))+5];
 	axis(ax(i),'on')
@@ -33,8 +33,7 @@ figlib.pretty('LineWidth',1)
 
 
 
-modulators = {'serotonin','CabTrp1a','RPCH','proctolin','oxotremorine','CCAP'};
-
+modulators = {'RPCH','proctolin','oxotremorine','serotonin'};
 
 temp = struct;
 
@@ -63,19 +62,18 @@ for ci = 1:length(modulators)
 	
 end
 
-axlib.move(ax(4:6),'down',.02)
 
 % are the distributions different?
-p = NaN(6);
-for i = 1:5
-	for j = i+1:6
+p = NaN(length(modulators));
+for i = 1:length(modulators)-1
+	for j = i+1:length(modulators)
 
 		% average over preps
 		A = [analysis.averageBy(temp(i).x,temp(i).prep) analysis.averageBy(temp(i).y,temp(i).prep)];
 		B = [analysis.averageBy(temp(j).x,temp(j).prep) analysis.averageBy(temp(j).y,temp(j).prep)];
 
-		[~,p(i,j)]=statlib.kstest_2s_2d(A,B);
-		if p(i,j) < 0.05/6
+		[~,p(i,j)] = statlib.kstest_2s_2d(A,B);
+		if p(i,j) < 0.05/(length(modulators)-1)
 			disp(['Difference b/w ' modulators{i} ' and ' modulators{j}])
 		end
 	end
