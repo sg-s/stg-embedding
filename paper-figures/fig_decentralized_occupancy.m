@@ -96,12 +96,7 @@ ax_mon = display.pairedMondrian(ax.mondrian,decdata,~decdata.decentralized, decd
 only_when = decdata.decentralized;
 [J, ~, marginal_counts, p_below, p_above]  = analysis.computeTransitionMatrix(decdata.idx(only_when),decdata.time_offset(only_when));
 
-% % now bootstrap the J
-% foo = @analysis.computeTransitionMatrix;
-% JB = analysis.boostrapExperiments(foo,{decdata.idx(only_when),decdata.time_offset(only_when)},decdata.experiment_idx(only_when),1e3);
 
-% frac_below = mean(JB >= J0,3) < Alpha;
-% frac_above = mean(JB <= J0,3) < Alpha;
 
 
 display.plotTransitionMatrix(J,cats,p_below, p_above,'ax',ax.J,'ShowScale',true);

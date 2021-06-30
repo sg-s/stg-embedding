@@ -10,6 +10,7 @@ arguments
     YOffset (1,1) double 
     options.LineWidth = 2
     options.MarkerSize = 15
+    options.Marker = 's'
 end
 
 
@@ -39,7 +40,7 @@ for j = length(cats):-1:1
     isolated_pts = ~isnan(y) & isnan(y1) & isnan(y2);
 
     if any(isolated_pts)
-        points(j) = plot(ax,time(isolated_pts),y(isolated_pts),'.','MarkerSize',options.MarkerSize,'Color',colors(cats{j}),'LineStyle','none');
+        points(j) = plot(ax,time(isolated_pts),y(isolated_pts),'MarkerSize',options.MarkerSize,'MarkerFaceColor',colors(cats{j}),'LineStyle','none','Marker',options.Marker,'MarkerEdgeColor',colors(cats{j}));
     end
 
 

@@ -18,7 +18,7 @@ end
 
 
 
-L = display.stateLegend(ax(n_mod),cats,3);
+L = display.stateLegend(ax(n_mod),cats,'NumColumns',3);
 
 
 delete(ax(2:n_mod-1))

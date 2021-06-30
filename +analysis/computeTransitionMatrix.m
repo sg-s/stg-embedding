@@ -39,6 +39,8 @@ J = J - J.*eye(N);
 
 J_raw = J;
 
+disp([mat2str(sum(J(:)>0)) ' distinct transitions'])
+
 % report # of transitions
 %disp(['There are ' mat2str(sum(J(:))) ' transitions here'])
 

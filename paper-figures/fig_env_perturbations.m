@@ -222,7 +222,7 @@ th = title(['(' mat2str(sum(P)) ' transitions)']);
 th.Position = [-.15 .5];
 th.FontWeight = 'normal';
 
-display.stateLegend(ax.legend,cats,2)
+display.stateLegend(ax.legend,cats,'NumColumns',2)
 
 
 ax.temp_dist.Position = [.57 .6 .334 .14];

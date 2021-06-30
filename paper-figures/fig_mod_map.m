@@ -79,8 +79,13 @@ for i = 1:length(modulators)-1
 	end
 end
 
+ax(1).Position(2) = .43;
+ax(2).Position(2) = .43;
 
-
+lax = axes;
+lax.Position = [.1 .9 .8 .1];
+lax = display.stateLegend(lax,cats,'NumColumns',6);
+lax.Box = 'off';
 
 
 figlib.saveall('Location',display.saveHere,'Format','png')
