@@ -34,7 +34,7 @@ for i = 1:length(all_preps)
 	end
 
 	show_this = time > -600 & time < 1800;
-	display.plotStates(ax(1), states(show_this), time(show_this), YOffset);
+	display.plotStates(ax(1), states(show_this), time(show_this), YOffset,'MarkerSize',5,'LineWidth',3);
 
 	YOffset = YOffset + 1;
 
@@ -74,32 +74,32 @@ end
 
 
 
-switching_rate = 0*time;
-switching_rate_N = 0*time;
-% find the switching rates by going prep by prep
-for i = 1:length(all_preps)
-	use_this = decdata.experiment_idx == all_preps(i);
-	idx = decdata.idx(use_this);
-	this_time = time_since_decentralization(use_this);
+% switching_rate = 0*time;
+% switching_rate_N = 0*time;
+% % find the switching rates by going prep by prep
+% for i = 1:length(all_preps)
+% 	use_this = decdata.experiment_idx == all_preps(i);
+% 	idx = decdata.idx(use_this);
+% 	this_time = time_since_decentralization(use_this);
 
-	for j = 1:length(time)-1
-		prev_state = idx(this_time == time(j));
-		next_state = idx(this_time == time(j+1));
-		if isempty(prev_state) | isempty (next_state)
-			continue
-		end
-		if isundefined(prev_state) | isundefined(next_state)
-			continue
-		end
-		switching_rate_N(j) = switching_rate_N(j) + 1;
+% 	for j = 1:length(time)-1
+% 		prev_state = idx(this_time == time(j));
+% 		next_state = idx(this_time == time(j+1));
+% 		if isempty(prev_state) | isempty (next_state)
+% 			continue
+% 		end
+% 		if isundefined(prev_state) | isundefined(next_state)
+% 			continue
+% 		end
+% 		switching_rate_N(j) = switching_rate_N(j) + 1;
 
-		if prev_state ~= next_state
-			switching_rate(j) = switching_rate(j)+1;
-		end
-	end
+% 		if prev_state ~= next_state
+% 			switching_rate(j) = switching_rate(j)+1;
+% 		end
+% 	end
 
-end
-switching_rate = switching_rate./switching_rate_N;
+% end
+% switching_rate = switching_rate./switching_rate_N;
 
 
 % smooth them a little bit
@@ -144,11 +144,19 @@ plot(ax(2),[0 0],[0 1],'w--');
 
 
 
-ax(1).Position = [.1 .47 .8 .5];
-ax(2).Position = [.1 .1 .8 .35];
+
+ax(1).Position = [.1 .37 .8 .5];
+ax(2).Position = [.1 .1 .8 .25];
 
 
+drawnow
+
+lax = axes;
+lax.Position = [.1 .9 .8 .1];
+lax = display.stateLegend(lax,cats,'NumColumns',6);
+lax.Box = 'off';
 figlib.pretty()
+
 
 figlib.label('FontSize',30,'XOffset',-.03,'YOffset',-.01)
 
