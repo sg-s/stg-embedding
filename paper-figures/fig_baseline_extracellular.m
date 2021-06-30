@@ -121,7 +121,7 @@ for i = 1:size(ShowThese,2)
 	P = mean(P);
 
 	display.mondrian(P,cats);
-	text(.2,.5,[mat2str(P(reg_idx)*100,2) '%'],'Color','w','FontSize',24)
+	text(.2,.5,[mat2str(P(reg_idx)*100,2) '%'],'Color','w','FontSize',128)
 	title(labels{i},'FontWeight','normal')
 
 	view([0 -90])
@@ -217,52 +217,6 @@ ax.LP01.XLim = [0 1];
 
 
 
-% show how the burst periods change if we switch from intra to extra
-clear L lh
-ax.T_PD = subplot(4,3,9); hold on
-X = basemetrics.PD_burst_period(basedata.PD_channel == 'PD');
-X = analysis.averageBy(X,basedata.experiment_idx(basedata.PD_channel == 'PD'));
-display.plotCDFWithError(X, intra_color);
-
-
-
-Y = basemetrics.PD_burst_period(basedata.PD_channel ~= 'PD');
-Y = analysis.averageBy(Y,basedata.experiment_idx(basedata.PD_channel ~= 'PD'));
-display.plotCDFWithError(Y, extra_color);
-xlabel('T_{PD} (s)')
-
-% fake plots for legend
-lines(1) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',intra_color,'MarkerFaceColor',intra_color);
-lines(2) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',extra_color,'MarkerFaceColor',extra_color);
-legend(lines,{'PD-intra','PD-extra'},'Location','southeast')
-[~,p]=kstest2(X,Y);
-text(2,.6,['\itp = ' corelib.num2tex(p)]);
-ax.T_PD.XLim = [0 3];
-
-
-
-
-clear lines
-ax.T_LP =subplot(4,3,12); hold on
-X = basemetrics.LP_burst_period(basedata.LP_channel == 'LP');
-X = analysis.averageBy(X,basedata.experiment_idx(basedata.LP_channel == 'LP'));
-display.plotCDFWithError(X, intra_color);
-
-Y = basemetrics.LP_burst_period(basedata.LP_channel ~= 'LP');
-Y = analysis.averageBy(Y,basedata.experiment_idx(basedata.LP_channel ~= 'LP'));
-display.plotCDFWithError(Y, extra_color);
-xlabel('T_{LP} (s)')
-
-% fake plots for legend
-lines(1) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',intra_color,'MarkerFaceColor',intra_color);
-lines(2) = plot(NaN,NaN,'Marker','o','LineStyle','none','MarkerSize',10,'Color',extra_color,'MarkerFaceColor',extra_color);
-legend(lines,{'LP-intra','LP-extra'},'Location','southeast')
-
-[~,p]=kstest2(X,Y);
-text(2,.6,['\itp = ' corelib.num2tex(p)]);
-
-
-
 
 figlib.pretty('FontSize',16)
 ax.experimenter.YLim = [0 14];
@@ -276,11 +230,17 @@ ax.LP01.XColor = colors('LP-weak-skipped');
 % scale some plots and let them breate
 ax.LP01.Position(4) =  ax.LP01.Position(4)*.9;
 ax.PD01.Position(4) =  ax.PD01.Position(4)*.9;
-ax.T_PD.Position(4) =  ax.T_PD.Position(4)*.9;
-ax.T_LP.Position(4) =  ax.T_LP.Position(4)*.9;
+
 
 % labels
 figlib.label('XOffset',-.01,'FontSize',24,'ColumnFirst',true,'YOffset',-.01)
+
+
+lax = axes;
+lax.Position = [.69 .1 .25 .35];
+lax = display.stateLegend(lax,cats,'NumColumns',2);
+
+
 
 % cleanup
 figlib.saveall('Location',display.saveHere)
