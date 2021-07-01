@@ -142,7 +142,7 @@ h.FaceColor = colors.LP;
 h.LineStyle = 'none';
 
 h = bar(ax.dataframe,50:57,VectorizedData(show_this,45:end));
-h.FaceColor = [.5 .5 .5];
+h.FaceColor = 'k';
 h.LineStyle = 'none';
 
 ylabel(ax.dataframe,'z-score')
