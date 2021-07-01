@@ -231,6 +231,14 @@ ax.states.TickLength = [0 0];
 
 th = text(ax.prctiles(1),1,-.1,'deciles','FontSize',18);
 
+
+th = text(ax.dataframe,5,1,'PD ISIs','FontSize',16,'Color',colors.PD,'HorizontalAlignment','center');
+th = text(ax.dataframe,17,1,'LP ISIs','FontSize',16,'Color',colors.LP,'HorizontalAlignment','center');
+
+th = text(ax.dataframe,30,1,'PD phases','FontSize',16,'Color',colors.PD,'HorizontalAlignment','center');
+th = text(ax.dataframe,42,1,'LP phases','FontSize',16,'Color',colors.LP,'HorizontalAlignment','center');
+
+
 figlib.saveall('Location',display.saveHere)
 
 display.trimImage([mfilename '_1.png']);
