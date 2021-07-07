@@ -106,7 +106,7 @@ FiringRates = normalize(firingRates(data));
 
 Burstiness = normalize(burstiness(data));
 
-% magic numbers and hyperparameters
+% magic numbers and hyper parameters
 Bias.ISI2 = 5;  % 5
 Bias.Phase = 1;   % 1
 Bias.f = 5; % 5

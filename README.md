@@ -1,34 +1,31 @@
 # stg embedding
 
-Low-dimensional visualization of long-term STG recordings while some parameter is changing
+This repository contains code to reproduce every figure in 
 
-## neuromodulators
-
-This folder contains scripts to analyze data from prepeations under thse conditions:
-
-1. normal
-2. decentralized
-3. addition of some modulator 
-
-To make figures for this, run the following figures (located within the `neuromodulators` folder):
+[Mapping circuit dynamics during function and dysfunction](https://www.biorxiv.org/content/10.1101/2021.07.06.451370v1.full.pdf)
 
 
-### `fig_map_states`
 
-Makes a figure showing the map and all the states. Assumes you already have the embedding and labeling done. 
+## Installation and prerequisites 
 
-![](https://user-images.githubusercontent.com/6005346/80520475-7b2e1880-8957-11ea-9474-e47604cbf466.png)
+You will need MATLAB. 
 
+Download the following repositories and add them to your MATLAB path:
 
-## `fig_ethogram`
+```
+https://github.com/sg-s/stg-embedding
+https://github.com/sg-s/srinivas.gs_mtools
+https://github.com/sg-s/crabsort
+https://github.com/KlugerLab/FIt-SNE
 
-Makes a figure showing states during time, and shows wordclouds at differnet points in time/modulators. 
+```
 
-![](https://user-images.githubusercontent.com/6005346/80520737-dd871900-8957-11ea-861d-15b47b0a91dc.png)
+## How to regenerate figures 
 
+Code to make figures exactly as they appear in the paper are located in [the paper-figures folder](https://github.com/sg-s/stg-embedding/tree/master/paper-figures)
 
-## `fig_map_condition`
+Run each script to generate that figure. 
 
-Highlights the part of the map that are visited during different conditions. 
+## License 
 
-![Screen Shot 2020-04-29 at 10 41 53 AM](https://user-images.githubusercontent.com/6005346/80609479-1d0c3e80-8a06-11ea-852e-ab87bdac235a.png)
+GPL v3
