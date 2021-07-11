@@ -4,6 +4,33 @@
 % It should be smart enough to only recompute things 
 % as needed
 
+
+% first, attempt to check if we already have access
+% to the reduced data. If so, just load that and be done with it
+
+addpath(strcat('..',filesep))
+
+files = ["LP_PD.mat","alldata.mat","decdata.mat","PD_LP.mat","allmetrics.mat","decmetrics.mat","R.mat","basedata.mat","hashes.mat","VectorizedData.mat","basemetrics.mat",	"moddata.mat"];
+
+for i = 1:length(files)
+	var_name = strrep(files(i),".mat","");
+	if exist(var_name,'var')
+		continue
+	end
+
+	thisfile = strcat('..',filesep,'reduced-data',filesep,files(i));
+
+	if exist(thisfile,'file') == 2
+		% load it
+		disp('Loading file:')
+		disp(thisfile)
+		load(thisfile)
+	end
+
+end
+
+
+
 % get the data and filter
 
 if ~exist('alldata','var')
