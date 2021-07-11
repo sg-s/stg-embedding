@@ -20,11 +20,18 @@ https://github.com/KlugerLab/FIt-SNE
 
 ```
 
+## Data
+
+The raw data is >30TB and getting it into your hands is not easy. Instead we provide [reduced data](https://en.wikipedia.org/wiki/Data_reduction) consisting of spiketimes, metadata and various annotations. This should allow you to reproduce every figure in the paper. 
+
+To get the data, download it from [Zenodo](https://zenodo.org/record/5090130). 
+
 ## How to regenerate figures 
 
-Code to make figures exactly as they appear in the paper are located in [the paper-figures folder](https://github.com/sg-s/stg-embedding/tree/master/paper-figures)
 
-Run each script to generate that figure. 
+1. First, download the code and add to path (see above).
+2. Then, [download the data](https://zenodo.org/record/5090130) and put it in a folder called "reduced-data" within your "stg-embedding" folder. You will have to create this if needed. 
+3. Then, navigate to the `paper-figures` folder and run any script to generate that figure. For example, to generate Figure 2, run: `fig_embedding`. 
 
 ## License 
 
