@@ -1,5 +1,7 @@
 # stg embedding
 
+![](https://user-images.githubusercontent.com/6005346/125205442-46526c80-e250-11eb-9673-192e504822a1.png)
+
 This repository contains code to reproduce every figure in 
 
 [Mapping circuit dynamics during function and dysfunction](https://www.biorxiv.org/content/10.1101/2021.07.06.451370v1.full.pdf)
