@@ -41,11 +41,18 @@ SynR = embedding.tsne_data(data,PD_LP, LP_PD, SynData);
 cats = unique(data.experiment_idx);
 
 
-figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+figure('outerposition',[300 300 1200 901],'PaperUnits','points','PaperSize',[1200 901]); hold on
 colors = colormaps.dcol(length(cats));
 for i = 1:length(cats)
 	this = data.experiment_idx == cats(i);
 	plot(SynR(this,1),SynR(this,2),'.','Color',colors(i,:))
 	l(i) = plot(NaN,NaN,'.','MarkerSize',40,'Color',colors(i,:));
 end
-legend(l,cats)
+xlabel('t-SNE 1')
+ylabel('t-SNE 2')
+legend(l,cats,'Location','eastoutside')
+axis square
+set(gca,'XLim',[-65 65],'YLim',[-65 65])
+figlib.pretty
+
+figlib.saveall('Location',display.saveHere)

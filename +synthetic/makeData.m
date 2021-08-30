@@ -39,7 +39,7 @@ options.SpikingRateRange = [1 10];
 
 options = corelib.parseNameValueArguments(options,varargin{:});
 
-categories = categorical({'normal','spiking/silent','spiking/bursting','irregular/bursting','irregular/spiking','irregular','irregular/silent','bursting/silent','phase-shifted'});
+categories = categorical({'normal','spiking/silent','spiking/bursting','irregular/bursting','irregular/spiking','irregular/silent','bursting/silent','phase-shifted'});
 
 
 
@@ -55,8 +55,12 @@ firing_rate = NaN(NSamples,1);
 
 NPerCategory = floor(NSamples/length(categories));
 
+
+
+M = 1;
+
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
-% make normal data
+% M = 1; make normal data
 all_T = linspace(BurstPeriodRange(1),BurstPeriodRange(2),NPerCategory);
 
 for i = 1:NPerCategory
@@ -78,11 +82,13 @@ for i = 1:NPerCategory
 end
 
 burst_period(1:NPerCategory) = all_T;
-
 experiment_idx(1:NPerCategory) = categories(1);
 
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
+
+M = M + 1;
+
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 
@@ -94,15 +100,16 @@ for i = 1:NPerCategory
 	% PD spiking, LP silent
 	this_PD = synthetic.spiking(all_f(i),BinSize,SpiketimeJitter);
 
-	PD(1:length(this_PD),i+NPerCategory) = this_PD;
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
 
 end
 
-firing_rate(NPerCategory+1:NPerCategory*2) = all_f;
-experiment_idx(NPerCategory+1:NPerCategory*2) = categories(2);
+firing_rate(NPerCategory+(M-1):NPerCategory*M) = all_f;
+experiment_idx(NPerCategory+(M-1):NPerCategory*M) = categories(M);
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
 
+M = M + 1;
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the spiking/bursting state
@@ -120,17 +127,19 @@ for i = 1:NPerCategory
 	this_LP = synthetic.bursting(all_T(i),NSpikesPerBurst,DutyCycle,SpiketimeJitter,BinSize);
 
 	% add
-	PD(1:length(this_PD),i+2*NPerCategory) = this_PD;
-	LP(1:length(this_LP),i+2*NPerCategory) = this_LP;
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
+	LP(1:length(this_LP),i+(M-1)*NPerCategory) = this_LP;
 
 end
 
-firing_rate(NPerCategory*2+1:NPerCategory*3) = all_f;
-burst_period(NPerCategory*2+1:NPerCategory*3) = all_T;
-experiment_idx(NPerCategory*2+1:NPerCategory*3) = categories(3);
+firing_rate(NPerCategory*(M-1)+1:NPerCategory*M) = all_f;
+burst_period(NPerCategory*(M-1)+1:NPerCategory*M) = all_T;
+experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
 
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
+M = M + 1;
+
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the irregular/bursting state 
@@ -150,18 +159,19 @@ for i = 1:NPerCategory
 	this_LP = synthetic.irregular(all_f(i),BinSize);
 
 	% add
-	PD(1:length(this_PD),i+3*NPerCategory) = this_PD;
-	LP(1:length(this_LP),i+3*NPerCategory) = this_LP;
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
+	LP(1:length(this_LP),i+(M-1)*NPerCategory) = this_LP;
 
 end
 
-firing_rate(NPerCategory*3+1:NPerCategory*4) = all_f;
-burst_period(NPerCategory*3+1:NPerCategory*4) = all_T;
-experiment_idx(NPerCategory*3+1:NPerCategory*4) = categories(4);
+firing_rate(NPerCategory*(M-1)+1:NPerCategory*M) = all_f;
+burst_period(NPerCategory*(M-1)+1:NPerCategory*M) = all_T;
+experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
+
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
 
-
+M = M + 1;
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the irregular/spiking state 
 
@@ -179,41 +189,49 @@ for i = 1:NPerCategory
 
 
 	% add
-	PD(1:length(this_PD),i+4*NPerCategory) = this_PD;
-	LP(1:length(this_LP),i+4*NPerCategory) = this_LP;
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
+	LP(1:length(this_LP),i+(M-1)*NPerCategory) = this_LP;
 
 end
 
-firing_rate(NPerCategory*4+1:NPerCategory*5) = all_f;
-experiment_idx(NPerCategory*4+1:NPerCategory*5) = categories(5);
+firing_rate(NPerCategory*(M-1)+1:NPerCategory*M) = all_f;
+experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
+
 
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
+
+M = M + 1;
+
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the irregular state 
 
-all_f = linspace(SpikingRateRange(1),SpikingRateRange(2),NPerCategory);
-all_f = veclib.shuffle(all_f);
-all_f2 = veclib.shuffle(all_f);
+% all_f = linspace(SpikingRateRange(1),SpikingRateRange(2),NPerCategory);
+% all_f = veclib.shuffle(all_f);
+% all_f2 = veclib.shuffle(all_f);
 
 
-for i = 1:NPerCategory
-	% PD irregular, LP spiking
+% for i = 1:NPerCategory
+% 	% PD irregular, LP spiking
 
-	this_PD = synthetic.irregular(all_f(i),BinSize);
-	this_LP = synthetic.irregular(all_f2(i),BinSize);
+% 	this_PD = synthetic.irregular(all_f(i),BinSize);
+% 	this_LP = synthetic.irregular(all_f2(i),BinSize);
 
 
-	% add
-	PD(1:length(this_PD),i+5*NPerCategory) = this_PD;
-	LP(1:length(this_LP),i+5*NPerCategory) = this_LP;
+% 	% add
+% 	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
+% 	LP(1:length(this_LP),i+(M-1)*NPerCategory) = this_LP;
 
-end
-experiment_idx(NPerCategory*5+1:NPerCategory*6) = categories(6);
+% end
 
-assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
-assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
+% experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
+
+
+% assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
+% assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
+
+% M = M + 1;
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the irregular/silent state 
@@ -226,14 +244,18 @@ for i = 1:NPerCategory
 	this_PD = synthetic.irregular(all_f(i),BinSize);
 
 	% add
-	PD(1:length(this_PD),i+6*NPerCategory) = this_PD;
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
 
 
 end
-experiment_idx(NPerCategory*6+1:NPerCategory*7) = categories(7);
+
+
+experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
+
 assert(min(PD(:)) >=0,'FATAL:Negative spiketimes')
 assert(min(LP(:)) >=0,'FATAL:Negative spiketimes')
 
+M = M + 1;
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the bursting/silent state 
@@ -249,16 +271,15 @@ for i = 1:NPerCategory
 	this_PD = synthetic.bursting(all_T(i),NSpikesPerBurst,DutyCycle,SpiketimeJitter,BinSize);
 
 	% add
-	PD(1:length(this_PD),i+7*NPerCategory) = this_PD;
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
 
 end
 
-burst_period(NPerCategory*7+1:NPerCategory*8) = all_T;
-experiment_idx(NPerCategory*7+1:NPerCategory*8) = categories(8);
+burst_period(NPerCategory*(M-1)+1:NPerCategory*M) = all_T;
+experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
 
-if min(PD(:)) < 0
-	keyboard
-end
+
+M = M + 1;
 
 % ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ 
 % now we make the phase_shifted case
@@ -282,15 +303,15 @@ for i = 1:NPerCategory
 	this_LP(this_LP>BinSize) = [];
 	this_PD(this_PD>BinSize) = [];
 
-
-	% add to data
-	PD(1:length(this_PD),i+8*NPerCategory) = this_PD;
-	LP(1:length(this_LP),i+8*NPerCategory) = this_LP;
+	% add
+	PD(1:length(this_PD),i+(M-1)*NPerCategory) = this_PD;
+	LP(1:length(this_LP),i+(M-1)*NPerCategory) = this_LP;
 
 end
 
-burst_period(NPerCategory*8+1:NPerCategory*9) = all_T;
-experiment_idx(NPerCategory*8+1:NPerCategory*9) = categories(9);
+burst_period(NPerCategory*(M-1)+1:NPerCategory*M) = all_T;
+experiment_idx(NPerCategory*(M-1)+1:NPerCategory*M) = categories(M);
+
 
 
 
