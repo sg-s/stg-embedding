@@ -21,6 +21,7 @@ opts.R0 = R0;
 % cache 
 hash = hashlib.md5hash([hashlib.md5hash(VectorizedData) structlib.md5hash(opts)]);
 
+
 cache_loc = (fullfile('../cache',[hash '.mat']));
 if exist(cache_loc,'file') == 2
 	load(cache_loc,'R')
