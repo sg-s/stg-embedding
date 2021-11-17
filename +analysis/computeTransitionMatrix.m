@@ -35,7 +35,7 @@ for i = 1:length(idx)-1
 end
 
 
-J = J - J.*eye(N);
+%J = J - J.*eye(N);
 
 J_raw = J;
 
@@ -95,8 +95,8 @@ end
 
 
 % zero out diagonal
-p_below = p_below - eye(N).*p_below;
-p_above = p_above - eye(N).*p_above;
+% p_below = p_below - eye(N).*p_below;
+% p_above = p_above - eye(N).*p_above;
 
 % for i = 1:N
 % 	for j = 1:N
