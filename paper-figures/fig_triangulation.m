@@ -122,7 +122,7 @@ axlib.move(ax(2).map,'right',.05)
 
 legend('Data','PCA','Shuffled')
 
-figlib.label('FontSize',28)
+figlib.label('FontSize',28,'ColumnFirst',true)
 
 figlib.saveall('Location',display.saveHere)
 init()
