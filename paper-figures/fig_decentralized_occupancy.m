@@ -20,7 +20,7 @@ figure('outerposition',[300 300 1800 1300],'PaperUnits','points','PaperSize',[18
 
 clear ax
 ax.map = subplot(2,2,1); hold on
-ax.distances = subplot(4,4,3); hold on
+%ax.distances = subplot(4,4,3); hold on
 ax.legend = subplot(4,4,4); hold on;
 ax.mondrian = subplot(4,2,4); hold on;
 ax.J = subplot(2,3,4); hold on
@@ -40,7 +40,7 @@ axis(ax.map,'off')
 ax.map.XLim = [-31 31];
 ax.map.YLim = [-31 31];
 axis(ax.map,'square') 
-axis(ax.distances,'square')
+%axis(ax.distances,'square')
 
 figlib.pretty('FontSize',15)
 
@@ -74,20 +74,21 @@ end
 
 c = lines;
 
-scatter(ax.distances,S_before,S_after,24,'MarkerFaceColor','k','MarkerEdgeColor','k','MarkerFaceAlpha',.5)
-plotlib.drawDiag(ax.distances,'k--');
-ax.distances.XLim = [0 12];
-ax.distances.YLim = [0 12];
-xlabel(ax.distances,{'Mean distance before',' decentralization (a.u.)'})
-ylabel(ax.distances,{'Mean distance after','decentralization (a.u.)'})
+% scatter(ax.distances,S_before,S_after,24,'MarkerFaceColor','k','MarkerEdgeColor','k','MarkerFaceAlpha',.5)
+% plotlib.drawDiag(ax.distances,'k--');
+% ax.distances.XLim = [0 12];
+% ax.distances.YLim = [0 12];
+% xlabel(ax.distances,{'Mean distance before',' decentralization (a.u.)'})
+% ylabel(ax.distances,{'Mean distance after','decentralization (a.u.)'})
 
-axes(ax.distances)
-[~,handles] = statlib.pairedPermutationTest(S_before,S_after,1e4,true);
+% axes(ax.distances)
+% [~,handles] = statlib.pairedPermutationTest(S_before,S_after,1e4,true);
 
-handles.line.Color = 'k';
+% handles.line.Color = 'k';
 
 
 lh = display.stateLegend(ax.legend,cats);
+lh.Position = [.6 .72 .3 .23];
 
 
 
@@ -124,7 +125,7 @@ ax_mon(3).Position = [0.72 0.37 0.2 0.2];
 
 
 ax.map.Position = [.04 .51 .4 .45];
-ax.distances.Position = [0.45 0.71 0.2 0.25];
+% ax.distances.Position = [0.45 0.71 0.2 0.25];
 ax.legend.Position = [0.75 0.77 0.16 0.16];
 ax.mondrian.Position = [0.57 0.55 0.33 0.16];
 ax.PD_burst_period.Position = [0.45 0.11 0.21 0.18];
@@ -149,22 +150,25 @@ drawnow
 % ax(2).Position = [.6 .62 .33 .35];
 
 
-h1 = axlib.label(ax.map,'a','FontSize',28,'XOffset',0.04,'YOffset',-.03);
-h2 = axlib.label(ax.J,'e','FontSize',28,'XOffset',-.02);
-h2.Position(1) = h1.Position(1);
+ha = axlib.label(ax.map,'a','FontSize',28,'XOffset',0.04,'YOffset',-.03);
+hd = axlib.label(ax.J,'d','FontSize',28,'XOffset',-.02);
+hd.Position(1) = ha.Position(1);
 
-h1 = axlib.label(ax.distances,'b','FontSize',28,'XOffset',-.02,'YOffset',-.04);
-h2 = axlib.label(ax_mon(1),'c','FontSize',28,'XOffset',-.08,'YOffset',-.02);
-h2.Position(1) = h1.Position(1);
+%h1 = axlib.label(ax.distances,'b','FontSize',28,'XOffset',-.02,'YOffset',-.04);
+hb = axlib.label(ax_mon(1),'b','FontSize',28,'XOffset',-.08,'YOffset',-.02);
+hb.Position(1) = .42;
 
-axlib.label(ax_mon(3),'d','FontSize',28,'XOffset',-.02,'YOffset',-.02);
+hc = axlib.label(ax_mon(3),'c','FontSize',28,'XOffset',-.02,'YOffset',-.02);
 
-h2 = axlib.label(ax.PD_burst_period,'f','FontSize',28);
-h2.Position(1) = h1.Position(1);
+he = axlib.label(ax.PD_burst_period,'e','FontSize',28);
+he.Position(1) = .42;
+he.Position(2) = .3;
 ax.J.Position = [.1 .05 .3 .47];
 
 
-lh.Position = [.71 .72 .2 .23];
+
+
+ax.PD_burst_period.Position = [0.45 0.11 0.21 0.18];
 
 
 
@@ -173,7 +177,7 @@ figlib.saveall('Location',display.saveHere)
 
 display.trimImage([mfilename '_1.png']);
 
-init
+init()
 
 
 
@@ -263,6 +267,8 @@ figlib.pretty()
 figlib.label('FontSize',28,'XOffset',-.01)
 
 
+
+return
 
 figlib.saveall('Location',display.saveHere,'Format','png')
 init()
