@@ -123,7 +123,7 @@ for i in np.arange(n):
 colors = tuple(colors)
 
 
-# In[15]:
+# In[30]:
 
 
 scatter_size=7
@@ -253,14 +253,78 @@ tsne_plot.add_tools(HoverTool(tooltips=[], callback=callback))
 #tsne_plot.add_layout(color_bar, 'right')
 
 div = Div(
-        text=f"""<h2>Pyloric circuit dynamics explorer.</h2> 
+        text=f"""
+        <h1 style="color: #4d4d4d;;">
+        Pyloric circuit dynamics explorer  🦀</h1> 
+        
+        <p style="color: #4d4d4d;;">
         Scatter plot shows embedding of pyloric circuit 
         dynamics. Color indicates time period of PD oscillations. 
         Hover over each point to see the spike pattern from LP and PD
-        neurons for that point. 
+        neurons for that point. </p>
         """,
         width=500,
         height=130,
+        margin=(0, 10, 0, 40),
+    )
+
+
+footer = Div(
+        text="""
+        
+        <div style="color:#8d8e8f;">
+        
+        <h3>Details</h3> 
+        
+        
+        <p>
+        This visualization was created to accompany 
+        <a href = "https://www.biorxiv.org/content/10.1101/2021.07.06.451370v1">
+        Gorur-Shandilya <i>et al</i>.</a> and full details about the method
+        are contained there. Briefly, the scatter plot shows 
+        a two-dimensional visualization of a large dataset collected
+        from the pyloric circuit in the crab. Two identified neurons,
+        the LP and PD neurons are recorded from and their spikes
+        are measured. </p>
+        
+        <p>
+        The top panel shows a raster plot of spikes from these two neurons. 
+        The rasters shown in this panel correspond to the point currently
+        highlighted in the scatter plot with a red circle. Hover over 
+        different points in the scatter plot to look at spike patterns
+        for that data point.</p>
+        
+        <p>
+        The colors of the scatter plot correspond to the burst period of
+        the PD neuron. When the burst period is not defined, because 
+        the PD neuron has no well defined bursts, dots are colored gray.
+        </p>
+        
+        <h4>Differences from visualization in the paper</h4>
+        
+        <p>
+        The following modifications have been made to create this interactive 
+        visualization:
+        </p>
+        
+         <ol>
+          <li>Only data segments with <400 spikes are shown, to reduce file size.</li>
+          <li>Only 1 in 13 data points have been shown, to reduce file size.</li>
+          <li>The colors corresponding to PD neurons with periods above 2s 
+              have been clipped to 2s.</li>
+        </ol> 
+        
+        
+        <h4>Code</h4>
+        
+        <p>The code to generate this visualization, together with all code
+        for this project, is available 
+        <a href = "https://github.com/sg-s/stg-embedding/">here</a>.</p>
+        
+        </div>
+        
+        """,
+        width=500,
         margin=(0, 10, 0, 40),
     )
 
@@ -269,8 +333,10 @@ show(
     layout(
         [
             [div],
-            [tsne_plot],
             [raster_plot],
+            [tsne_plot],
+            [footer],
+            
         ]
     )
 )
